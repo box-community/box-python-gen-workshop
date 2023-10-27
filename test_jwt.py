@@ -1,8 +1,7 @@
 """Test configuration for developer token access"""
 
 import logging
-from utils.config import ConfigJWT
-from utils.box_client import get_jwt_enterprise_client, get_jwt_user_client
+from utils.box_client_jwt import ConfigJWT, get_jwt_enterprise_client, get_jwt_user_client
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)

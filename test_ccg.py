@@ -1,8 +1,7 @@
 """Test configuration for developer token access"""
 
 import logging
-from utils.config import ConfigCCG
-from utils.box_client import get_ccg_enterprise_client, get_ccg_user_client
+from utils.box_client import ConfigCCG, get_ccg_enterprise_client, get_ccg_user_client
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)

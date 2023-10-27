@@ -7,12 +7,11 @@ import logging
 import urllib.parse
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from box_sdk_gen.oauth import BoxOAuth
 
-from utils.config import ConfigOAuth
-from box_sdk_gen.oauth import OAuthConfig, BoxOAuth
-from box_sdk_gen.token_storage import FileWithInMemoryCacheTokenStorage
 
 CSRF_TOKEN_ORIG = ""
+AUTH = None
 
 
 class CallbackServer(BaseHTTPRequestHandler):
@@ -42,7 +41,9 @@ class CallbackServer(BaseHTTPRequestHandler):
         logging.info("error_description: %s", error_description)
 
         assert state == CSRF_TOKEN_ORIG
-        _ = oauth_authenticate(code) if code else None
+
+        if code:
+            AUTH.get_tokens_authorization_code_grant(code)
 
         self.wfile.write(
             bytes(
@@ -60,24 +61,23 @@ class CallbackServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes("<p>You can close this browser window.</p>", "utf-8"))  # noqa: E501
         self.wfile.write(bytes("</body></html>", "utf-8"))
 
-        if error:
-            raise Exception(error_description)
 
-
-def callback_handle_request(config: ConfigOAuth, csrf_token: str):
+def callback_handle_request(auth: BoxOAuth, hostname, port, csrf_token: str):
     """
     Handles the call back request from Box OAuth2.0
     Creates a simple HTTP server that listens for a request from Box OAuth2.0.
     """
     global CSRF_TOKEN_ORIG  # pylint: disable=global-statement
     CSRF_TOKEN_ORIG = csrf_token
+    global AUTH  # pylint: disable=global-statement
+    AUTH = auth
 
-    web_server = HTTPServer((config.callback_hostname, config.callback_port), CallbackServer)
+    web_server = HTTPServer((hostname, port), CallbackServer)
 
     logging.info(
         "Server started http://%s:%s",
-        config.callback_hostname,
-        config.callback_port,
+        hostname,
+        port,
     )
 
     try:
@@ -93,18 +93,3 @@ def open_browser(auth_url: str):
     Opens a browser to the auth_url
     """
     webbrowser.open(auth_url)
-
-
-def oauth_authenticate(code: str):
-    """
-    Retreives the access and refresh tokens
-    from using the code obtained from the first leg
-    of the oAuth2 process
-    """
-    oauth = OAuthConfig(
-        client_id=ConfigOAuth().client_id,
-        client_secret=ConfigOAuth().client_secret,
-        token_storage=FileWithInMemoryCacheTokenStorage(ConfigOAuth().cache_file),
-    )
-    auth = BoxOAuth(oauth)
-    auth.get_tokens_authorization_code_grant(code)

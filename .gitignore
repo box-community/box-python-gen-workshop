@@ -124,6 +124,8 @@ celerybeat.pid
 .*.env
 .tk.db
 .*.tk.db
+.config.json
+.*.config.json
 .venv
 env/
 venv/

@@ -40,7 +40,7 @@ def get_ccg_enterprise_client(config: ConfigCCG) -> BoxClient:
         client_id=config.client_id,
         client_secret=config.client_secret,
         enterprise_id=config.enterprise_id,
-        token_storage=FileWithInMemoryCacheTokenStorage(".ent." + config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(".ent" + config.cache_file),
     )
     auth = BoxCCGAuth(ccg)
 

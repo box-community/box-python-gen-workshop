@@ -5,6 +5,7 @@ import dotenv
 ENV_DEV = ".dev.env"
 ENV_OAUTH = ".oauth.env"
 ENV_CCG = ".ccg.env"
+ENV_JET = ".jwt.env"
 
 
 class ConfigDev:
@@ -63,11 +64,13 @@ class ConfigJWT:
     """application configurations"""
 
     def __init__(self) -> None:
-        dotenv.load_dotenv()
+        dotenv.load_dotenv(ENV_JET)
 
         # JWT configurations
         self.jwt_config_path = os.getenv("JWT_CONFIG_PATH")
         self.jwt_user_id = os.getenv("JWT_USER_ID")
+
+        self.cache_file = os.getenv("CACHE_FILE", ".jwt.tk")
 
     def __repr__(self) -> str:
         return f"ConfigJWT({self.__dict__})"

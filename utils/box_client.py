@@ -9,11 +9,12 @@ from box_sdk_gen.client import BoxClient
 from box_sdk_gen.developer_token_auth import BoxDeveloperTokenAuth
 from box_sdk_gen.oauth import OAuthConfig, BoxOAuth, GetAuthorizeUrlOptions
 from box_sdk_gen.ccg_auth import BoxCCGAuth, CCGConfig
+from box_sdk_gen.jwt_auth import BoxJWTAuth, JWTConfig
 
 from box_sdk_gen.token_storage import FileWithInMemoryCacheTokenStorage
 
 
-from utils.config import ConfigCCG, ConfigDev, ConfigOAuth
+from utils.config import ConfigCCG, ConfigDev, ConfigJWT, ConfigOAuth
 from utils.oauth_callback import callback_handle_request, open_browser
 
 
@@ -102,19 +103,30 @@ def get_ccg_user_client(config: ConfigCCG, user_id: str) -> BoxClient:
     return client
 
 
-# def get_ccg_user_client(config: AppConfig, as_user_id: str = None) -> Client:
-#     """Returns a boxsdk Client object"""
+def get_jwt_enterprise_client(config: ConfigJWT) -> BoxClient:
+    """Returns a boxsdk Client object"""
 
-#     auth = CCGAuth(
-#         client_id=config.client_id,
-#         client_secret=config.client_secret,
-#         user=config.ccg_user_id,
-#     )
+    jwt = JWTConfig.from_config_file(
+        config_file_path=config.jwt_config_path,
+        token_storage=FileWithInMemoryCacheTokenStorage(".ent." + config.cache_file),
+    )
+    auth = BoxJWTAuth(jwt)
 
-#     client = Client(auth)
+    client = BoxClient(auth)
 
-#     if as_user_id:
-#         as_user = client.user(as_user_id)
-#         client.as_user(as_user)
+    return client
 
-#     return client
+
+def get_jwt_user_client(config: ConfigJWT, user_id: str) -> BoxClient:
+    """Returns a boxsdk Client object"""
+
+    jwt = JWTConfig.from_config_file(
+        config_file_path=config.jwt_config_path,
+        token_storage=FileWithInMemoryCacheTokenStorage(".user." + config.cache_file),
+    )
+    auth = BoxJWTAuth(jwt)
+    auth.as_user(user_id)
+
+    client = BoxClient(auth)
+
+    return client

@@ -21,6 +21,7 @@ class ConfigJWT:
         # JWT configurations
         self.jwt_config_path = os.getenv("JWT_CONFIG_PATH")
         self.jwt_user_id = os.getenv("JWT_USER_ID")
+        self.enterprise_id = os.getenv("ENTERPRISE_ID")
 
         self.cache_file = os.getenv("CACHE_FILE", ".jwt.tk")
 

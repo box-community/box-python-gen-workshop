@@ -85,5 +85,5 @@ def create_samples(client: Client):
     """Uploads sample content to Box."""
     wks_folder = create_box_folder(client, "workshops", client.folders.get_folder_by_id("0"))
 
-    module_folder = create_box_folder(client, "file_representations", wks_folder)
-    folder_upload(client, module_folder, "workshops/file_representations/content_samples/")
+    module_folder = create_box_folder(client, "shared_links", wks_folder)
+    folder_upload(client, module_folder, "workshops/shared_links/content_samples/")

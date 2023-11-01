@@ -19,29 +19,36 @@ for item in search_results:
 ```
 The search API supports a number of parameters to refine your search via the query method:
 ```python
-def query(
-            self,
-            query: str,
-            limit: int = None,
-            offset: int = 0,
-            ancestor_folders: Iterable['Folder'] = None,
-            file_extensions: Iterable[str] = None,
-            metadata_filters: MetadataSearchFilters = None,
-            result_type: str = None,
-            content_types: Iterable[str] = None,
-            scope: Optional[str] = None,
-            created_at_range: Tuple[Optional[str], Optional[str]] = None,
-            updated_at_range: Tuple[Optional[str], Optional[str]] = None,
-            size_range: Tuple[Optional[int], Optional[int]] = None,
-            owner_users: Iterable['User'] = None,
-            trash_content: Optional[str] = None,
-            fields: Iterable[str] = None,
-            sort: Optional[str] = None,
-            direction: Optional[str] = None,
-            ...
-    ) -> Iterable['Item']:
+    def get_search(
+        self,
+        query: Optional[str] = None,
+        scope: Optional[GetSearchScopeArg] = None,
+        file_extensions: Optional[List[str]] = None,
+        created_at_range: Optional[List[str]] = None,
+        updated_at_range: Optional[List[str]] = None,
+        size_range: Optional[List[int]] = None,
+        owner_user_ids: Optional[List[str]] = None,
+        recent_updater_user_ids: Optional[List[str]] = None,
+        ancestor_folder_ids: Optional[List[str]] = None,
+        content_types: Optional[List[GetSearchContentTypesArg]] = None,
+        type: Optional[GetSearchTypeArg] = None,
+        trash_content: Optional[GetSearchTrashContentArg] = None,
+        mdfilters: Optional[List[MetadataFilter]] = None,
+        sort: Optional[GetSearchSortArg] = None,
+        direction: Optional[GetSearchDirectionArg] = None,
+        limit: Optional[int] = None,
+        include_recent_shared_links: Optional[bool] = None,
+        fields: Optional[List[str]] = None,
+        offset: Optional[int] = None,
+        deleted_user_ids: Optional[List[str]] = None,
+        deleted_at_range: Optional[List[str]] = None,
+        extra_headers: Optional[Dict[str, Optional[str]]] = None,
+    ) -> Union[SearchResults, SearchResultsWithSharedLinks]:
 ```
-Refer to our [Search Guide](https://developer.box.com/reference/get-search/) and [API Documentation](https://developer.box.com/reference/get-search/) for more details.
+References to our documentation:
+- [SDK](https://github.com/box/box-python-sdk-gen/blob/main/docs/search.md)
+- [Search Guide](https://developer.box.com/reference/get-search/)
+- [API Documentation](https://developer.box.com/reference/get-search/) for more details.
 
 # Exercises
 ## Setup

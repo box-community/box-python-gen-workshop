@@ -17,7 +17,7 @@ You want to make sure a certain user gets a notification about the comment your 
 
 ## Files API
 References to our documentation:
-* [SDK](https://github.com/box/box-python-sdk/blob/main/docs/usage/comments.md)
+* [SDK](https://github.com/box/box-python-sdk-gen/blob/main/docs/comments.md)
 * [API Guide](https://developer.box.com/guides/comments/create-comment/)
 * [API Reference](https://developer.box.com/reference/resources/comment/)
 
@@ -54,7 +54,7 @@ INFO:root:      Uploaded sample_file.txt
 ```
 Now open your Box.com app, and enter some comments on the `sample_file.txt` file, under `ALL Files > workshops > comments` folder, and take note of the `file_id` in the URL.
 For examples:
-![Alt text](/images/comments_file.png)
+![Alt text](img/file-comment.png)
 
 Next, create a `comments.py` file on the root of the project that you will use to write your code.
 Create a global constant named `COMMENTS_ROOT` and make it equal to the id of the `comments` folder, in my case `223269791429`

@@ -23,17 +23,14 @@ def main():
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 
     auth.as_user(config.jwt_user_id)
-    auth.token_storage.clear()
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 
     auth.as_user("29598695136")
-    auth.token_storage.clear()
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 
     auth.as_enterprise(config.enterprise_id)
-    auth.token_storage.clear()
     me = client.users.get_user_me()
     print(f"\nHello, I'm back to {me.name} ({me.login}) [{me.id}]")
 

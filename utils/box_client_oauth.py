@@ -56,7 +56,9 @@ def get_client_oauth(config: ConfigOAuth) -> BoxClient:
         )
         auth_url = auth.get_authorize_url(options)
         open_browser(auth_url)
-        callback_handle_request(auth, config.callback_hostname, config.callback_port, state)
+        callback_handle_request(
+            auth, config.callback_hostname, config.callback_port, state
+        )
 
     access_token = auth.token_storage.get()
     if not access_token:

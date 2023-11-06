@@ -73,16 +73,16 @@ def download_zip(client: Client, local_path_to_zip: str, items: List[CreateZipDo
     file_name = os.path.basename(local_path_to_zip)
     zip_download = client.zip_downloads.create_zip_download(items, file_name)
 
-    # ## fix this hack ## #
-    # the zip_download.download_url is a full url that includes the id like this:
-    # https://dl.boxcloud.com/2.0/zip_downloads/2r6IQDsU33XfcSWpZ6I-Dug==rnTAVzm2vntcB4P1XK12QdfxYIRTQVYp47UbJoUdZfhPL0VfWxm0NSgDo9TH/content
-    # we need to parse it and get only the id
+    # # ## fix this hack ## #
+    # # the zip_download.download_url is a full url that includes the id like this:
+    # # https://dl.boxcloud.com/2.0/zip_downloads/2r6IQDsU33XfcSWpZ6I-Dug==rnTAVzm2vntcB4P1XK12QdfxYIRTQVYp47UbJoUdZfhPL0VfWxm0NSgDo9TH/content
+    # # we need to parse it and get only the id
 
-    # get the id from the url
-    url_parts = zip_download.download_url.split("/")
-    zip_download_id = url_parts[5]
+    # # get the id from the url
+    # url_parts = zip_download.download_url.split("/")
+    # zip_download_id = url_parts[5]
 
-    file_stream: ByteStream = client.zip_downloads.get_zip_download_content(zip_download_id)
+    file_stream: ByteStream = client.zip_downloads.get_zip_download_content(zip_download.download_url)
 
     with open(local_path_to_zip, "wb") as file:
         shutil.copyfileobj(file_stream, file)

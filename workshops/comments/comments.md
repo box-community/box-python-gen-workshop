@@ -119,7 +119,7 @@ def main():
 ```
 Resulting in:
 ```
-Hello, I'm Free Dev 001 (barduinor+001@gmail.com) [25428698627]
+Hello, I'm Free Dev 001 [25428698627]
 
 Comments for file sample_file.txt (1290064263703):
 ----------

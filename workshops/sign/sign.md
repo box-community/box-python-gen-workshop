@@ -54,6 +54,7 @@ INFO:root:      Uploaded Simple-DOC.docx (1358077513913) 12409 bytes
 
 Next, create a `sign.py` file on the root of the project that you will use to write your code.
 Take note of the above document id's and include statics for them in the doc.
+Replace the `YOUR_EMAIL` with your email, or use a different email for each signer.
 
 ```python
 """Box Shared links"""
@@ -77,24 +78,16 @@ SIMPLE_PDF = "1355143830404"
 SIMPLE_DOC = "1358077513913"
 CONTRACT = "1358047520478"
 
-def sign_doc_single(
-    client: Client,
-    doc_id: str,
-    signer_email: str,
-    sign_docs_folder: str,
-    is_document_preparation_needed: bool = False,
-) -> SignRequest:
-    """Single doc sign by single signer"""
-    # make sure file is accessible to this user
-    file = client.files.get_file_by_id(file_id=doc_id)
-    return client.sign_requests.create_sign_request(
-        signers=[SignRequestCreateSigner(email=signer_email)],
-        parent_folder=FolderMini(
-            id=sign_docs_folder, type=FolderBaseTypeField.FOLDER.value
-        ),
-        source_files=[FileBase(id=file.id, type=FileBaseTypeField.FILE.value)],
-        is_document_preparation_needed=is_document_preparation_needed,
-    )
+SIGNER_A = "YOUR_EMAIL+A@gmail.com"
+SIGNER_A_PHONE = "+15554443322"
+
+SIGNER_B = "YOUR_EMAIL+B@gmail.com"
+
+def check_sign_request(sign_request: SignRequest):
+    print(f"\nSimple sign request: {sign_request.id}")
+    print(f"  Status: {sign_request.status.value}")
+    print(f"  Signers: {sign_request.signers[0].email}")
+    print(f"  Prepare url: {sign_request.prepare_url}")
 
 
 def main():
@@ -122,41 +115,36 @@ These documents are typically not structured, the signature requirements and pla
 Create a method to sign a document with a single signer:
 ```python
 def sign_doc_single(
-    client: Client,
-    doc_id: str,
-    signer_email: str,
-    sign_docs_folder: str,
-    is_document_preparation_needed: bool = False,
+    client: Client, signer_email: str, prep_needed: bool = False
 ) -> SignRequest:
     """Single doc sign by single signer"""
     # make sure file is accessible to this user
-    file = client.files.get_file_by_id(file_id=doc_id)
-    return client.sign_requests.create_sign_request(
-        signers=[SignRequestCreateSigner(email=signer_email)],
-        parent_folder=FolderMini(
-            id=sign_docs_folder, type=FolderBaseTypeField.FOLDER.value
-        ),
-        source_files=[FileBase(id=file.id, type=FileBaseTypeField.FILE.value)],
-        is_document_preparation_needed=is_document_preparation_needed,
+    file = client.files.get_file_by_id(file_id=SIMPLE_PDF)
+
+    signer = SignRequestCreateSigner(signer_email)
+    parent_folder = FolderMini(
+        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
     )
+    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+
+    # sign document
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[signer],
+        parent_folder=parent_folder,
+        source_files=[source_file],
+        is_document_preparation_needed=prep_needed,
+    )
+
+    return sign_request
 ```
 And use it in the main method. In my case I'm using a different email for the signer from the one I'm in my Box account. Use an email that you have access to:
 ```python
 def main():
     ...
 
-    # Simple sign request
-    simple_sign_request = sign_doc_single(
-        client,
-        SIMPLE_PDF,
-        "barbasr@gmail.com",
-        SIGN_DOCS_FOLDER,
-        False,
-    )
-    print(f"\nSimple sign request: {simple_sign_request.id}")
-    print(f"  Status: {simple_sign_request.status.value}")
-    print(f"  Signers: {simple_sign_request.signers[0].email}")
-    print(f"  Prepare url: {simple_sign_request.prepare_url}") 
+    # Simple sign a pdf request
+    sign_pdf = sign_doc_single(client, SIGNER_A)
+    check_sign_request(sign_pdf)
 ```
 
 Resulting in:
@@ -164,7 +152,7 @@ Resulting in:
 ```
 Simple sign request: 97ac3486-5fe1-42e0-9ed2-3234e8e2129f
   Status: converting
-  Signers: barduinor@gmail.com
+  Signers: ...@gmail.com
   Prepare url: None
 ```
 In the mean time check your Box Sign app and you should see something like this:
@@ -211,18 +199,9 @@ def main()
     # sign_pdf = sign_doc_single(
     ...
 
-    sign_pdf_prep = sign_doc_single(
-        client,
-        SIMPLE_PDF,
-        "barbasr@gmail.com",
-        SIGN_DOCS_FOLDER,
-        True,
-    )
-    print(f"\nSimple sign request with prep: {sign_pdf_prep.id}")
-    print(f"  Status: {sign_pdf_prep.status.value}")
-    print(f"  Signers: {sign_pdf_prep.signers[0].email}")
-    print(f"  Prepare url: {sign_pdf_prep.prepare_url}")
-
+    # Simple sign a pdf request with preparation
+    sign_pdf_prep = sign_doc_single(client, SIGNER_A, True)
+    check_sign_request(sign_pdf_prep)
     if sign_pdf_prep.prepare_url is not None:
         open_browser(sign_pdf_prep.prepare_url)
 ```
@@ -231,7 +210,7 @@ Resulting in:
 ```
 Simple sign request with prep: 1358028452508-f58485ec-6779-4456-8d83-fafcfb2165c9
   Status: converting
-  Signers: barduinor@gmail.com
+  Signers: ...@gmail.com
   Prepare url: https://app.box.com/sign/document/1358028452508-f58485ec-6779-4456-8d83-fafcfb2165c9/a8489c98bb3fbd5504482185a7a17f400d5964143fea37c5d27c0dee0c8ca31e/prepare_doc/
 ```
 
@@ -261,7 +240,9 @@ Let create a method specific for this:
 
 ```python
 def sign_contract(
-    client: Client, institution_email: str, student_email: str
+    client: Client,
+    institution_email: str,
+    student_email: str,
 ) -> SignRequest:
     """Sign contract"""
     # make sure file is accessible to this user
@@ -290,14 +271,6 @@ def sign_contract(
         is_document_preparation_needed=True,
     )
 
-    print(f"\nSimple sign request with prep: {sign_request.id}")
-    print(f"  Status: {sign_request.status.value}")
-    print(f"  Signers: {sign_request.signers[0].email}")
-    print(f"  Prepare url: {sign_request.prepare_url}")
-
-    if sign_request.prepare_url is not None:
-        open_browser(sign_request.prepare_url)
-
     return sign_request
 ```
 
@@ -309,10 +282,9 @@ def main():
     # Multiple signers
     sign_contract_multi = sign_contract(
         client,
-        institution_email="barbasr+inst@gmail.com",
-        student_email="barbasr+std@gmail.com",
+        institution_email=SIGNER_A,
+        student_email=SIGNER_B,
     )
-
     if sign_contract_multi.prepare_url is not None:
         open_browser(sign_contract_multi.prepare_url)
 ```
@@ -333,6 +305,231 @@ Indicating that the first request was sent, but the second is waiting for the fi
 Go ahead and complete the sign process for both signers.
 
 Notice that when you get the second request it is already signed by the first signer.
+
+## Resend sign requests
+What if the signer did not receive the email? Or the email was lost? Or the signer deleted the email by mistake?
+
+You can resend the sign request email to the signer, either manually or turn on the automatic resend option.
+
+The automatic resend option sends a reminder email to the `signers` that have not signed the document yet, after 3, 8, 13, and 18 days.
+
+You can also manually resend the sign request email to the signer, by calling the `resend_sign_request` method on the `sign_requests` object.
+>This can only be done once every 10 minutes.
+
+### Manually sending a reminder
+Let's see how this is done. Add the following code:
+```python
+def sign_send_reminder(client: Client, sign_request_id: str):
+    """Send reminder to signers"""
+    sign_request = client.sign_requests.resend_sign_request(sign_request_id)
+    return sign_request
+```
+It is difficult to test this in our workshop since we would need to wait at least 10 minutes to resend the sign request.
+
+You can however take note of the sign request id and use it in postman later.
+
+### Automatic resend
+To enable automatic resend all you need to do is set the `are_reminders_enabled` parameter to `True`.
+For example:
+```python
+def sign_doc_single_more_options(
+    client: Client,
+    signer_email: str,
+    prep_needed: bool = False,
+    auto_reminder: bool = False,
+) -> SignRequest:
+    ...
+
+    # sign document
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[signer],
+        parent_folder=parent_folder,
+        source_files=[source_file],
+        is_document_preparation_needed=prep_needed,
+        are_reminders_enabled=auto_reminder,
+    )
+
+    return sign_request
+```
+
+## Sign request expiration
+There are situations where you might need to set an expiration date for the sign request. 
+
+For example, imagine a quote for a service that is valid for 30 days. This proposal has to be signed by a certain date, and if not, the sign request is no longer valid.
+
+All you need todo is pass the `days_valid` parameter to the `create_sign_request` method.
+
+For example:
+```python
+def sign_doc_single_more_options(
+    client: Client,
+    signer_email: str,
+    prep_needed: bool = False,
+    auto_reminder: bool = False,
+    days_valid: int = None,
+) -> SignRequest:
+    ...
+
+    # sign document
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[signer],
+        parent_folder=parent_folder,
+        source_files=[source_file],
+        is_document_preparation_needed=prep_needed,
+        are_reminders_enabled=auto_reminder,
+        days_valid=days_valid,
+    )
+
+    return sign_request
+```
+
+## Customizing redirect URL's
+When the sign process is completed, the signer is redirected to a default page. The same happens when the signer `declines` the sign request.
+
+We can customize these pages by passing the `redirect_url` and `decline_redirect_url` parameters to the `create_sign_request` method.
+
+For example:
+```python
+def sign_doc_single_more_options(
+    ...
+
+    redirect_url: str = None,
+    declined_redirect_url: str = None,
+) -> SignRequest:
+    ...
+
+    # sign document
+    sign_request = client.sign_requests.create_sign_request(
+        ...
+
+        redirect_url=redirect_url,
+        declined_redirect_url=declined_redirect_url,
+    )
+
+    return sign_request
+```
+
+Lets try this out. Add the following code to your main method:
+```python
+def main():
+    ...
+    
+    sign_with_redirects = sign_doc_single_more_options(
+        client,
+        SIGNER_A,
+        prep_needed=False,
+        redirect_url="https://forum.box.com/",
+        declined_redirect_url="https://developer.box.com/",
+    )
+    check_sign_request(sign_with_redirects)
+```
+
+Go ahead and complete the sign process, and you should be redirected to the forum page.
+
+If you sign you'll be redirected to our forum page. If you `decline` you'll be redirected to our developer page.
+
+## Customizing email messages
+You can customize the email messages sent to the signers by passing the `email_subject` and the `email_message` parameter to the `create_sign_request` method.
+
+For example:
+```python
+def sign_doc_single_more_options(
+    client: Client,
+    ...
+
+    email_subject: str = None,
+    email_message: str = None,
+) -> SignRequest:
+    ...
+
+    # sign document
+    sign_request = client.sign_requests.create_sign_request(
+        ...
+
+        email_subject=email_subject,
+        email_message=email_message,
+    )
+
+    return sign_request
+```
+Both parameters accept simple strings, however the `email_message` parameter also accepts HTML with some limitations.
+
+Only some html tags are allowed. Links included in the message are also converted to hyperlinks in the email. The message may contain the following html tags including `a`, `abbr`, `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and `strong`. 
+Be aware that when the text to html ratio is too high, the email may end up in spam filters. 
+Custom styles on these tags are not allowed. 
+If this field is not passed, a default message will be used.
+
+Lets test this:
+```python
+def main():
+    ...
+
+    # Sign with custom email subject
+    sign_custom_email_subject = sign_doc_single_more_options(
+        client,
+        SIGNER_A,
+        prep_needed=False,
+        email_subject="All we need is your signature to get started",
+    )
+    check_sign_request(sign_custom_email_subject)
+```
+Resulting in the following email:
+![Alt text](img/sign-simple-options-email.png)
+
+## 2FA in sign requests
+Emails are volatile and can be easily compromised. Imagine you want and additional layer of security for your sign requests, by requesting the signer to use a phone verification to sign the document.
+
+You can require the signer to use 2FA to sign the document by passing the `is_phone_verification_required_to_view` parameter to the `create_sign_request` method.
+
+However you must specify the `verification_phone_number` for each signer.
+
+For example:
+```python
+def sign_doc_verify_phone(
+    client: Client,
+    signer_email: str,
+    signer_phone: str,
+) -> SignRequest:
+    # make sure file is accessible to this user
+    file = client.files.get_file_by_id(file_id=SIMPLE_PDF)
+
+    signer = SignRequestCreateSigner(
+        email=signer_email,
+        verification_phone_number=signer_phone,
+    )
+    parent_folder = FolderMini(
+        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
+    )
+    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+
+    # sign document
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[signer],
+        parent_folder=parent_folder,
+        source_files=[source_file],
+        is_phone_verification_required_to_view=True,
+    )
+
+    return sign_request
+```
+
+And use it in the main method:
+```python
+def main():
+    ...
+
+    sign_with_phone_verification = sign_doc_verify_phone(
+        client,
+        SIGNER_A
+        SIGNER_A_PHONE,
+    )
+    check_sign_request(sign_with_phone_verification)
+```
+When you try to open the sign request you should see something like this:
+![Alt text](img/sign-simple-phone-verification.png)
+
+Enter the verification code and proceed with the sign process.
+![Alt text](img/sign-simple-phone-verification-enter-code.png)
 
 
 

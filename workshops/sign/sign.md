@@ -16,6 +16,7 @@ References to our documentation:
 * [SDK Sign](https://github.com/box/box-python-sdk-gen/blob/main/docs/sign_requests.md)
 * [API Guide](https://developer.box.com/guides/box-sign/)
 * [API Reference ](https://developer.box.com/reference/resources/sign-request/)
+* [Sign Guide](https://support.box.com/hc/en-us/articles/4404105810195-Sending-a-document-for-signature)
 
 # Exercises
 ## Setup
@@ -476,9 +477,10 @@ def main():
 Resulting in the following email:
 ![Alt text](img/sign-simple-options-email.png)
 
-## 2FA in sign requests
-Emails are volatile and can be easily compromised. Imagine you want and additional layer of security for your sign requests, by requesting the signer to use a phone verification to sign the document.
+## Security in sign requests
+Emails are volatile and can be easily compromised. Imagine you want and additional layer of security for your sign requests, by requesting the signer to use a phone verification or a password to sign the document.
 
+### Phone verification (2FA)
 You can require the signer to use 2FA to sign the document by passing the `is_phone_verification_required_to_view` parameter to the `create_sign_request` method.
 
 However you must specify the `verification_phone_number` for each signer.
@@ -526,11 +528,71 @@ def main():
     check_sign_request(sign_with_phone_verification)
 ```
 When you try to open the sign request you should see something like this:
+
 ![Alt text](img/sign-simple-phone-verification.png)
 
 Enter the verification code and proceed with the sign process.
+
 ![Alt text](img/sign-simple-phone-verification-enter-code.png)
 
+### Password verification
+You can also require the signer to use a password to sign the document by passing the `password` parameter in the `signer` object.
+
+For example:
+```python
+def sign_doc_verify_password(
+    client: Client,
+    signer_email: str,
+    signer_password: str,
+) -> SignRequest:
+    # make sure file is accessible to this user
+    file = client.files.get_file_by_id(file_id=SIMPLE_PDF)
+
+    signer = SignRequestCreateSigner(
+        email=signer_email,
+        password=signer_password,
+    )
+    parent_folder = FolderMini(
+        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
+    )
+    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+
+    # sign document
+    # sign document
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[signer],
+        parent_folder=parent_folder,
+        source_files=[source_file],
+    )
+
+    return sign_request
+```
+
+And use it in the main method:
+```python
+def main():
+    ...
+
+    # Sign with phone verification
+    sign_with_password_verification = sign_doc_verify_password(
+        client,
+        SIGNER_A,
+        "1234",
+    )
+    check_sign_request(sign_with_password_verification)
+```
+Once you open the sign request you should see something like this:
+
+![Alt text](img/sign-simple-password.png)
+
+Enter the password and proceed with the sign process.
+
+## Signer roles
+So far we have been working with the `signer` role. However there are other roles that you can use to customize the sign process.
+
+
+
+## Signer roles
 
 
 ## Extra Credit

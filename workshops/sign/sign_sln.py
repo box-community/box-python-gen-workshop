@@ -126,6 +126,33 @@ def sign_doc_verify_phone(
     return sign_request
 
 
+def sign_doc_verify_password(
+    client: Client,
+    signer_email: str,
+    signer_password: str,
+) -> SignRequest:
+    # make sure file is accessible to this user
+    file = client.files.get_file_by_id(file_id=SIMPLE_PDF)
+
+    signer = SignRequestCreateSigner(
+        email=signer_email,
+        password=signer_password,
+    )
+    parent_folder = FolderMini(
+        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
+    )
+    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+
+    # sign document
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[signer],
+        parent_folder=parent_folder,
+        source_files=[source_file],
+    )
+
+    return sign_request
+
+
 def sign_contract(
     client: Client,
     institution_email: str,
@@ -228,6 +255,14 @@ def main():
     #     SIGNER_A_PHONE,
     # )
     # check_sign_request(sign_with_phone_verification)
+
+    # # Sign with phone verification
+    # sign_with_password_verification = sign_doc_verify_password(
+    #     client,
+    #     SIGNER_A,
+    #     "1234",
+    # )
+    # check_sign_request(sign_with_password_verification)
 
 
 if __name__ == "__main__":

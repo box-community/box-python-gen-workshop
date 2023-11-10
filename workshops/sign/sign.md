@@ -327,7 +327,7 @@ Notice that when you get the second request it is already signed by the first si
 ## Resend sign requests
 What if the signer did not receive the email? Or the email was lost? Or the signer deleted the email by mistake?
 
-You can resend the sign request email to the signer, either manually or turn on the automatic resend option.
+You can resend the sign request email to the `signer`, either manually or turn on the automatic resend option.
 
 The automatic resend option sends a reminder email to the `signers` that have not signed the document yet, after 3, 8, 13, and 18 days.
 
@@ -454,10 +454,10 @@ def main():
 
 Go ahead and complete the sign process, and you should be redirected to the forum page.
 
-If you sign you'll be redirected to our forum page. If you `decline` you'll be redirected to our developer page.
+If you `sign` you'll be redirected to our forum page. If you `decline` you'll be redirected to our developer page.
 
 ## Customizing email messages
-You can customize the email messages sent to the signers by passing the `email_subject` and the `email_message` parameter to the `create_sign_request` method.
+You can customize the email messages sent to the signers by passing the `email_subject` and the `email_message` parameters to the `create_sign_request` method.
 
 For example:
 ```python
@@ -507,7 +507,7 @@ Resulting in the following email:
 ![Alt text](img/sign-simple-options-email.png)
 
 ## Security in sign requests
-Emails are volatile and can be easily compromised. Imagine you want and additional layer of security for your sign requests, by requesting the signer to use a phone verification or a password to sign the document.
+Emails are volatile and can be easily compromised. Imagine you want an additional layer of security for your sign requests, by requesting the signer to use a phone verification or a password to sign the document.
 
 ### Phone verification (2FA)
 You can require the signer to use 2FA to sign the document by passing the `is_phone_verification_required_to_view` parameter to the `create_sign_request` method.
@@ -583,7 +583,6 @@ def sign_doc_verify_password(
     signer_email: str,
     signer_password: str,
 ) -> SignRequest:
-    # make sure file is accessible to this user
     # make sure file is accessible to this user
     file = client.files.get_file_by_id(document_id)
 
@@ -743,7 +742,7 @@ Next the student signs the scholarship:
 
 ![Alt text](img/sign-multi-steps-student.png)
 
-Finally the legal department receives a copy of the signed document. Note that the legal department must be a Box user.
+Finally the legal department receives a copy of the signed document. Note that the legal department must be a Box user to get the notification.
 
 
 ## Extra Credit

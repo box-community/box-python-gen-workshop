@@ -24,13 +24,13 @@ SIMPLE_PDF = "1355143830404"
 SIMPLE_DOC = "1358077513913"
 CONTRACT = "1358047520478"
 
-SIGNER_A = "barbasr+A@gmail.com"
-SIGNER_A_PHONE = "+17029812190"
+SIGNER_A = "YOUR_EMAIL+A@gmail.com"
+SIGNER_A_PHONE = "+15554443322"
 
-SIGNER_B = "barbasr+B@gmail.com"
+SIGNER_B = "YOUR_EMAIL+B@gmail.com"
 
-APPROVER = "barbasr+APPROVER@gmail.com"
-FINAL_COPY = "barbasr+FINAL_COPY@gmail.com"
+APPROVER = "YOUR_EMAIL+APPROVER@gmail.com"
+FINAL_COPY = "YOUR_EMAIL+FINAL_COPY@gmail.com"
 
 
 def check_sign_request(sign_request: SignRequest):

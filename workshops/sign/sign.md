@@ -119,22 +119,25 @@ These documents are typically not structured, the signature requirements and pla
 Create a method to sign a document with a single signer:
 ```python
 def sign_doc_single(
-    client: Client, signer_email: str, prep_needed: bool = False
+    client: Client,
+    document_id: str,
+    destination_folder_id: str,
+    signer_email: str,
+    prep_needed: bool = False,
 ) -> SignRequest:
     """Single doc sign by single signer"""
     # make sure file is accessible to this user
-    file = client.files.get_file_by_id(file_id=SIMPLE_PDF)
-
-    signer = SignRequestCreateSigner(signer_email)
-    parent_folder = FolderMini(
-        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
-    )
+    file = client.files.get_file_by_id(document_id)
+    # Sign request params
     source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
-
+    destination_folder = FolderMini(
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+    )
+    signer = SignRequestCreateSigner(signer_email)
     # sign document
     sign_request = client.sign_requests.create_sign_request(
         signers=[signer],
-        parent_folder=parent_folder,
+        parent_folder=destination_folder,
         source_files=[source_file],
         is_document_preparation_needed=prep_needed,
     )
@@ -147,7 +150,7 @@ def main():
     ...
 
     # Simple sign a pdf request
-    sign_pdf = sign_doc_single(client, SIGNER_A)
+    sign_pdf = sign_doc_single(client, SIMPLE_PDF, SIGN_DOCS_FOLDER, SIGNER_A)
     check_sign_request(sign_pdf)
 ```
 
@@ -204,7 +207,9 @@ def main()
     ...
 
     # Simple sign a pdf request with preparation
-    sign_pdf_prep = sign_doc_single(client, SIGNER_A, True)
+    sign_pdf_prep = sign_doc_single(
+        client, SIMPLE_PDF, SIGN_DOCS_FOLDER, SIGNER_A, True
+    )
     check_sign_request(sign_pdf_prep)
     if sign_pdf_prep.prepare_url is not None:
         open_browser(sign_pdf_prep.prepare_url)
@@ -238,19 +243,27 @@ If you do not specify the order, the request is sent to everyone at the same tim
 
 If you specify the order, the send request is sent to the first signer, and only when the first signer signs the document, the request is sent to the second signer, and so on.
 
-Let's see this working with an example contract between and university and a student for a scholarship. In this case the institution must sign first.
+Let's see this working with an example contract between an university and a student for a scholarship. In this case the institution must sign first.
 
 Let create a method specific for this:
 
 ```python
 def sign_contract(
     client: Client,
+    document_id: str,
+    destination_folder_id: str,
     institution_email: str,
     student_email: str,
+    prep_needed: bool = False,
 ) -> SignRequest:
     """Sign contract"""
     # make sure file is accessible to this user
-    file = client.files.get_file_by_id(file_id=CONTRACT)
+    file = client.files.get_file_by_id(document_id)
+    # Sign request params
+    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    destination_folder = FolderMini(
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+    )
 
     # signers
     institution = SignRequestCreateSigner(
@@ -268,11 +281,9 @@ def sign_contract(
     # create sign request
     sign_request = client.sign_requests.create_sign_request(
         signers=[institution, student],
-        parent_folder=FolderMini(
-            id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
-        ),
-        source_files=[FileBase(id=file.id, type=FileBaseTypeField.FILE.value)],
-        is_document_preparation_needed=True,
+        parent_folder=destination_folder,
+        source_files=[source_file],
+        is_document_preparation_needed=prep_needed,
     )
 
     return sign_request
@@ -286,8 +297,11 @@ def main():
     # Multiple signers
     sign_contract_multi = sign_contract(
         client,
+        CONTRACT,
+        SIGN_DOCS_FOLDER,
         institution_email=SIGNER_A,
         student_email=SIGNER_B,
+        prep_needed=True,
     )
     if sign_contract_multi.prepare_url is not None:
         open_browser(sign_contract_multi.prepare_url)
@@ -338,16 +352,28 @@ For example:
 ```python
 def sign_doc_single_more_options(
     client: Client,
+    document_id: str,
+    destination_folder_id: str,
     signer_email: str,
     prep_needed: bool = False,
     auto_reminder: bool = False,
 ) -> SignRequest:
-    ...
+    """Single doc sign by single signer"""
+    # make sure file is accessible to this user
+    file = client.files.get_file_by_id(document_id)
+    # Sign request params
+    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    destination_folder = FolderMini(
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+    )
+
+    # signer
+    signer = SignRequestCreateSigner(signer_email)
 
     # sign document
     sign_request = client.sign_requests.create_sign_request(
         signers=[signer],
-        parent_folder=parent_folder,
+        parent_folder=destination_folder,
         source_files=[source_file],
         is_document_preparation_needed=prep_needed,
         are_reminders_enabled=auto_reminder,
@@ -366,21 +392,16 @@ All you need todo is pass the `days_valid` parameter to the `create_sign_request
 For example:
 ```python
 def sign_doc_single_more_options(
-    client: Client,
-    signer_email: str,
-    prep_needed: bool = False,
-    auto_reminder: bool = False,
+    ...
+
     days_valid: int = None,
 ) -> SignRequest:
     ...
 
     # sign document
     sign_request = client.sign_requests.create_sign_request(
-        signers=[signer],
-        parent_folder=parent_folder,
-        source_files=[source_file],
-        is_document_preparation_needed=prep_needed,
-        are_reminders_enabled=auto_reminder,
+        ...
+
         days_valid=days_valid,
     )
 
@@ -418,8 +439,11 @@ Lets try this out. Add the following code to your main method:
 def main():
     ...
     
+    # Sign with redirects
     sign_with_redirects = sign_doc_single_more_options(
         client,
+        SIMPLE_PDF,
+        SIGN_DOCS_FOLDER,
         SIGNER_A,
         prep_needed=False,
         redirect_url="https://forum.box.com/",
@@ -471,6 +495,8 @@ def main():
     # Sign with custom email subject
     sign_custom_email_subject = sign_doc_single_more_options(
         client,
+        SIMPLE_PDF,
+        SIGN_DOCS_FOLDER,
         SIGNER_A,
         prep_needed=False,
         email_subject="All we need is your signature to get started",
@@ -492,25 +518,29 @@ For example:
 ```python
 def sign_doc_verify_phone(
     client: Client,
+    document_id: str,
+    destination_folder_id: str,
     signer_email: str,
     signer_phone: str,
 ) -> SignRequest:
     # make sure file is accessible to this user
-    file = client.files.get_file_by_id(file_id=SIMPLE_PDF)
+    file = client.files.get_file_by_id(document_id)
+
+    # Sign request params
+    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    destination_folder = FolderMini(
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+    )
 
     signer = SignRequestCreateSigner(
         email=signer_email,
         verification_phone_number=signer_phone,
     )
-    parent_folder = FolderMini(
-        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
-    )
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
 
     # sign document
     sign_request = client.sign_requests.create_sign_request(
         signers=[signer],
-        parent_folder=parent_folder,
+        parent_folder=destination_folder,
         source_files=[source_file],
         is_phone_verification_required_to_view=True,
     )
@@ -523,9 +553,12 @@ And use it in the main method:
 def main():
     ...
 
+    # Sign with phone verification
     sign_with_phone_verification = sign_doc_verify_phone(
         client,
-        SIGNER_A
+        SIMPLE_PDF,
+        SIGN_DOCS_FOLDER,
+        SIGNER_A,
         SIGNER_A_PHONE,
     )
     check_sign_request(sign_with_phone_verification)
@@ -545,26 +578,31 @@ For example:
 ```python
 def sign_doc_verify_password(
     client: Client,
+    document_id: str,
+    destination_folder_id: str,
     signer_email: str,
     signer_password: str,
 ) -> SignRequest:
     # make sure file is accessible to this user
-    file = client.files.get_file_by_id(file_id=SIMPLE_PDF)
+    # make sure file is accessible to this user
+    file = client.files.get_file_by_id(document_id)
 
+    # Sign request params
+    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    destination_folder = FolderMini(
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+    )
+
+    # signer
     signer = SignRequestCreateSigner(
         email=signer_email,
         password=signer_password,
     )
-    parent_folder = FolderMini(
-        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
-    )
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
 
-    # sign document
     # sign document
     sign_request = client.sign_requests.create_sign_request(
         signers=[signer],
-        parent_folder=parent_folder,
+        parent_folder=destination_folder,
         source_files=[source_file],
     )
 
@@ -579,6 +617,8 @@ def main():
     # Sign with phone verification
     sign_with_password_verification = sign_doc_verify_password(
         client,
+        SIMPLE_PDF,
+        SIGN_DOCS_FOLDER,
         SIGNER_A,
         "1234",
     )
@@ -605,8 +645,10 @@ Imagine that the scholarship needs to be approved by the dean and the legal depa
 
 Lets create a method for this:
 ```python
-def def sign_contract_step(
+def sign_contract_step(
     client: Client,
+    document_id: str,
+    destination_folder_id: str,
     institution_email: str,
     student_email: str,
     dean_email: str,
@@ -614,7 +656,13 @@ def def sign_contract_step(
 ) -> SignRequest:
     """Sign contract"""
     # make sure file is accessible to this user
-    file = client.files.get_file_by_id(file_id=CONTRACT)
+    file = client.files.get_file_by_id(document_id)
+
+    # Sign request params
+    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    destination_folder = FolderMini(
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+    )
 
     # signers
     institution = SignRequestCreateSigner(
@@ -642,10 +690,8 @@ def def sign_contract_step(
     # create sign request
     sign_request = client.sign_requests.create_sign_request(
         signers=[institution, student, dean, legal],
-        parent_folder=FolderMini(
-            id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
-        ),
-        source_files=[FileBase(id=file.id, type=FileBaseTypeField.FILE.value)],
+        parent_folder=destination_folder,
+        source_files=[source_file],
         is_document_preparation_needed=True,
     )
 
@@ -653,6 +699,21 @@ def def sign_contract_step(
 ```
 And use it in the main method:
 ```python
+def main():
+    ...
+    
+    # Multiple signers and steps
+    sign_contract_multi_step = sign_contract_step(
+        client,
+        CONTRACT,
+        SIGN_DOCS_FOLDER,
+        institution_email=SIGNER_A,
+        student_email=SIGNER_B,
+        dean_email=APPROVER,
+        legal_email=FINAL_COPY,
+    )
+    if sign_contract_multi_step.prepare_url is not None:
+        open_browser(sign_contract_multi_step.prepare_url)
 ```
 
 Like before we need to prepare the document, so open the prepare url in your browser.

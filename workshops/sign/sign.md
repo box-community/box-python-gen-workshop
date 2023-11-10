@@ -84,6 +84,9 @@ SIGNER_A_PHONE = "+15554443322"
 
 SIGNER_B = "YOUR_EMAIL+B@gmail.com"
 
+APPROVER = "YOUR_EMAIL+APPROVER@gmail.com"
+FINAL_COPY = "YOUR_EMAIL+FINAL_COPY@gmail.com"
+
 def check_sign_request(sign_request: SignRequest):
     print(f"\nSimple sign request: {sign_request.id}")
     print(f"  Status: {sign_request.status.value}")
@@ -589,13 +592,114 @@ Enter the password and proceed with the sign process.
 
 ## Signer roles
 So far we have been working with the `signer` role. However there are other roles that you can use to customize the sign process.
+The available roles are, `Signer`, `Approver`, and `Final copy reader`.
+
+From a developer perspective, this means:
+* `Signer` - Any person who is allowed to add data to the document. This includes adding a signature, initials, date, but also filling out text fields, checkboxes, and radio buttons, even if it does not include a signature.
+* `Approver` - This role will be asked if they approve the document.
+* `Final copy reader` - This role does not interact with the signature process, but will receive a copy of the signed document.
+
+Using roles we can be a bit more creative in our scholarship example.
+
+Imagine that the scholarship needs to be approved by the dean and the legal department receives a final copy of the contract.
+
+Lets create a method for this:
+```python
+def def sign_contract_step(
+    client: Client,
+    institution_email: str,
+    student_email: str,
+    dean_email: str,
+    legal_email: str,
+) -> SignRequest:
+    """Sign contract"""
+    # make sure file is accessible to this user
+    file = client.files.get_file_by_id(file_id=CONTRACT)
+
+    # signers
+    institution = SignRequestCreateSigner(
+        email=institution_email,
+        role=SignRequestCreateSignerRoleField.SIGNER,
+        order=1,
+    )
+
+    student = SignRequestCreateSigner(
+        email=student_email,
+        role=SignRequestCreateSignerRoleField.SIGNER,
+        order=2,
+    )
+
+    dean = SignRequestCreateSigner(
+        email=dean_email,
+        role=SignRequestCreateSignerRoleField.APPROVER,
+    )
+
+    legal = SignRequestCreateSigner(
+        email=legal_email,
+        role=SignRequestCreateSignerRoleField.FINAL_COPY_READER,
+    )
+
+    # create sign request
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[institution, student, dean, legal],
+        parent_folder=FolderMini(
+            id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
+        ),
+        source_files=[FileBase(id=file.id, type=FileBaseTypeField.FILE.value)],
+        is_document_preparation_needed=True,
+    )
+
+    return sign_request
+```
+And use it in the main method:
+```python
+```
+
+Like before we need to prepare the document, so open the prepare url in your browser.
+
+Notice in the example the institution is represented by the blue color in the left, and the student by green on the right, both are `signers`.
+
+Neither the `approver` nor the `final copy reader` can have inputs associated with them. If you do this, their roles will be adjusted to `signer`.
 
 
+![Alt text](img/sign_multi-steps-prep.png)
 
-## Signer roles
+Continue the sign process.
+
+First the dean approves the scholarship:
+
+![Alt text](img/sign-multi-steps-approve.png)
+
+Continue the sign process.
+
+Next the institution signs the scholarship:
+
+![Alt text](img/sign-multi-steps-teacher.png)
+
+Continue the sign process.
+
+Next the student signs the scholarship:
+
+![Alt text](img/sign-multi-steps-student.png)
+
+Finally the legal department receives a copy of the signed document. Note that the legal department must be a Box user.
 
 
 ## Extra Credit
+There are a few features that we didn't cover in this workshop. Feel free to explore them on your own.
+* Sign request
+    * Multiple source files
+    * Signature color
+    * Disable text signature
+    * Name
+    * External id
+* Signer
+    * In person
+    * Embed URL
+    * Box login required
+* Get sign request by id
+* List sign requests
+* Cancel sign request
 
 
 # Final thoughts

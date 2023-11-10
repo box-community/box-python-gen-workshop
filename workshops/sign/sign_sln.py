@@ -26,7 +26,11 @@ CONTRACT = "1358047520478"
 
 SIGNER_A = "YOUR_EMAIL+A@gmail.com"
 SIGNER_A_PHONE = "+15554443322"
+
 SIGNER_B = "YOUR_EMAIL+B@gmail.com"
+
+APPROVER = "YOUR_EMAIL+APPROVER@gmail.com"
+FINAL_COPY = "YOUR_EMAIL+FINAL_COPY@gmail.com"
 
 
 def check_sign_request(sign_request: SignRequest):
@@ -188,6 +192,53 @@ def sign_contract(
     return sign_request
 
 
+def sign_contract_step(
+    client: Client,
+    institution_email: str,
+    student_email: str,
+    dean_email: str,
+    legal_email: str,
+) -> SignRequest:
+    """Sign contract"""
+    # make sure file is accessible to this user
+    file = client.files.get_file_by_id(file_id=CONTRACT)
+
+    # signers
+    institution = SignRequestCreateSigner(
+        email=institution_email,
+        role=SignRequestCreateSignerRoleField.SIGNER,
+        order=1,
+    )
+
+    student = SignRequestCreateSigner(
+        email=student_email,
+        role=SignRequestCreateSignerRoleField.SIGNER,
+        order=2,
+    )
+
+    dean = SignRequestCreateSigner(
+        email=dean_email,
+        role=SignRequestCreateSignerRoleField.APPROVER,
+    )
+
+    legal = SignRequestCreateSigner(
+        email=legal_email,
+        role=SignRequestCreateSignerRoleField.FINAL_COPY_READER,
+    )
+
+    # create sign request
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[institution, student, dean, legal],
+        parent_folder=FolderMini(
+            id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
+        ),
+        source_files=[FileBase(id=file.id, type=FileBaseTypeField.FILE.value)],
+        is_document_preparation_needed=True,
+    )
+
+    return sign_request
+
+
 def sign_send_reminder(client: Client, sign_request_id: str):
     """Send reminder to signers"""
     sign_request = client.sign_requests.resend_sign_request(sign_request_id)
@@ -263,6 +314,17 @@ def main():
     #     "1234",
     # )
     # check_sign_request(sign_with_password_verification)
+
+    # Multiple signers and steps
+    sign_contract_multi_step = sign_contract_step(
+        client,
+        institution_email=SIGNER_A,
+        student_email=SIGNER_B,
+        dean_email=APPROVER,
+        legal_email=FINAL_COPY,
+    )
+    if sign_contract_multi_step.prepare_url is not None:
+        open_browser(sign_contract_multi_step.prepare_url)
 
 
 if __name__ == "__main__":

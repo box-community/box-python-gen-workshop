@@ -24,7 +24,7 @@ SIMPLE_PDF = "1355143830404"
 SIMPLE_DOC = "1358077513913"
 CONTRACT = "1358047520478"
 
-SIGNER_A = "YOUR_EMAIL+A@gmail.com"
+SIGNER_A = "barbasr+A@gmail.com"
 SIGNER_A_PHONE = "+15554443322"
 
 SIGNER_B = "YOUR_EMAIL+B@gmail.com"
@@ -285,13 +285,13 @@ def main():
     # sign_pdf = sign_doc_single(client, SIMPLE_PDF, SIGN_DOCS_FOLDER, SIGNER_A)
     # check_sign_request(sign_pdf)
 
-    # # Simple sign a pdf request with preparation
-    # sign_pdf_prep = sign_doc_single(
-    #     client, SIMPLE_PDF, SIGN_DOCS_FOLDER, SIGNER_A, True
-    # )
-    # check_sign_request(sign_pdf_prep)
-    # if sign_pdf_prep.prepare_url is not None:
-    #     open_browser(sign_pdf_prep.prepare_url)
+    # Simple sign a pdf request with preparation
+    sign_pdf_prep = sign_doc_single(
+        client, SIMPLE_PDF, SIGN_DOCS_FOLDER, SIGNER_A, True
+    )
+    check_sign_request(sign_pdf_prep)
+    if sign_pdf_prep.prepare_url is not None:
+        open_browser(sign_pdf_prep.prepare_url)
 
     # # Multiple signers
     # sign_contract_multi = sign_contract(

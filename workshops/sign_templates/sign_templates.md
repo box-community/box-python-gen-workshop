@@ -62,11 +62,12 @@ Replace the `YOUR_EMAIL` with your email, or use a different email for each sign
 import logging
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
+from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import (
+    SignRequest,
     SignRequestCreateSigner,
-    FileBaseTypeField,
+    SignRequestPrefillTag,
     FolderBaseTypeField,
-    FileBase,
     FolderMini,
 )
 
@@ -126,7 +127,6 @@ These requirements can be `mandatory` or `optional` and can also be pre-populate
 ## Create a template
 Let's start by creating a simple sign template.
 
-### Single signer template
 From the Box app navigate to the sign menu on the left, then select templates.
 
 ![Alt text](img/sign-template-navigate.png)
@@ -232,7 +232,7 @@ Go to the inbox of the sender and complete the sign request.
 
 >Also the date is automatically populated with the current date.
 
-Bu what if we want to pre-populate the name?
+But what if we want to pre-populate the name?
 
 ## Pre-populate the signature attributes
 Go back to the template design and add an id to the name field, like so:
@@ -296,21 +296,61 @@ Open the signer inbox and complete the sign request.
 
 >Notice that the name is now pre-populated. However the `signer` can still change it.
 
+Pre-populating the signature attributes is a great way to save the signer time. Using the ` document_tag_id` allows your app to integrate any other data source, contextualizing the document with extra information.
 
+# Get more information about a template
+We've seen that we can list the templates available to a user.
+But we can also get more information about a specific template.
+Let's create a method that returns basic information of a template, but details all the signature requirements:
+```python
+def sign_template_print_info(client: Client, template_id: str):
+    sign_template = client.sign_templates.get_sign_template_by_id(template_id)
+    print(f"\nSign template: {sign_template.id} - {sign_template.name}")
+    print(f"  Signers: {len(sign_template.signers)}")
+    for signer in sign_template.signers:
+        print(f"    {signer.role.value}")
+        if len(signer.inputs) > 0:
+            print("      Tag ID\t Type\t Required")
+        for input in signer.inputs:
+            print(
+                f"      {input.document_tag_id} {input.type.value} {input.is_required}"
+            )
+```
+And use it on our main:
+```python
+def main():
+    ...
 
-
-
-
+    # Print sign template details
+    sign_template_print_info(client, TEMPLATE_SIMPLE)
+```
+Resulting in:
+```
+Sign template: 94e3815b-f7f5-4c2c-8a26-e9ba5c486031 - Simple-PDF.pdf
+  Signers: 2
+    final_copy_reader
+    signer
+      Tag ID     Type    Required
+      None date True
+      signer_full_name text True
+      None signature True
+```
+Notice that the `signer_full_name` is the tag id we used to pre-populate the name.
 
 ## Extra Credit
+There are many other signature attributes that can be pre-populated, like the `company_name`, `dropdown`, and `checkboxes`.
+
+Create a new template or modify an existing one to include more attributes, and pre-populate them in the signature request.
 
 
 # Final thoughts
-Templates are a form of Sign structured documents where the signature requirements are already defined, and placed on the document.
+Templates are a form of signing structured documents where the signature requirements are already defined, and placed on the document.
 
 This not only keeps your legal department happy, but also avoids having the users do an extra step and prepare the document.
 
 Finally if your document signature requirements has a lot of options, you can pre-populate these from another data source and save the user time.
 Just remember that the user who owns these properties can always change them.
+
+There is no API entry point to create a template, so you will have to create and manage them manually from the Box app.
 
 

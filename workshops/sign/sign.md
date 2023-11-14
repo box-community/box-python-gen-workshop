@@ -763,5 +763,11 @@ There are a few features that we didn't cover in this workshop. Feel free to exp
 
 
 # Final thoughts
+You only need a document and a signer email to send a signature request.
 
+When using unstructured documents your app should pass the `is_document_preparation_needed`, and redirect the user to the `preparation_url` to prepare the document.
+
+You can customize the sign process by using the `signer` roles, `signer`, `approver`, and `final copy reader.
+
+You can further customize it by using features such as `redirect_url`, `declined_redirect_url`, `email_subject`, `email_message`, `days_valid`, `are_reminders_enabled`, `is_phone_verification_required_to_view`, `password`, and so on.
 

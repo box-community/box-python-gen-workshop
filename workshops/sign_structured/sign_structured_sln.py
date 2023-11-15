@@ -135,9 +135,9 @@ def main():
     # )
     # check_sign_request(sign_request_pre_pop)
 
-    # Latest sign request
-    LATEST_SIGN_REQUEST = "7b86e46c-72ba-4568-a6ff-787077cca007"
-    check_sign_request_by_id(client, LATEST_SIGN_REQUEST)
+    # # Latest sign request
+    # LATEST_SIGN_REQUEST = "7b86e46c-72ba-4568-a6ff-787077cca007"
+    # check_sign_request_by_id(client, LATEST_SIGN_REQUEST)
 
 
 if __name__ == "__main__":

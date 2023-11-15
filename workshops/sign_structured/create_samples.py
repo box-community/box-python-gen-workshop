@@ -108,5 +108,5 @@ def create_samples(client: Client):
     docs_folder = create_box_folder(client, "docs", module_folder)
 
     folder_upload(
-        client, docs_folder, "workshops/sign_templates/content_samples/"
+        client, docs_folder, "workshops/sign_structured/content_samples/"
     )

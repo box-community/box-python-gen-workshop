@@ -85,7 +85,7 @@ def create_sign_request(client: Client, template_id: str, signer_email: str):
 
 def create_sign_request_name_default(
     client: Client, template_id: str, signer_name, signer_email: str
-):
+) -> SignRequest:
     """Create sign request from template"""
     parent_folder = FolderMini(
         id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER

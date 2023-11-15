@@ -348,7 +348,7 @@ Templates are a form of signing structured documents where the signature require
 
 This not only keeps your legal department happy, but also avoids having the users do an extra step and prepare the document.
 
-Finally if your document signature requirements has a lot of options, you can pre-populate these from another data source and save the user time.
+Finally if your document signature requirements have a lot of options, you can pre-populate these from another data source and save the user time.
 Just remember that the user who owns these properties can always change them.
 
 There is no API entry point to create a template, so you will have to create and manage them manually from the Box app.

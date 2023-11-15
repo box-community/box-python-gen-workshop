@@ -32,6 +32,15 @@ APPROVER = "YOUR_EMAIL+APPROVER@gmail.com"
 FINAL_COPY = "YOUR_EMAIL+FINAL_COPY@gmail.com"
 
 
+def check_sign_request(sign_request: SignRequest):
+    print(f"\nSimple sign request: {sign_request.id}")
+    print(f"  Status: {sign_request.status.value}")
+    print(f"  Signers: {len(sign_request.signers)}")
+    for signer in sign_request.signers:
+        print(f"    {signer.role.value}: {signer.email}")
+    print(f"  Prepare url: {sign_request.prepare_url}")
+
+
 def check_sign_request_by_id(client: Client, sign_request_id: str):
     """Check sign request by id"""
     sign_request = client.sign_requests.get_sign_request_by_id(sign_request_id)

@@ -81,6 +81,14 @@ STRUCTURED_DOC = "1363379762284"
 
 SIGNER_A = "YOUR_EMAIL+A@gmail.com"
 
+def check_sign_request(sign_request: SignRequest):
+    print(f"\nSimple sign request: {sign_request.id}")
+    print(f"  Status: {sign_request.status.value}")
+    print(f"  Signers: {len(sign_request.signers)}")
+    for signer in sign_request.signers:
+        print(f"    {signer.role.value}: {signer.email}")
+    print(f"  Prepare url: {sign_request.prepare_url}")
+
 
 def main():
     """Simple script to demonstrate how to use the Box SDK"""

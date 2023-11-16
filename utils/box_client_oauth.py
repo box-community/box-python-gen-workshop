@@ -3,6 +3,7 @@ Handles the box client object creation
 orchestrates the authentication process
 """
 import os
+import logging
 import dotenv
 import uuid
 from box_sdk_gen.client import BoxClient
@@ -55,6 +56,7 @@ def get_client_oauth(config: ConfigOAuth) -> BoxClient:
             state=state,
         )
         auth_url = auth.get_authorize_url(options)
+        logging.info("auth url: %s", auth_url)
         open_browser(auth_url)
         callback_handle_request(
             auth, config.callback_hostname, config.callback_port, state

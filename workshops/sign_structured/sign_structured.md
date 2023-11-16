@@ -114,7 +114,7 @@ A structured document in the context of Box Sign is a document that includes spe
 
 This allows your app to handle a dynamic generated document that is ready to be signed, which has a couple of advantages:
 * The document can be dynamically generated, and the signature properties can be added to the document before creating the signature request, effectively bypassing the document preparation step.
-* The document format can be handled outside Bos Sign templates, allowing higher flexibility and integration with external document management systems.
+* The document format can be handled outside Box Sign templates, allowing higher flexibility and integration with external document management systems.
 
 
 
@@ -179,7 +179,7 @@ Resulting in:
 Simple sign request: 6878e048-e9bd-4fb1-88c6-8e502783e8d0
   Status: converting
   Signers: 2
-    final_copy_reader: barduinor@gmail.com
+    final_copy_reader: ...@gmail.com
     signer: YOUR_EMAIL+a@gmail.com
   Prepare url: None
 ```
@@ -194,7 +194,7 @@ Complete the signing process and you'll see the document in the `signed docs` fo
 
 ## Pre-populate the signature attributes
 
-If we have an external id in the document tags we can use it to pre-populate their values. For example, if we have a tag with the id `tag_full_name` we can use it to pre-populate the name of the signer.
+If we have an external id in the document tags we can use it to pre-populate their values. For example, we have a tag with the id `tag_full_name` we can use it to pre-populate the name of the signer.
 
 ```python
 def create_sign_request_structured_with_prefill(
@@ -243,7 +243,7 @@ Resulting in:
 Simple sign request: 7b86e46c-72ba-4568-a6ff-787077cca007
   Status: converting
   Signers: 2
-    final_copy_reader: barduinor@gmail.com
+    final_copy_reader: ...@gmail.com
     signer: YOUR_EMAIL+a@gmail.com
   Prepare url: None
 ```
@@ -254,7 +254,7 @@ Go to the `signer` email inbox and open the email from Box Sign. Click on the Re
 Complete the signing process and you'll see the document in the `signed docs` folder.
 
 # Extract information from a signed document
-Lets say we want to extract the name of the signer, and the other properties from the signed document. This is useful if you need to tie information from the sign request back into your systems.
+Lets say we want to extract the name of the signer, and the other properties from the signed document. This is useful if you need to tie the information from the sign request back into your systems.
 Lets create a method to extract the information from the signed request:
 ```python
 def check_sign_request_by_id(client: Client, sign_request_id: str):
@@ -298,7 +298,7 @@ Resulting in:
 Simple sign request: 7b86e46c-72ba-4568-a6ff-787077cca007
   Status: signed
   Signers: 2
-    final_copy_reader: barduinor@gmail.com
+    final_copy_reader: ...@gmail.com
     signer: YOUR_EMAIL+a@gmail.com
       checkbox: True
       text: Rui Barbosa

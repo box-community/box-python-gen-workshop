@@ -48,12 +48,11 @@ def sign_doc_single(
     prep_needed: bool = False,
 ) -> SignRequest:
     """Single doc sign by single signer"""
-    # make sure file is accessible to this user
-    file = client.files.get_file_by_id(document_id)
+
     # Sign request params
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
     destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
     )
     signer = SignRequestCreateSigner(signer_email)
     # sign document
@@ -76,12 +75,11 @@ def sign_contract(
     prep_needed: bool = False,
 ) -> SignRequest:
     """Sign contract"""
-    # make sure file is accessible to this user
-    file = client.files.get_file_by_id(document_id)
+
     # Sign request params
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
     destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
     )
 
     # signers
@@ -128,12 +126,11 @@ def sign_doc_single_more_options(
     email_message: str = None,
 ) -> SignRequest:
     """Single doc sign by single signer"""
-    # make sure file is accessible to this user
-    file = client.files.get_file_by_id(document_id)
+
     # Sign request params
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
     destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
     )
 
     # signer
@@ -163,13 +160,10 @@ def sign_doc_verify_phone(
     signer_email: str,
     signer_phone: str,
 ) -> SignRequest:
-    # make sure file is accessible to this user
-    file = client.files.get_file_by_id(document_id)
-
     # Sign request params
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
     destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
     )
 
     signer = SignRequestCreateSigner(
@@ -195,13 +189,10 @@ def sign_doc_verify_password(
     signer_email: str,
     signer_password: str,
 ) -> SignRequest:
-    # make sure file is accessible to this user
-    file = client.files.get_file_by_id(document_id)
-
     # Sign request params
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
     destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
     )
 
     # signer
@@ -230,13 +221,11 @@ def sign_contract_step(
     legal_email: str,
 ) -> SignRequest:
     """Sign contract"""
-    # make sure file is accessible to this user
-    file = client.files.get_file_by_id(document_id)
 
     # Sign request params
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
     destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER.value
+        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
     )
 
     # signers

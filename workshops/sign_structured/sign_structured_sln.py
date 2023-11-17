@@ -73,13 +73,11 @@ def create_sign_request_structured(
     client: Client, file_id: str, signer_email: str
 ) -> SignRequest:
     """Create a sign request with structured data"""
-    # make sure file is accessible to this user
-    file = client.files.get_file_by_id(file_id)
 
     # Sign request params
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    structure_file = FileBase(id=file_id, type=FileBaseTypeField.FILE)
     parent_folder = FolderMini(
-        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
+        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER
     )
     signer = SignRequestCreateSigner(signer_email)
 
@@ -87,7 +85,7 @@ def create_sign_request_structured(
     sign_request = client.sign_requests.create_sign_request(
         signers=[signer],
         parent_folder=parent_folder,
-        source_files=[source_file],
+        source_files=[structure_file],
     )
 
     return sign_request
@@ -97,13 +95,11 @@ def create_sign_request_structured_with_prefill(
     client: Client, file_id: str, signer_name, signer_email: str
 ) -> SignRequest:
     """Create a sign request with structured data"""
-    # make sure file is accessible to this user
-    file = client.files.get_file_by_id(file_id)
 
     # Sign request params
-    source_file = FileBase(id=file.id, type=FileBaseTypeField.FILE.value)
+    source_file = FileBase(id=file_id, type=FileBaseTypeField.FILE)
     parent_folder = FolderMini(
-        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER.value
+        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER
     )
     signer = SignRequestCreateSigner(signer_email)
 

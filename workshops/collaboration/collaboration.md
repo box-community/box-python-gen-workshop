@@ -61,11 +61,18 @@ We'll also need an email address to collaborate with, so create a global constan
 ```python
 """Box Collaborations"""
 import logging
+from box_sdk_gen.fetch import APIException
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import Collaborations, Collaboration, File, Folder
+from box_sdk_gen.schemas import Collaborations, Collaboration
 
-from box_sdk_gen.managers.list_collaborations import ListCollaborationsManager
-from box_sdk_gen.managers.user_collaborations import UserCollaborationsManager
+from box_sdk_gen.managers.user_collaborations import (
+    CreateCollaborationItemArg,
+    CreateCollaborationItemArgTypeField,
+    CreateCollaborationAccessibleByArg,
+    CreateCollaborationAccessibleByArgTypeField,
+    CreateCollaborationRoleArg,
+    UpdateCollaborationByIdRoleArg,
+)
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 

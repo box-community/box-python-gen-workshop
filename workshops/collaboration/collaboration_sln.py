@@ -4,9 +4,7 @@ from box_sdk_gen.fetch import APIException
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import Collaborations, Collaboration
 
-from box_sdk_gen.managers.list_collaborations import ListCollaborationsManager
 from box_sdk_gen.managers.user_collaborations import (
-    UserCollaborationsManager,
     CreateCollaborationItemArg,
     CreateCollaborationItemArgTypeField,
     CreateCollaborationAccessibleByArg,

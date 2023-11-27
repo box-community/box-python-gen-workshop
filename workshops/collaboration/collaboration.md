@@ -155,8 +155,11 @@ def main():
 ```
 Resulting in:
 ```
-Created collaboration: 50084072415
-<class 'box_sdk_gen.schemas.Collaboration'> {'id': '50084072415', 'type': 'collaboration', 'item': {'id': '1373026823928', 'type': 'file', 'etag': '0', 'sequence_id': '0', 'name': 'sample_file.txt', 'sha1': '715a6fe7d575e27934e16e474c290048829ffc54', 'file_version': {'id': '1503911049528', 'type': 'file_version', 'sha1': '715a6fe7d575e27934e16e474c290048829ffc54'}}, 'accessible_by': {'id': '25451546798', 'type': 'user', 'name': 'Rui Barbosa', 'login': 'barduinor+002@gmail.com'}, 'role': 'editor', 'status': 'accepted', 'acknowledged_at': '2023-11-27T13:44:51-08:00', 'created_by': {'id': '25428698627', 'type': 'user', 'name': 'Free Dev 001', 'login': 'barduinor+001@gmail.com'}, 'created_at': '2023-11-27T13:44:52-08:00', 'modified_at': '2023-11-27T13:44:52-08:00'}
+Created collaboration: 50086660113
+Collaboration: 50086660113
+ Collaborator: YOUR_EMAIL+collab@gmail.com 
+         Role: editor
+       Status: accepted
 ```
 
 Now if we open the Box.com app and navigate to `workshops/collaboration`, you'll see a file with a collaboration icon.

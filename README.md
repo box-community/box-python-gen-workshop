@@ -75,7 +75,7 @@ Once this process is complete you can close the browser window.
 By default the sample app prints the current user's name to the console, and lists the items on the root folder.
 
 The authorization token last for 60 minutes, and the refresh toke for 60 days.
-If you get stuck, you can delete the .outh.json file and reauthorize the application.
+If you get stuck, you can delete the .oauth.tk.db file and reauthorize the application.
 
 JWT or CCG authentication **will not** require you to log in to Box.
 
@@ -90,4 +90,6 @@ You'll find the workshop exercises in the [workshops](workshops) folder.
 * [Search](workshops/search/search.md) - Using search in the Box API
 * [Shared Links](workshops/shared_links/shared_links.md) - Create and manage shared links
 * [File Representations](workshops/file_representations/file_representations.md) - Working with file representations
-* [Sign](workshops/sign/) - Working with Sign. Includes most features of the Sign request.
+* [Sign - Unstructured documents](workshops/sign/) - Working with Sign, and simple documents. Includes most features of the Sign request.
+* [Sign Templates](workshops/sign_templates/) - Working with Sign Templates.
+* [Sign Structured documents](workshops/sign_structured/) - Working with Sign Structured documents.

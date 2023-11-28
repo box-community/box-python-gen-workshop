@@ -19,7 +19,7 @@ References to our documentation:
 * [SDK List collaborations](https://github.com/box/box-python-sdk-gen/blob/main/docs/list_collaborations.md)
 * [SDK User collaborations](https://github.com/box/box-python-sdk-gen/blob/main/docs/user_collaborations.md)
 * [API Guide](https://developer.box.com/guides/collaborations/)
-* [API Reference Files](https://developer.box.com/reference/post-collaborations/)
+* [API Reference](https://developer.box.com/reference/post-collaborations/)
 
 
 # Exercises

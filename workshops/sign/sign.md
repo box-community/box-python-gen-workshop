@@ -9,7 +9,13 @@ Make sure your Box app is configured to use the following scopes:
 > If the application scope is not available, then your account can not use the Sign API and you wont be able to complete this exercise.
 
 ## Concepts
+Box Sign enables you to send documents to people for electronic signatures.  With Box Sign, you select who needs to sign, select the order in which people need to sign, and include additional fields such as date of signature, explanatory text, and checkboxes.
 
+To receive and sign documents, recipients do not need to have Box accounts — anyone with an email address can receive and sign the documents you send.
+
+In this exercise we'll be covering signing unstructured documents.
+
+Imagine some sort of document management app, where users can upload a document and ask anyone to sign it. In this case your app will know what document to sign and who needs to sign, but it has no idea where to put the signature or its properties like name, date, initial, and so on.
 
 ## Sign API
 References to our documentation:
@@ -733,7 +739,7 @@ Next the student signs the scholarship:
 
 ![Alt text](img/sign-multi-steps-student.png)
 
-Finally the legal department receives a copy of the signed document. Note that the legal department must be a Box user to get the notification.
+Finally the legal department receives a copy of the signed document.
 
 
 ## Extra Credit

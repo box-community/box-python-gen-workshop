@@ -25,7 +25,10 @@ SAMPLE_EMAIL = "YOUR_EMAIL+collab@gmail.com"
 
 
 def create_file_collaboration(
-    client: Client, item_id: str, user_email: str
+    client: Client,
+    item_id: str,
+    user_email: str,
+    role: CreateCollaborationRoleArg,
 ) -> Collaboration:
     item = CreateCollaborationItemArg(
         type=CreateCollaborationItemArgTypeField.FILE,
@@ -35,7 +38,6 @@ def create_file_collaboration(
         type=CreateCollaborationAccessibleByArgTypeField.USER,
         login=user_email,
     )
-    role = CreateCollaborationRoleArg.EDITOR
 
     try:
         collaboration = client.user_collaborations.create_collaboration(
@@ -46,7 +48,7 @@ def create_file_collaboration(
     # return collaboration if user is already a collaborator
     except APIException as err:
         if err.status == 400 and err.code == "user_already_collaborator":
-            # User is already a collaborator
+            # User is already a collaborator let's update the role
             collaborations = (
                 client.list_collaborations.get_file_collaborations(
                     file_id=item_id,
@@ -54,13 +56,20 @@ def create_file_collaboration(
             )
             for collaboration in collaborations.entries:
                 if collaboration.accessible_by.login == user_email:
-                    return collaboration
+                    collaboration_updated = (
+                        client.user_collaborations.update_collaboration_by_id(
+                            collaboration_id=collaboration.id,
+                            role=role,
+                        )
+                    )
+                    return collaboration_updated
 
     return collaboration
 
 
 def print_file_collaboration(client: Client, collaboration: Collaboration):
     print(f"Collaboration: {collaboration.id}")
+
     print(f" Collaborator: {collaboration.accessible_by.login} ")
     print(f"         Role: {collaboration.role.value}")
     print(f"       Status: {collaboration.status.value}")
@@ -103,7 +112,10 @@ def main():
 
     # Create a collaboration
     collaboration = create_file_collaboration(
-        client=client, item_id=SAMPLE_FILE, user_email=SAMPLE_EMAIL
+        client=client,
+        item_id=SAMPLE_FILE,
+        user_email=SAMPLE_EMAIL,
+        role=CreateCollaborationRoleArg.EDITOR,
     )
     print(f"\nCreated collaboration: {collaboration.id}")
 

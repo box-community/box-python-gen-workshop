@@ -101,26 +101,27 @@ if __name__ == "__main__":
 Let's create a method that creates a collaboration for a file.
 At minimum we'll need a client, the id of the file, the role, and the email of the user we want to collaborate with.
 
-Typically when using just an email, and none on the type, this means an external collaborations to a user that does not exist in the enterprise.
+You can specify a user by its `id` or `login` (email). When a user is external to your organizations you will only use the login, since you wont know the `id`, we'll assume an external collaboration for now.
 
-You can also collaborate with `users` or `groups` that are part of the enterprise, but in that case you need to specify the type as `user` or `group`, and use the corresponding id's.
-
-We'll assume an external collaboration for now.
+You can also collaborate with groups that are part of the enterprise, but in that case you need to specify the type as `group`, and use the corresponding `id`'s.
 
 >At the time of writing this workshop, the SDK is returning an error if the collaborator does not already have a Box account. If this is the case, just create a free Box account with the email you want to collaborate with.
 
 ```python
 def create_file_collaboration(
-    client: Client, item_id: str, user_email: str
+    client: Client,
+    item_id: str,
+    user_email: str,
+    role: CreateCollaborationRoleArg,
 ) -> Collaboration:
     item = CreateCollaborationItemArg(
         type=CreateCollaborationItemArgTypeField.FILE,
         id=item_id,
     )
     accessible_by = CreateCollaborationAccessibleByArg(
+        type=CreateCollaborationAccessibleByArgTypeField.USER,
         login=user_email,
     )
-    role = CreateCollaborationRoleArg.EDITOR
 
     try:
         collaboration = client.user_collaborations.create_collaboration(
@@ -131,7 +132,7 @@ def create_file_collaboration(
     # return collaboration if user is already a collaborator
     except APIException as err:
         if err.status == 400 and err.code == "user_already_collaborator":
-            # User is already a collaborator
+            # User is already a collaborator let's update the role
             collaborations = (
                 client.list_collaborations.get_file_collaborations(
                     file_id=item_id,
@@ -139,10 +140,19 @@ def create_file_collaboration(
             )
             for collaboration in collaborations.entries:
                 if collaboration.accessible_by.login == user_email:
-                    return collaboration
+                    collaboration_updated = (
+                        client.user_collaborations.update_collaboration_by_id(
+                            collaboration_id=collaboration.id,
+                            role=role,
+                        )
+                    )
+                    return collaboration_updated
 
     return collaboration
 ```
+Because we are running this script multiple times, we need to handle the case where the user is already a collaborator. In the example above we are catching the `user_already_collaborator` error and blindly updating the role of the existing collaboration.
+
+
 Then use it in your main method:
 ``` python
 def main():
@@ -153,7 +163,6 @@ def main():
         client=client, item_id=SAMPLE_FILE, user_email=SAMPLE_EMAIL
     )
     print(f"\nCreated collaboration: {collaboration.id}")
-    print(f"{collaboration}")
 ```
 Resulting in:
 ```

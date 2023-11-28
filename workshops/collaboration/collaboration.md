@@ -107,6 +107,8 @@ You can also collaborate with `users` or `groups` that are part of the enterpris
 
 We'll assume an external collaboration for now.
 
+>At the time of writing this workshop, the SDK is returning an error if the collaborator does not already have a Box account. If this is the case, just create a free Box account with the email you want to collaborate with.
+
 ```python
 def create_file_collaboration(
     client: Client, item_id: str, user_email: str

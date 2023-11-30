@@ -1,8 +1,8 @@
 # Tasks
-Tasks allow users to request collaborators on a file to review a file or complete a piece of work. Tasks can be used by developers to create file-centric workflows.
+Tasks allow users to request collaborators on a document to review it or complete a piece of work. Tasks can be used by developers to create document-centric workflows.
 
 ## Concepts
-A task is primarily associated with a file.
+A task is primarily associated with a document.
 
 There are two types of tasks, `review` and `complete`. 
 
@@ -14,9 +14,7 @@ A task can be assigned to single or multiple users, and has a `completion_rule` 
 
 The only way to complete a task is to complete the assignments.
 
-A task can also have a `due_at`, specifying the date and time when the task needs to be completed.
-
-A task can also include a message describing the tasks it self.
+A task can also have a `due_at`, specifying the date and time when the task needs to be completed, and a message describing the tasks it self.
 
 ## Tasks API
 References to our documentation:
@@ -69,16 +67,24 @@ Create a global constant named `SAMPLE_FILE_B` and make it equal to the id of th
 
 ```python
 """Box Tasks API example"""
+from datetime import datetime, timedelta, UTC
 import logging
 from box_sdk_gen.fetch import APIException
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import Task
+from box_sdk_gen.schemas import Task, TaskAssignment, Tasks
 
 from box_sdk_gen.managers.tasks import (
     CreateTaskItemArg,
     CreateTaskItemArgTypeField,
     CreateTaskActionArg,
     CreateTaskCompletionRuleArg,
+)
+
+from box_sdk_gen.managers.task_assignments import (
+    CreateTaskAssignmentTaskArg,
+    CreateTaskAssignmentTaskArgTypeField,
+    CreateTaskAssignmentAssignToArg,
+    UpdateTaskAssignmentByIdResolutionStateArg,
 )
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -107,7 +113,6 @@ if __name__ == "__main__":
 
 ## Create a tasks for a file
 Let us start by creating a task for a file.
-
 
 ```python
 def create_task(
@@ -152,7 +157,7 @@ if __name__ == "__main__":
 ```
 Result:
 ```
-Hello, I'm Free Dev 001 (barduinor+001@gmail.com) [25428698627]
+Hello, I'm Free Dev 001 (...@gmail.com) [25428698627]
 
 Created task 23863153599 for file 1375158910885
 ```
@@ -285,6 +290,9 @@ def delete_task(client: Client, task_id: str):
 ```
 And delete all tasks from both files:
 ```python
+def main():
+    ...
+
     # delete tasks file A
     print("\nDeleting tasks for file A")
     for task_a in tasks_a.entries:
@@ -319,6 +327,21 @@ No tasks
 We can programmatically complete a task. This is done indirectly by assignment, meaning we update the assignment, and depending on the completion rule, the task will be completed.
 Let's create a method to update an assignment:
 ```python
+def update_task_assignment(
+    client: Client,
+    assignment_id: str,
+    message: str,
+    resolution_state: UpdateTaskAssignmentByIdResolutionStateArg,
+):
+    """Update a task assignment"""
+    try:
+        client.task_assignments.update_task_assignment_by_id(
+            task_assignment_id=assignment_id,
+            message=message,
+            resolution_state=resolution_state,
+        )
+    except APIException as err:
+        print(f"Error updating task assignment {assignment_id}: {err}")
 ```
 Now in the main we'll create a task, assign it to the user, and update it to a complete state with a comment:
 

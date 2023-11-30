@@ -126,7 +126,7 @@ def main():
     print(f"\nHello, I'm {user.name} ({user.login}) [{user.id}]")
 
     # create a complete task
-    task_c = create_task(
+    task_a = create_task(
         client,
         SAMPLE_FILE_A,
         CreateTaskActionArg.COMPLETE,
@@ -134,7 +134,7 @@ def main():
         datetime.now(UTC) + timedelta(days=7),
         CreateTaskCompletionRuleArg.ANY_ASSIGNEE,
     )
-    print(f"\nCreated task {task_c.id} for file {task_c.item.id}")
+    print(f"\nCreated task {task_a.id} for file {task_a.item.id}")
 
     # create and assign a review task and assign it
     task_b = create_task(

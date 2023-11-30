@@ -12,9 +12,11 @@ A `complete` task is used to request a collaborator to complete a piece of work.
 
 A task can be assigned to single or multiple users, and has a `completion_rule` that determines if the task can be completed by any user (`any_assignee`), or requires all users (`all_assignees`).
 
-A task can also have a due_at, specifying the date and time when the task needs to be completed.
+The only way to complete a task is to complete the assignments.
 
-Finally your app can include a message describing the tasks it self.
+A task can also have a `due_at`, specifying the date and time when the task needs to be completed.
+
+A task can also include a message describing the tasks it self.
 
 ## Tasks API
 References to our documentation:
@@ -212,9 +214,171 @@ Now if we navigate to sample_file_b.txt in our Box app:
 
 Notice the task is assigned to a user, and because it is a review task, you can approve or reject it.
 
+## List tasks on a file
+Let's create a method to return all tasks on a file:
+```python
+def get_tasks_from_file(client: Client, file_id: str) -> Tasks:
+    """List tasks"""
+    tasks = client.tasks.get_file_tasks(file_id=file_id)
+    return tasks
+```
+And a method to print the tasks:
+```python
+def print_tasks(tasks: Tasks):
+    if tasks.total_count == 0:
+        print("No tasks")
+        return tasks
+    for task in tasks.entries:
+        print(f"Task {task.id} {task.message}")
+        print(f"     {task.action.value} done:[{task.is_completed}]")
+        print(f"     {task.due_at}")
+        print(f"     {task.completion_rule.value}")
+        print(f"Assignments: {task.task_assignment_collection.total_count}")
+        for assignment in task.task_assignment_collection.entries:
+            print(f"     {assignment.id} {assignment.assigned_to.name}")
+            print(f"     state:[{assignment.resolution_state.value}]")
+            print(f"     {assignment.message}")
+```
+
+Using them in in our main:
+```python
+dev main()
+    ...
+
+    # list tasks
+    tasks_a = get_tasks_from_file(client, SAMPLE_FILE_A)
+    print("\nTasks for file A:")
+    print_tasks(tasks_a)
+
+    tasks_b = get_tasks_from_file(client, SAMPLE_FILE_B)
+    print("\nTasks for file B:")
+    print_tasks(tasks_b)
+```
+Resulting in:
+```
+Tasks for file A:
+Task 23879977594 Please register this new customer
+     complete done:[False]
+     2023-12-07T15:49:28+00:00
+     any_assignee
+Assignments: 0
+
+Tasks for file B:
+Task 23879795358 Please approve or reject this proposal
+     review done:[False]
+     2023-12-07T15:49:29+00:00
+     any_assignee
+Assignments: 1
+     54437394916 Free Dev 001
+     state:[incomplete]
+```
+
+## Deleting a task
+Let's create a method to delete a task:
+```python
+def delete_task(client: Client, task_id: str):
+    """Delete a task"""
+    try:
+        client.tasks.delete_task_by_id(task_id=task_id)
+    except APIException as err:
+        print(f"Error deleting task {task_id}: {err}")
+```
+And delete all tasks from both files:
+```python
+    # delete tasks file A
+    print("\nDeleting tasks for file A")
+    for task_a in tasks_a.entries:
+        delete_task(client, task_a.id)
+    tasks_a = get_tasks_from_file(client, SAMPLE_FILE_A)
+    print("\nTasks for file A:")
+    print_tasks(tasks_a)
+
+    # delete tasks file B
+    print("\nDeleting tasks for file B")
+    for task_b in tasks_b.entries:
+        delete_task(client, task_b.id)
+    tasks_b = get_tasks_from_file(client, SAMPLE_FILE_B)
+    print("\nTasks for file B:")
+    print_tasks(tasks_b)
+```
+Resulting in:
+```
+Deleting tasks for file A
+
+Tasks for file A:
+No tasks
+
+Deleting tasks for file B
+
+Tasks for file B:
+No tasks
+```
+>You may not be able to delete all tasks. Completed tasks cannot be deleted.
+
+## Completing a task
+We can programmatically complete a task. This is done indirectly by assignment, meaning we update the assignment, and depending on the completion rule, the task will be completed.
+Let's create a method to update an assignment:
+```python
+```
+Now in the main we'll create a task, assign it to the user, and update it to a complete state with a comment:
+
+```python
+def main()
+    ...
+
+    # create, assign and complete tasks
+    task_c = create_task(
+        client,
+        SAMPLE_FILE_A,
+        CreateTaskActionArg.COMPLETE,
+        "Please register this new customer",
+        datetime.now(UTC) + timedelta(days=7),
+        CreateTaskCompletionRuleArg.ANY_ASSIGNEE,
+    )
+    print(f"\nCreated task {task_c.id} for file {task_c.item.id}")
+
+    assignment_c = assign_task_to_user(client, task_c.id, user.id)
+    print(f"Assigned task {task_c.id} to user {assignment.assigned_to.name}")
+
+    update_task_assignment(
+        client,
+        assignment_c.id,
+        "All done boss",
+        UpdateTaskAssignmentByIdResolutionStateArg.COMPLETED,
+    )
+    print(f"Updated assignment {assignment_c.id}")
+
+    tasks_a = get_tasks_from_file(client, SAMPLE_FILE_A)
+    print("\nTasks for file A:")
+    print_tasks(tasks_a)
+```
+Resulting in:
+```
+Created task 23880184540 for file 1375158910885
+Assigned task 23880184540 to user Free Dev 001
+Updated assignment 54438381007
+
+Tasks for file A:
+Task 23880184540 Please register this new customer
+     complete done:[True]
+     2023-12-07T15:59:16+00:00
+     any_assignee
+Assignments: 1
+     54438381007 Free Dev 001
+     state:[completed]
+     All done boss
+```
+>Note that since we only had one assignment, when it was completed, the task also got completed.
 
 ## Extra Credit
+There is more you can do with both tasks and task assignments, like updating them, or creating a task assignment for multiple users. Both endpoints support full CRUD operations.
+
+* If your account has multiple users, try creating a task assignment for multiple users.
+* Try updating a task or task assignment.
 
 # Final thoughts
+Both the SDK and API do not provide a way to list all tasks associated to a user, although this feature exists in the Box app. The list of tasks is only per file.
+
+There is a set of webhooks triggers associated with tasks that you can use in your app. The `TASK_ASSIGNMENT.CREATED` and the `TASK_ASSIGNMENT.UPDATED` will allow your application to react to user interactions with tasks even if within the Box app.
 
 

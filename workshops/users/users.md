@@ -146,7 +146,9 @@ def main():
     print(f"\nNew user: {new_user.name} ({new_user.login}) [{new_user.id}]")
 ```
 
-> Note: that the user creation accepts 18+ parameters, but we are only using 2 of them. The other parameters are optional and can be used to provide more information about the user, like the phone number, timezone, etc.
+> Note: The user creation accepts 18+ parameters, but we are only using 2 of them. The other parameters are optional and can be used to provide more information about the user, like the phone number, timezone, etc.
+
+Resulting in:
 
 ```
 New user: Test User (your_email@example.com) [30979098580]

@@ -265,7 +265,11 @@ def main():
 
 
 # Final thoughts
+From an API perspective, the users end point is a simple CRUD. 
 
+However, it is the foundation of the Box Platform, as it is the way to manage content sharing and permissions. It is also the way to manage the users of your application, if you are building one.
+
+Multiple user types are also a powerful way to manage content ownership and permissions. For example, you can create a service account user to represent your application, and then use it to manage content in the context of your application.
 
 
 

@@ -96,3 +96,4 @@ You'll find the workshop exercises in the [workshops](workshops) folder.
 * [Sign Templates](workshops/sign_templates/) - Working with Sign Templates.
 * [Sign Structured documents](workshops/sign_structured/) - Working with Sign Structured documents.
 * [Tasks](workshops/tasks/) - Working with Tasks.
+* [Users](workshops/users/) - Working with Users.

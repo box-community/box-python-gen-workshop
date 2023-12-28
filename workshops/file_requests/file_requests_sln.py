@@ -62,6 +62,32 @@ def create_file_request(
     return file_request
 
 
+def update_file_request(
+    client: Client,
+    file_request_id: str,
+    title: str | None = None,
+    description: str | None = None,
+    status: CreateFileRequestCopyStatusArg | None = None,
+    is_email_required: bool | None = None,
+    is_description_required: bool | None = None,
+    expires_at: str | None = None,
+) -> FileRequest:
+    file_request = client.file_requests.update_file_request_by_id(
+        file_request_id,
+        title,
+        description,
+        status,
+        is_email_required,
+        is_description_required,
+        expires_at,
+    )
+    return file_request
+
+
+def delete_file_request(client: Client, file_request_id: str) -> None:
+    client.file_requests.delete_file_request_by_id(file_request_id)
+
+
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
     conf = ConfigOAuth()
@@ -82,6 +108,21 @@ def main():
         description="This is a file request created from the Box SDK",
     )
     print_file_request(file_request)
+
+    # update the file request
+    file_request_template = update_file_request(
+        client,
+        FILE_REQUEST_TEMPLATE,
+        title="File Request from SDK (updated)",
+        description="This is a file request created from the Box SDK (updated)",
+    )
+    print_file_request(file_request_template)
+
+    # delete the file requests
+    delete_file_request(client, "7932431925")
+    delete_file_request(client, "7932434325")
+    delete_file_request(client, "7932351693")
+    delete_file_request(client, "7932882833")
 
 
 if __name__ == "__main__":

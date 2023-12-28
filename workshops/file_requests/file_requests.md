@@ -99,7 +99,7 @@ Select the file request create link and you should see something like:
 ![File request details](img/file-request-details.png)
 Notice that a file request link has been create.
 
-Pressing the `edit` button will allow you to customize the file request. We won't be customizing the request just yet, but please note the file request URL as it contain the id.
+Pressing the `edit` button will allow you to customize the file request, and reveal the `file_request_id`, which we will need next.
 
 ![Editing a file request](img/file-request-edit.png)
 
@@ -206,14 +206,111 @@ Go ahead and upload a file to the file request:
 
 ![Uploading a file](img/file-request-upload-a-file.png)
 
-Once the upload is complete you'll see the file in the specified upload folder, not the template:
+Once the upload is complete you'll see the file in the specified upload folder, not the template folder:
 
 ![Upload complete](img/file-request-upload-complete.png)
 
+## Update a file request
 
+Although limited, we can update a file request. One of the most useful updates is to turn off the file request, so that no more files can be uploaded, by setting the status to `inactive`.
 
-## Extra Credit
+Since we have a linear script, let's update the title and description of the template. Consider the following code:
+
+```python
+def update_file_request(
+    client: Client,
+    file_request_id: str,
+    title: str | None = None,
+    description: str | None = None,
+    status: CreateFileRequestCopyStatusArg | None = None,
+    is_email_required: bool | None = None,
+    is_description_required: bool | None = None,
+    expires_at: str | None = None,
+) -> FileRequest:
+    file_request = client.file_requests.update_file_request_by_id(
+        file_request_id,
+        title,
+        description,
+        status,
+        is_email_required,
+        is_description_required,
+        expires_at,
+    )
+    return file_request
+```
+
+Using it on the main script:
+```python
+def main():
+    ...
+
+    # update the file request
+    file_request_template = update_file_request(
+        client,
+        FILE_REQUEST_TEMPLATE,
+        title="File Request from SDK (updated)",
+        description="This is a file request created from the Box SDK (updated)",
+    )
+    print_file_request(file_request_template)
+```
+
+Resulting in:
+```yaml
+File Request: 7931914925 - Submit files
+  Description: 
+  Folder: 241675434602 - template
+  Status: active
+  URL: /f/a31702430b5747008900023cec7e2d7b
+
+...
+
+File Request: 7931914925 - File Request from SDK (updated)
+  Description: This is a file request created from the Box SDK (updated)
+  Folder: 241675434602 - template
+  Status: active
+  URL: /f/a31702430b5747008900023cec7e2d7b
+```
+
+Now if we navigate to our template folder and edit the file request we should see the changes:
+
+![Updated template](img/file-request-updated-template.png)
+
+## Delete a file request
+
+We can also delete a file request. Consider the following code:
+
+```python
+def delete_file_request(client: Client, file_request_id: str) -> None:
+    client.file_requests.delete_file_request_by_id(file_request_id)
+```
+
+Now let's delete all the file requests we created, except the template:
+    
+```python   
+def main():
+    ...
+
+    # delete the file requests
+    delete_file_request(client, "7932431925")
+    delete_file_request(client, "7932434325")
+    delete_file_request(client, "7932351693")
+    delete_file_request(client, "7932882833")
+```
+
+Did you take note of the id's of the file requests you created? 
+
+It is important to keep tabs on the id's of the file requests you create, as the API does not provide a way to list them. If your app creates file requests then store them along with some context on a database.
 
 # Final thoughts
+
+File requests are a great way to collect files from anyone, and place them in a Box folder of your choice. You can request some extra data such as email, description, and metadata.
+
+You can use the API to copy and customize an existing file request, creating personalized file requests for your users and use cases.
+You can also activate and deactivate file requests, and delete them.
+
+Your application should keep track of the file requests it creates, as the API does not provide a way to list them.
+
+
+
 
 

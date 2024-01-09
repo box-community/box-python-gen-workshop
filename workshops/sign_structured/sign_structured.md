@@ -267,11 +267,11 @@ def check_sign_request_by_id(client: Client, sign_request_id: str):
             content_type = input.content_type
             value = None
 
-            if content_type == SignRequestSignerInputTypeField.CHECKBOX:
+            if content_type == SignRequestSignerInputContentTypeField.CHECKBOX:
                 value = input.checkbox_value
-            elif content_type == SignRequestSignerInputTypeField.TEXT:
+            elif content_type == SignRequestSignerInputContentTypeField.TEXT:
                 value = input.text_value
-            elif content_type == SignRequestSignerInputTypeField.DATE:
+            elif content_type == SignRequestSignerInputContentTypeField.DATE:
                 value = input.date_value
 
             print(

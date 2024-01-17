@@ -92,8 +92,9 @@ You'll find the workshop exercises in the [workshops](workshops) folder.
 * [Search](workshops/search/search.md) - Using search in the Box API
 * [Shared Links](workshops/shared_links/shared_links.md) - Create and manage shared links
 * [File Representations](workshops/file_representations/file_representations.md) - Working with file representations
-* [Sign - Unstructured documents](workshops/sign/) - Working with Sign, and simple documents. Includes most features of the Sign request.
-* [Sign Templates](workshops/sign_templates/) - Working with Sign Templates.
-* [Sign Structured documents](workshops/sign_structured/) - Working with Sign Structured documents.
-* [Tasks](workshops/tasks/) - Working with Tasks.
-* [Users](workshops/users/) - Working with Users.
+* [Sign - Unstructured documents](workshops/sign/sign.md) - Working with Sign, and simple documents. Includes most features of the Sign request.
+* [Sign Templates](workshops/sign_templates/sign_templates.md) - Working with Sign Templates.
+* [Sign Structured documents](workshops/sign_structured/sign_structured.md) - Working with Sign Structured documents.
+* [Tasks](workshops/tasks/tasks.md) - Working with Tasks.
+* [Users](workshops/users/users.md) - Working with Users.
+* [Groups](workshops/groups/groups.md) - Working with Groups.

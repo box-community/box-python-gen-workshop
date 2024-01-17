@@ -391,12 +391,6 @@ Results in:
 Deleted group My Group (18394127658)
 ```
 
-## Updating a group
-
-## Updating group membership
-
-## Removing a user from a group
-
 ## Extra credit
 There are more operations available in the SDK, try implementing these:
 * Update a group name and description

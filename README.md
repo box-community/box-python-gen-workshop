@@ -98,3 +98,4 @@ You'll find the workshop exercises in the [workshops](workshops) folder.
 * [Tasks](workshops/tasks/tasks.md) - Working with Tasks.
 * [Users](workshops/users/users.md) - Working with Users.
 * [Groups](workshops/groups/groups.md) - Working with Groups.
+* [Watermark](workshops/watermark/watermark.md) - Working with Watermark.

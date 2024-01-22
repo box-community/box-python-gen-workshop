@@ -9,7 +9,7 @@ Make sure your Box app is configured to use the following scopes:
 ![Alt text](img/sign-specific-scope.png)
 
 > ### Note
-> If the application scope is not available, then your account can not use the Sign API and you wont be able to complete this exercise.
+> If the application scope is not available, then your account cannot use the Sign API and you won't be able to complete this exercise.
 
 ## Sign API
 References to our documentation:
@@ -54,7 +54,7 @@ INFO:root:      Uploaded Simple-DOC.docx (1358077513913) 12409 bytes
 ```
 
 Next, create a `sign_templates.py` file on the root of the project that you will use to write your code.
-Take note of the above document id's and include statics for them in the doc.
+Take note of the above document ids and include statics for them in the doc.
 Replace the `YOUR_EMAIL` with your email, or use a different email for each signer.
 
 ```python
@@ -116,28 +116,28 @@ Hello, I'm Rui Barbosa  [18622116055]
 
 ## Concepts
 
-A sign template is a special type of document that not only contains the text, but also the signature requirements and placement.
-Essentially a sign template is a document that is prepared for signing, and as such can be sent directly to the signer.
+A Sign template is a special type of document that not only contains the text, but also the signature requirements and placement.
+Essentially a Sign template is a document that is prepared for signing, and as such can be sent directly to the signer.
 
-Signature requirements include the signature pad, the full name, the date, and many more options.
+Signature requirements include the signature pad field, the full name, the date, and many more options.
 
 These requirements can be `mandatory` or `optional` and can also be pre-populated by your application. However even if pre-populated, they can always be changed by the `signer`.
 
 
 ## Create a template
-Let's start by creating a simple sign template.
+Let's start by creating a simple Sign template.
 
-From the Box app navigate to the sign menu on the left, then select templates.
+From the Box app navigate to the Sign menu on the left, then select templates.
 
 ![Alt text](img/sign-template-navigate.png)
 
 
-The, click on the `New Template` button, chose or upload document, from box.
+Then click on the `New Template` button, and click choose or upload document from Box.
 Navigate to `workshops/sign/docs` and select `Simple-PDF.pdf` and click `Next`.
 
 ![Alt text](img/sign-template-selecting-template.png)
 
-Drag and drop a date, a name and a signature pad to the template, like so:
+Drag and drop a date, a name and a signature pad field to the template, like so:
 
 ![Alt text](img/sign-template-signature-props.png)
 
@@ -153,7 +153,7 @@ def sign_templates_list(client: Client):
     for sign_template in sign_templates.entries:
         print(f"  {sign_template.id} - {sign_template.name}")
 ```
-And use it on our main:
+And use it on our main method:
 ```python
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
@@ -187,8 +187,8 @@ SIGN_DOCS_FOLDER = "234102987614"
 TEMPLATE_SIMPLE = "94e3815b-f7f5-4c2c-8a26-e9ba5c486031"
 ```
 
-## Create a sign request
-We can now create sign requests based on the template. Add this method to your code:
+## Create a signature request
+We can now create signature requests based on the template. Add this method to your code:
 ```python
 def create_sign_request(client: Client, template_id: str, signer_email: str):
     """Create sign request from template"""
@@ -208,7 +208,7 @@ def create_sign_request(client: Client, template_id: str, signer_email: str):
 
     return sign_request
 ```
-And use it on our main:
+And use it on our main method: 
 ```python
 def main():
     ...
@@ -226,7 +226,7 @@ Simple sign request: b25674a2-540b-4201-ae18-a78f05ef1a9a
     signer: YOUR_EMAIL+a@gmail.com
   Prepare url: None
 ```
-Go to the inbox of the sender and complete the sign request.
+Go to the inbox of the sender and complete the signature request.
 
 >Notice that there was no document preparation required, since the template already had the signature requirements.
 
@@ -290,7 +290,7 @@ Simple sign request: adab1740-eeba-4392-a3f5-defddc79c946
     signer: ...+a@gmail.com
   Prepare url: None
 ```
-Open the signer inbox and complete the sign request.
+Open the signer inbox and complete the signature request.
 
 ![Alt text](img/sign-template-name-populated.png)
 
@@ -301,7 +301,7 @@ Pre-populating the signature attributes is a great way to save the signer time. 
 # Get more information about a template
 We've seen that we can list the templates available to a user.
 But we can also get more information about a specific template.
-Let's create a method that returns basic information of a template, but details all the signature requirements:
+Let's create a method that returns basic information of a template, and details all the signature requirements:
 ```python
 def sign_template_print_info(client: Client, template_id: str):
     sign_template = client.sign_templates.get_sign_template_by_id(template_id)
@@ -316,7 +316,7 @@ def sign_template_print_info(client: Client, template_id: str):
                 f"      {input.document_tag_id} {input.type.value} {input.is_required}"
             )
 ```
-And use it on our main:
+And use it on our main method:
 ```python
 def main():
     ...
@@ -344,7 +344,7 @@ Create a new template or modify an existing one to include more attributes, and 
 
 
 # Final thoughts
-Templates are a form of signing structured documents where the signature requirements are already defined, and placed on the document.
+Templates are a form of structured documents where the signature requirements are already defined and placed on the document.
 
 This not only keeps your legal department happy, but also avoids having the users do an extra step and prepare the document.
 

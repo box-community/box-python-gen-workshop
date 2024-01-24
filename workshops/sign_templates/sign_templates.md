@@ -137,7 +137,7 @@ Navigate to `workshops/sign/docs` and select `Simple-PDF.pdf` and click `Next`.
 
 ![Alt text](img/sign-template-selecting-template.png)
 
-Drag and drop a date, a name and a signature pad field to the template, like so:
+In the recipients add a Signer placeholder, and drag and drop a date, a name and a signature pad field to the template, like so:
 
 ![Alt text](img/sign-template-signature-props.png)
 

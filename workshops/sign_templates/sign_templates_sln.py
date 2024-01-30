@@ -16,21 +16,21 @@ from box_sdk_gen.schemas import (
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-SIGN_DOCS_FOLDER = "234102987614"
+SIGN_DOCS_FOLDER = "245752394169"
 
-SIMPLE_PDF = "1355143830404"
-SIMPLE_DOC = "1358077513913"
-CONTRACT = "1358047520478"
+SIMPLE_PDF = "1424134015035"
+SIMPLE_DOC = "1424119907834"
+CONTRACT = "1424145227112"
 
-SIGNER_A = "YOUR_EMAIL+A@gmail.com"
+SIGNER_A = "barduinor+A@gmail.com"
 SIGNER_A_PHONE = "+15554443322"
 
-SIGNER_B = "YOUR_EMAIL+B@gmail.com"
+SIGNER_B = "barduinor+B@gmail.com"
 
-APPROVER = "YOUR_EMAIL+APPROVER@gmail.com"
-FINAL_COPY = "YOUR_EMAIL+FINAL_COPY@gmail.com"
+APPROVER = "barduinor+APPROVER@gmail.com"
+FINAL_COPY = "barduinor+FINAL_COPY@gmail.com"
 
-TEMPLATE_SIMPLE = "94e3815b-f7f5-4c2c-8a26-e9ba5c486031"
+TEMPLATE_SIMPLE = "21dd330e-f2aa-4b51-a747-ae09626a1269"
 
 
 def check_sign_request(sign_request: SignRequest):
@@ -119,12 +119,12 @@ def main():
     user = client.users.get_user_me()
     print(f"\nHello, I'm {user.name} ({user.login}) [{user.id}]")
 
-    # # List all sign templates
-    # sign_templates_list(client)
+    # List all sign templates
+    sign_templates_list(client)
 
-    # # Create sign request from template
-    # sign_request = create_sign_request(client, TEMPLATE_SIMPLE, SIGNER_A)
-    # check_sign_request(sign_request)
+    # Create sign request from template
+    sign_request = create_sign_request(client, TEMPLATE_SIMPLE, SIGNER_A)
+    check_sign_request(sign_request)
 
     # # Create sign request from template with name
     # sign_request_name = create_sign_request_name_default(

@@ -16,7 +16,9 @@ def main():
         client_id=config.client_id,
         client_secret=config.client_secret,
         enterprise_id=config.enterprise_id,
-        token_storage=FileWithInMemoryCacheTokenStorage(".ent" + config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(
+            ".ent" + config.cache_file
+        ),
     )
 
     auth = BoxCCGAuth(ccg)
@@ -25,10 +27,6 @@ def main():
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 
     auth.as_user(config.ccg_user_id)
-    me = client.users.get_user_me()
-    print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
-
-    auth.as_user("29598695136")
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 

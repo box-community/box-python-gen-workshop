@@ -29,7 +29,7 @@ SIGNER_A_PHONE = "+15554443322"
 SIGNER_B = "Signer+B@example.com"
 
 APPROVER = "APPROVER@example.com"
-FINAL_COPY = "FINAL_COPY@gmexampleail.com"
+FINAL_COPY = "FINAL_COPY@example.com"
 
 TEMPLATE_SIMPLE = "21dd330e-f2aa-4b51-a747-ae09626a1269"
 

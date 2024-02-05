@@ -201,7 +201,7 @@ Resulting in:
 ```
 Created collaboration: 50086062997
 Collaboration: 50086062997
- Collaborator: barduinor+002@gmail.com 
+ Collaborator: YOUR_EMAIL+collab@gmail.com 
          Role: editor
        Status: accepted
 ```
@@ -231,7 +231,7 @@ Resulting in:
 ```
 File 1373026823928 has 1 collaborations
 Collaboration: 50086660113
- Collaborator: barduinor+002@gmail.com 
+ Collaborator: YOUR_EMAIL+collab@gmail.com 
          Role: editor
        Status: accepted
 ```
@@ -270,7 +270,7 @@ Resulting in:
 ```
 Updated collaboration: 50086062997
 Collaboration: 50086062997
- Collaborator: barduinor+002@gmail.com 
+ Collaborator: YOUR_EMAIL+collab@gmail.com 
          Role: viewer
        Status: accepted
 ```

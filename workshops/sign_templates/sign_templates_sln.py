@@ -1,4 +1,5 @@
 """Box Shared links"""
+
 import logging
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -22,13 +23,13 @@ SIMPLE_PDF = "1424134015035"
 SIMPLE_DOC = "1424119907834"
 CONTRACT = "1424145227112"
 
-SIGNER_A = "barduinor+A@gmail.com"
+SIGNER_A = "Signer+A@example.com"
 SIGNER_A_PHONE = "+15554443322"
 
-SIGNER_B = "barduinor+B@gmail.com"
+SIGNER_B = "Signer+B@example.com"
 
-APPROVER = "barduinor+APPROVER@gmail.com"
-FINAL_COPY = "barduinor+FINAL_COPY@gmail.com"
+APPROVER = "APPROVER@example.com"
+FINAL_COPY = "FINAL_COPY@gmexampleail.com"
 
 TEMPLATE_SIMPLE = "21dd330e-f2aa-4b51-a747-ae09626a1269"
 

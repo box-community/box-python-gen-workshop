@@ -1,4 +1,5 @@
 """Box Shared links"""
+
 import logging
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import File, Folder
@@ -21,8 +22,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 
-SHARED_LINKS_ROOT = "223783108378"
-SAMPLE_FILE = "1293174201535"
+SHARED_LINKS_ROOT = "248399836264"
+SAMPLE_FILE = "1440519289533"
 
 
 def file_shared_link_update(
@@ -41,16 +42,22 @@ def folder_shared_link_update(
     shared_link_args,
 ) -> Folder:
     return client.shared_links_folders.add_share_link_to_folder(
-        folder_id=folder_id, shared_link=shared_link_args, fields=["shared_link"]
+        folder_id=folder_id,
+        shared_link=shared_link_args,
+        fields=["shared_link"],
     )
 
 
-def file_from_shared_link(client: Client, link: str, password: str = None) -> File:
+def file_from_shared_link(
+    client: Client, link: str, password: str = None
+) -> File:
     box_api = f"shared_link={link}&shared_link_password={password}"
     return client.shared_links_files.find_file_for_shared_link(box_api)
 
 
-def folder_from_shared_link(client: Client, link: str, password: str = None) -> Folder:
+def folder_from_shared_link(
+    client: Client, link: str, password: str = None
+) -> Folder:
     box_api = f"shared_link={link}&shared_link_password={password}"
     return client.shared_links_folders.find_folder_for_shared_link(box_api)
 
@@ -66,20 +73,22 @@ def main():
     # Make sure file exists
     file = client.files.get_file_by_id(SAMPLE_FILE)
 
-    # shared_link_args = AddShareLinkToFileSharedLink(
-    #     access=AddShareLinkToFileSharedLinkAccessField.OPEN,
-    #     permissions=AddShareLinkToFileSharedLinkPermissionsField(
-    #         can_download=True,
-    #         can_preview=True,
-    #     ),
-    # )
-    # file_shared_link = file_shared_link_update(
-    #     client,
-    #     SAMPLE_FILE,
-    #     shared_link_args,
-    # )
-    # print(f"\nShared link for {file.name}: {file_shared_link.shared_link}")
+    # Create or update the shared link for a file
+    shared_link_args = AddShareLinkToFileSharedLink(
+        access=AddShareLinkToFileSharedLinkAccessField.OPEN,
+        permissions=AddShareLinkToFileSharedLinkPermissionsField(
+            can_download=True,
+            can_preview=True,
+        ),
+    )
+    file_shared_link = file_shared_link_update(
+        client,
+        SAMPLE_FILE,
+        shared_link_args,
+    )
+    print(f"\nShared link for {file.name}: {file_shared_link.shared_link}")
 
+    # Updating permissions
     shared_link_args = AddShareLinkToFileSharedLink(
         access=AddShareLinkToFileSharedLinkAccessField.OPEN,
         permissions=AddShareLinkToFileSharedLinkPermissionsField(
@@ -97,6 +106,7 @@ def main():
     # Make sure the folder exists
     folder = client.folders.get_folder_by_id(SHARED_LINKS_ROOT)
 
+    # Create or update the shared link for a folder
     shared_link_args = AddShareLinkToFolderSharedLink(
         access=AddShareLinkToFolderSharedLinkAccessField.OPEN,
         permissions=AddShareLinkToFolderSharedLinkPermissionsField(
@@ -104,28 +114,43 @@ def main():
             can_preview=True,
         ),
     )
-    folder_shared_link = folder_shared_link_update(client, SHARED_LINKS_ROOT, shared_link_args)
+    folder_shared_link = folder_shared_link_update(
+        client, SHARED_LINKS_ROOT, shared_link_args
+    )
     print(f"\nShared link for {folder.name}: {folder_shared_link.shared_link}")
 
-    # shared_link_args = AddShareLinkToFileSharedLink(
-    #     access=AddShareLinkToFileSharedLinkAccessField.OPEN,
-    #     permissions=AddShareLinkToFileSharedLinkPermissionsField(
-    #         can_download=True,
-    #         can_preview=True,
-    #     ),
-    # )
-    # file_shared_link = file_shared_link_update(
-    #     client,
-    #     SAMPLE_FILE,
-    #     shared_link_args,
-    # )
-    # print(f"\nDownload URL for {file.name}: {file_shared_link.shared_link.download_url}")
+    # Updating permissions
+    shared_link_args = AddShareLinkToFileSharedLink(
+        access=AddShareLinkToFileSharedLinkAccessField.OPEN,
+        permissions=AddShareLinkToFileSharedLinkPermissionsField(
+            can_download=True,
+            can_preview=True,
+        ),
+    )
+    file_shared_link = file_shared_link_update(
+        client,
+        SAMPLE_FILE,
+        shared_link_args,
+    )
+    print(
+        f"\nDownload URL for {file.name}: ",
+        f"{file_shared_link.shared_link.download_url}",
+    )
 
+    # Item from Shared Link
     item_a = file_from_shared_link(client, file_shared_link.shared_link.url)
-    print(f"\nItem from shared link: {item_a.name} is a {item_a.type.value} ({item_a.id})")
+    print(
+        f"\nItem from shared link: {item_a.name} is a ",
+        f"{item_a.type.value} ({item_a.id})",
+    )
 
-    item_b = folder_from_shared_link(client, folder_shared_link.shared_link.url)
-    print(f"\nItem from shared link: {item_b.name} is a {item_b.type.value} ({item_b.id})")
+    item_b = folder_from_shared_link(
+        client, folder_shared_link.shared_link.url
+    )
+    print(
+        f"\nItem from shared link: {item_b.name} is a ",
+        f"{item_b.type.value} ({item_b.id})",
+    )
 
 
 if __name__ == "__main__":

@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 223095001439
 INFO:root:Folder shared_links with id: 223783108378
 INFO:root:      Uploaded sample_file.txt (1293174201535) 42 bytes
@@ -65,10 +65,21 @@ Create a global constant named `SAMPLE_FILE` and make it equal to the id of the 
 ```python
 """Box Shared links"""
 
-from enum import Enum
 import logging
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import File, Folder
+from box_sdk_gen.managers.shared_links_files import (
+    AddShareLinkToFileSharedLink,
+    AddShareLinkToFileSharedLinkAccessField,
+    AddShareLinkToFileSharedLinkPermissionsField,
+)
+from box_sdk_gen.managers.shared_links_folders import (
+    AddShareLinkToFolderSharedLink,
+    AddShareLinkToFolderSharedLinkAccessField,
+    AddShareLinkToFolderSharedLinkPermissionsField,
+)
+
+# from box_sdk_gen.managers.shared_links_folders
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
@@ -115,6 +126,7 @@ def main():
     # Make sure file exists
     file = client.files.get_file_by_id(SAMPLE_FILE)
 
+    # Create or update the shared link for a file
     shared_link_args = AddShareLinkToFileSharedLink(
         access=AddShareLinkToFileSharedLinkAccessField.OPEN,
         permissions=AddShareLinkToFileSharedLinkPermissionsField(
@@ -130,7 +142,7 @@ def main():
     print(f"\nShared link for {file.name}: {file_shared_link.shared_link}")
 ```
 Resulting in:
-```
+```yaml
 Shared link for sample_file.txt: <class 'box_sdk_gen.schemas.FileSharedLinkField'> {'url': 'https://app.box.com/s/kbx32aep6z11brckbnkkapt1h8h0eu49', 'effective_access': 'open', 'effective_permission': 'can_download', 'is_password_enabled': False, 'download_count': 0, 'preview_count': 0, 'download_url': 'https://app.box.com/shared/static/kbx32aep6z11brckbnkkapt1h8h0eu49.txt', 'access': 'open', 'permissions': {'can_download': True, 'can_preview': True, 'can_edit': False}}
 ```
 
@@ -147,6 +159,7 @@ Let's make a new request to create a shared link with that only allows viewing.
 def main():
     ...
 
+    # Updating permissions
     shared_link_args = AddShareLinkToFileSharedLink(
         access=AddShareLinkToFileSharedLinkAccessField.OPEN,
         permissions=AddShareLinkToFileSharedLinkPermissionsField(
@@ -159,10 +172,10 @@ def main():
         SAMPLE_FILE,
         shared_link_args,
     )
-    print(f"\nShared link for {file.name}: {file_shared_link.shared_link}") 
+    print(f"\nShared link for {file.name}: {file_shared_link.shared_link}")
 ```
 Resulting in:
-```
+```yaml
 Shared link for sample_file.txt: <class 'box_sdk_gen.schemas.FileSharedLinkField'> {'url': 'https://app.box.com/s/kbx32aep6z11brckbnkkapt1h8h0eu49', 'effective_access': 'open', 'effective_permission': 'can_preview', 'is_password_enabled': False, 'download_count': 0, 'preview_count': 0, 'download_url': 'https://app.box.com/shared/static/kbx32aep6z11brckbnkkapt1h8h0eu49.txt', 'access': 'open', 'permissions': {'can_download': False, 'can_preview': True, 'can_edit': False}}
 ```
 
@@ -175,13 +188,16 @@ The `company` access level is only available to paid accounts.
 The `allow_download` can only be used if the `access` is `open` or `company`
 
 ```python
-def folder_shared_link(
-    folder: Folder,
-    access: SharedLinkAccess,
-    allow_download: bool = None,
-    allow_preview: bool = None,
-) -> str:
-    return folder.get_shared_link(access=access.value, allow_download=allow_download, allow_preview=allow_preview)
+def folder_shared_link_update(
+    client: Client,
+    folder_id: str,
+    shared_link_args,
+) -> Folder:
+    return client.shared_links_folders.add_share_link_to_folder(
+        folder_id=folder_id,
+        shared_link=shared_link_args,
+        fields=["shared_link"],
+    )
 ```
 Test this by creating a shared link for the `SHARED_LINKS_ROOT` folder.
 ```python
@@ -191,6 +207,7 @@ def main():
     # Make sure the folder exists
     folder = client.folders.get_folder_by_id(SHARED_LINKS_ROOT)
 
+    # Create or update the shared link for a folder
     shared_link_args = AddShareLinkToFolderSharedLink(
         access=AddShareLinkToFolderSharedLinkAccessField.OPEN,
         permissions=AddShareLinkToFolderSharedLinkPermissionsField(
@@ -198,11 +215,13 @@ def main():
             can_preview=True,
         ),
     )
-    folder_shared_link = folder_shared_link_update(client, SHARED_LINKS_ROOT, shared_link_args)
+    folder_shared_link = folder_shared_link_update(
+        client, SHARED_LINKS_ROOT, shared_link_args
+    )
     print(f"\nShared link for {folder.name}: {folder_shared_link.shared_link}")
 ```
 Resulting in:
-```
+```yaml
 Shared link for shared_links: <class 'box_sdk_gen.schemas.FolderSharedLinkField'> {'url': 'https://app.box.com/s/p290ubkwp7shf7p7noexbtdquqxbtn26', 'effective_access': 'open', 'effective_permission': 'can_download', 'is_password_enabled': False, 'download_count': 0, 'preview_count': 0, 'access': 'open', 'permissions': {'can_download': True, 'can_preview': True, 'can_edit': False}}
 ```
 Again test the folder shared link on your incognito browser:
@@ -212,7 +231,11 @@ Again test the folder shared link on your incognito browser:
 Files also have a direct download shared link url, which can be used to download the file directly.
 Update your main method to update the shared link file to alow downloads and print the download url for the file.
 ```python
-shared_link_args = AddShareLinkToFileSharedLink(
+def main():
+    ...
+
+    # Updating permissions
+    shared_link_args = AddShareLinkToFileSharedLink(
         access=AddShareLinkToFileSharedLinkAccessField.OPEN,
         permissions=AddShareLinkToFileSharedLinkPermissionsField(
             can_download=True,
@@ -224,10 +247,13 @@ shared_link_args = AddShareLinkToFileSharedLink(
         SAMPLE_FILE,
         shared_link_args,
     )
-    print(f"\nShared link for {file.name}: {file_shared_link.shared_link.download_url}")
+    print(
+        f"\nDownload URL for {file.name}: ",
+        f"{file_shared_link.shared_link.download_url}",
+    )
 ```
 Resulting in:
-```
+```yaml
 Download URL for sample_file.txt: https://app.box.com/shared/static/kbx32aep6z11brckbnkkapt1h8h0eu49.txt
 ```
 Now you can open this last url in your incognito browser and the file will be downloaded directly.
@@ -240,12 +266,16 @@ If you're using a free account you will not be able to change these options.
 We can find out what object type and id a shared link is pointing to.
 Let's create methods to do this:
 ```python
-def file_from_shared_link(client: Client, link: str, password: str = None) -> File:
+def file_from_shared_link(
+    client: Client, link: str, password: str = None
+) -> File:
     box_api = f"shared_link={link}&shared_link_password={password}"
     return client.shared_links_files.find_file_for_shared_link(box_api)
 
 
-def folder_from_shared_link(client: Client, link: str, password: str = None) -> Folder:
+def folder_from_shared_link(
+    client: Client, link: str, password: str = None
+) -> Folder:
     box_api = f"shared_link={link}&shared_link_password={password}"
     return client.shared_links_folders.find_folder_for_shared_link(box_api)
 ```
@@ -254,14 +284,23 @@ And test it in your main method:
 def main():
     ...
 
+    # Item from Shared Link
     item_a = file_from_shared_link(client, file_shared_link.shared_link.url)
-    print(f"\nItem from shared link: {item_a.name} is a {item_a.type.value} ({item_a.id})")
+    print(
+        f"\nItem from shared link: {item_a.name} is a ",
+        f"{item_a.type.value} ({item_a.id})",
+    )
 
-    item_b = folder_from_shared_link(client, folder_shared_link.shared_link.url)
-    print(f"\nItem from shared link: {item_b.name} is a {item_b.type.value} ({item_b.id})")
+    item_b = folder_from_shared_link(
+        client, folder_shared_link.shared_link.url
+    )
+    print(
+        f"\nItem from shared link: {item_b.name} is a ",
+        f"{item_b.type.value} ({item_b.id})",
+    )
 ```
 Resulting in:
-```
+```yaml
 Item from shared link: sample_file.txt is a file (1293174201535)
 
 Item from shared link: shared_links is a folder (223783108378)

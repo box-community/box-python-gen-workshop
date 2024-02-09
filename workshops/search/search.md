@@ -75,7 +75,7 @@ if __name__ == "__main__":
     main()
 ```
 Open your Box account and verify that the following content was uploaded:
-```
+```yaml
 - workshops
     - search
         - apple
@@ -103,12 +103,20 @@ Next, create a `search.py` file on the root of the project that you will use to 
 ```python
 """ Searching Box exercises"""
 import logging
+from typing import List, Union
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.fetch import APIException
-from box_sdk_gen.schemas import File, Comment
 
-from box_sdk_gen.managers.comments import CreateCommentItem, CreateCommentItemTypeField
+from box_sdk_gen.schemas import (
+    Items,
+    FileMini,
+    FolderMini,
+    WebLinkMini,
+    SearchResults,
+    SearchResultsWithSharedLinks,
+)
+
+from box_sdk_gen.managers.search import SearchForContentContentTypes
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
@@ -118,7 +126,9 @@ logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 def print_box_item(box_item: Union[FileMini, FolderMini, WebLinkMini]):
     """Basic print of a Box Item attributes"""
-    print(f"Type: {box_item.type.value} ID: {box_item.id} Name: {box_item.name}")
+    print(
+        f"Type: {box_item.type.value} ID: {box_item.id} Name: {box_item.name}"
+    )
 
 
 def print_search_results(items: Items):
@@ -165,7 +175,7 @@ def main():
     print_search_results(search_results)
 ```
 The output should be similar to:
-```
+```yaml
 ❯ python search_sln.py 
 --- Search Results ---
 Type: folder ID: 231320711952 Name: apple banana
@@ -202,7 +212,7 @@ def main():
     search_results = simple_search(client, "apple banana")
     print_search_results(search_results)
 ```
-```
+```yaml
 --- Search Results ---
 Type: folder ID: 231320711952 Name: apple banana
 Type: folder ID: 231318527838 Name: apple pineapple banana
@@ -233,7 +243,7 @@ def main():
     print_search_results(search_results)
 ```
 Notice we have now limited the search to only items with "apple banana" in the name.
-```
+```yaml
 --- Search Results ---
 Type: folder ID: 231320711952 Name: apple banana
 --- End Search Results ---
@@ -300,7 +310,7 @@ def main():
 >Note: In Python a string is an Iterable of characters. Make sure you pass the content_types as a list.
 
 You get an empty result:
-```
+```yaml
 --- Search Results ---
 --- End Search Results ---
 ```
@@ -322,7 +332,7 @@ def main():
     print_search_results(search_results)
 ```
 You should get:
-```
+```yaml
 --- Search Results ---
 Type: file ID: 1220468415414 Name: pineapple.txt
 Type: file ID: 1220479104299 Name: pineapple.txt
@@ -359,7 +369,7 @@ def main():
     print_search_results(search_results)
 ```
 Returns only folders:
-```
+```yaml
 --- Search Results ---
 Type: folder ID: 208850093677 Name: apple banana
 Type: folder ID: 208858841669 Name: apple
@@ -403,7 +413,7 @@ def main():
     print("--- End Search Results ---")
 ```
 Returns:
-```
+```yaml
 --- Search Results ---
 Type: folder ID: 208858913186 Name: banana Folder: search
 Type: folder ID: 208850093677 Name: apple banana Folder: search
@@ -438,7 +448,7 @@ Modify your search to only search `banana` in the `banana apple` and `apple bana
     print("--- End Search Results ---")
 ```
 Returns:
-```
+```yaml
 --- Search Results ---
 Type: file ID: 1220482412264 Name: banana.txt Folder: apple banana
 Type: file ID: 1220480931465 Name: banana.txt Folder: banana apple

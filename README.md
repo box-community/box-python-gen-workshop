@@ -32,6 +32,8 @@ cd box-python-gen-workshop
 ```
 
 ### Set up your virtual environment
+
+#### On MacOS and Linux (Python 3.12)
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -39,9 +41,30 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### Create your local application environment file
+##### Create your local application environment file
 ```bash
 cp sample_oauth.env .oauth.env
+```
+
+#### On Windows CMD (Python 3.12)
+```bash
+python3 -m venv .venv
+.venv\Scripts\activate.bat
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+#### On Windows PowerShell (Python 3.12)
+```bash
+python3 -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+##### Create your local application environment file
+```bash
+copy sample_oauth.env .oauth.env
 ```
 
 ### Open the code in the code editor of your choice.

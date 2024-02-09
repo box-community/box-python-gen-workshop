@@ -1,8 +1,13 @@
 """Box Collaborations"""
+
 import logging
 from box_sdk_gen.fetch import APIException
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import Collaborations, Collaboration
+from box_sdk_gen.schemas import (
+    Collaborations,
+    Collaboration,
+    CollaborationStatusField,
+)
 
 from box_sdk_gen.managers.user_collaborations import (
     CreateCollaborationItem,
@@ -19,8 +24,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 
-COLLABORATION_ROOT = "237027983333"
-SAMPLE_FILE = "1373026823928"
+COLLABORATION_ROOT = "237014955712"
+SAMPLE_FILE = "1372950973232"
 SAMPLE_EMAIL = "YOUR_EMAIL+collab@gmail.com"
 
 
@@ -55,7 +60,8 @@ def create_file_collaboration(
                 )
             )
             for collaboration in collaborations.entries:
-                if collaboration.accessible_by.login == user_email:
+                # pending collaborations have no accessible_by.login
+                if collaboration.invite_email == user_email:
                     collaboration_updated = (
                         client.user_collaborations.update_collaboration_by_id(
                             collaboration_id=collaboration.id,
@@ -64,13 +70,24 @@ def create_file_collaboration(
                     )
                     return collaboration_updated
 
+                # accepted collaborations have accessible_by.login
+                if collaboration.accessible_by.login == user_email:
+                    collaboration_updated = (
+                        client.user_collaborations.update_collaboration_by_id(
+                            collaboration_id=collaboration.id,
+                            role=role,
+                        )
+                    )
+                    return collaboration_updated
     return collaboration
 
 
 def print_file_collaboration(client: Client, collaboration: Collaboration):
     print(f"Collaboration: {collaboration.id}")
-
-    print(f" Collaborator: {collaboration.accessible_by.login} ")
+    if collaboration.status == CollaborationStatusField.ACCEPTED:
+        print(f" Collaborator: {collaboration.accessible_by.login} ")
+    else:
+        print(f" Collaborator: {collaboration.invite_email} ")
     print(f"         Role: {collaboration.role.value}")
     print(f"       Status: {collaboration.status.value}")
 

@@ -47,7 +47,7 @@ if __name__ == "__main__":
     main()
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 223095001439
 INFO:root:Folder collaboration with id: 237027983333
 INFO:root:      Uploaded sample_file.txt (1373026823928) 42 bytes
@@ -63,7 +63,11 @@ We'll also need an email address to collaborate with, so create a global constan
 import logging
 from box_sdk_gen.fetch import APIException
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import Collaborations, Collaboration
+from box_sdk_gen.schemas import (
+    Collaborations,
+    Collaboration,
+    CollaborationStatusField,
+)
 
 from box_sdk_gen.managers.user_collaborations import (
     CreateCollaborationItem,
@@ -80,8 +84,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 
-COLLABORATION_ROOT = "237027983333"
-SAMPLE_FILE = "1373026823928"
+COLLABORATION_ROOT = "237014955712"
+SAMPLE_FILE = "1372950973232"
 SAMPLE_EMAIL = "YOUR_EMAIL+collab@gmail.com"
 
 def main():
@@ -139,7 +143,8 @@ def create_file_collaboration(
                 )
             )
             for collaboration in collaborations.entries:
-                if collaboration.accessible_by.login == user_email:
+                # pending collaborations have no accessible_by.login
+                if collaboration.invite_email == user_email:
                     collaboration_updated = (
                         client.user_collaborations.update_collaboration_by_id(
                             collaboration_id=collaboration.id,
@@ -148,6 +153,15 @@ def create_file_collaboration(
                     )
                     return collaboration_updated
 
+                # accepted collaborations have accessible_by.login
+                if collaboration.accessible_by.login == user_email:
+                    collaboration_updated = (
+                        client.user_collaborations.update_collaboration_by_id(
+                            collaboration_id=collaboration.id,
+                            role=role,
+                        )
+                    )
+                    return collaboration_updated
     return collaboration
 ```
 Because we are running this script multiple times, we need to handle the case where the user is already a collaborator. In the example above we are catching the `user_already_collaborator` error and blindly updating the role of the existing collaboration.
@@ -160,17 +174,16 @@ def main():
 
     # Create a collaboration
     collaboration = create_file_collaboration(
-        client=client, item_id=SAMPLE_FILE, user_email=SAMPLE_EMAIL
+        client=client,
+        item_id=SAMPLE_FILE,
+        user_email=SAMPLE_EMAIL,
+        role=CreateCollaborationRole.EDITOR,
     )
     print(f"\nCreated collaboration: {collaboration.id}")
 ```
 Resulting in:
-```
+```yaml
 Created collaboration: 50086660113
-Collaboration: 50086660113
- Collaborator: YOUR_EMAIL+collab@gmail.com 
-         Role: editor
-       Status: accepted
 ```
 
 Now if we open the Box.com app and navigate to `workshops/collaboration`, you'll see a file with a collaboration icon.
@@ -185,9 +198,14 @@ Let's create a method that prints the details of a single collaboration.
 ```python
 def print_file_collaboration(client: Client, collaboration: Collaboration):
     print(f"Collaboration: {collaboration.id}")
-    print(f" Collaborator: {collaboration.accessible_by.login} ")
+    if collaboration.status == CollaborationStatusField.ACCEPTED:
+        print(f" Collaborator: {collaboration.accessible_by.login} ")
+    else:
+        print(f" Collaborator: {collaboration.invite_email} ")
     print(f"         Role: {collaboration.role.value}")
     print(f"       Status: {collaboration.status.value}")
+
+    return collaboration
 ```
 Then use it in your main method:
 ``` python
@@ -198,12 +216,12 @@ def main():
     print_file_collaboration(client=client, collaboration=collaboration)
 ```
 Resulting in:
-```
+```yaml
 Created collaboration: 50086062997
 Collaboration: 50086062997
  Collaborator: YOUR_EMAIL+collab@gmail.com 
          Role: editor
-       Status: accepted
+       Status: pending
 ```
 
 
@@ -228,15 +246,15 @@ def main():
     list_file_collaborations(client=client, file_id=SAMPLE_FILE)
 ```
 Resulting in:
-```
+```yaml
 File 1373026823928 has 1 collaborations
 Collaboration: 50086660113
  Collaborator: YOUR_EMAIL+collab@gmail.com 
          Role: editor
-       Status: accepted
+       Status: pending
 ```
 Depending if the collaborator already has a Box account or not, you may be redirected to create a free Box account.
-The status mey be accepted or pending, depending if the collaborator has accepted the collaboration or not.
+The status may be accepted or pending, depending if the collaborator has accepted the collaboration or not.
 Check the collaborator email for an invitation email from Box.
 
 ## Update a collaboration
@@ -267,7 +285,7 @@ def main():
     print_file_collaboration(client=client, collaboration=collaboration)
 ```
 Resulting in:
-```
+```yaml
 Updated collaboration: 50086062997
 Collaboration: 50086062997
  Collaborator: YOUR_EMAIL+collab@gmail.com 
@@ -294,7 +312,7 @@ def main():
     list_file_collaborations(client=client, file_id=SAMPLE_FILE)
 ```
 Resulting in:
-```
+```yaml
 File 1373026823928 has 0 collaborations
 ```
 

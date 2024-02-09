@@ -45,7 +45,7 @@ if __name__ == "__main__":
     main()
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 223095001439
 INFO:root:Folder file_representations with id: 223939315135
 INFO:root:      Uploaded Single Page.docx (1294096878155) 11723 bytes
@@ -86,7 +86,13 @@ import shutil
 from typing import List
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import File, FileMini, Folder, FileFullRepresentationsEntriesStatusStateField, FileFullRepresentationsEntriesField
+from box_sdk_gen.schemas import (
+    File,
+    FileMini,
+    Folder,
+    FileFullRepresentationsEntriesStatusStateField,
+    FileFullRepresentationsEntriesField,
+)
 from box_sdk_gen.managers.files import GetFileThumbnailByIdExtension
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -127,35 +133,38 @@ def obj_dict(obj):
     return obj.__dict__
 
 
-def file_representations_print(file_name: str, representations: List[FileFullRepresentationsEntriesField]):
+def file_representations_print(
+    file_name: str, representations: List[FileFullRepresentationsEntriesField]
+):
     json_str = json.dumps(representations, indent=4, default=obj_dict)
     print(f"\nFile {file_name} has {len(representations)} representations:\n")
     print(json_str)
 
 
-def file_representations(client: Client, file: FileMini, rep_hints: str = None) -> List[FileFullRepresentationsEntriesField]:
+def file_representations(
+    client: Client, file: FileMini, rep_hints: str = None
+) -> List[FileFullRepresentationsEntriesField]:
     """Get file representations"""
-    file = client.files.get_file_by_id(file.id, fields=["name", "representations"], x_rep_hints=rep_hints)
+    file = client.files.get_file_by_id(
+        file.id, fields=["name", "representations"], x_rep_hints=rep_hints
+    )
     return file.representations.entries
 ```
 Then use it in your main method with the `FILE_DOCX`:
 ```python
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
-    conf = ConfigOAuth()
-    client = get_client_oauth(conf)
-
-    user = client.users.get_user_me()
-    print(f"\nHello, I'm {user.name} ({user.login}) [{user.id}]")
+    ...
 
     # make sure the file exists
     file_docx = client.files.get_file_by_id(FILE_DOCX)
 
+    # List all representations for a file
     file_docx_representations = file_representations(client, file_docx)
     file_representations_print(file_docx.name, file_docx_representations)
 ```
 Resulting in:
-```
+```yaml
 Hello, I'm Free Dev 001 [25428698627]
 
 File Single Page.docx has 9 representations:
@@ -183,6 +192,7 @@ For example, to get the png 320x320 representation of the `FILE_DOCX`:
 def main():
     ...
 
+    # Get a specific representation
     file_docx_representations_png = file_representations(client, file_docx, "[jpg?dimensions=320x320]")
     file_representations_print(file_docx.name, file_docx_representations_png)
 ```
@@ -215,27 +225,45 @@ Now that we have the `url_template` we can download the representation.
 First let's create the simplest method to download a file from a url:
 ```python
 def do_request(url: str, access_token: str):
-    resp = requests.get(url, headers={"Authorization": f"Bearer {access_token}"})
+    resp = requests.get(
+        url, headers={"Authorization": f"Bearer {access_token}"}
+    )
     resp.raise_for_status()
     return resp.content
 ```
 Next let's create a representation download method:
 ```python
-def representation_download(access_token: str, file_representation: FileFullRepresentationsEntriesField, file_name: str):
-    if file_representation.status.state != FileFullRepresentationsEntriesStatusStateField.SUCCESS:
-        print(f"Representation {file_representation.representation} is not ready")
+def representation_download(
+    access_token: str,
+    file_representation: FileFullRepresentationsEntriesField,
+    file_name: str,
+):
+    if (
+        file_representation.status.state
+        != FileFullRepresentationsEntriesStatusStateField.SUCCESS
+    ):
+        print(
+            f"Representation {file_representation.representation} is not ready"
+        )
         return
 
     url_template = file_representation.content.url_template
     url = url_template.replace("{+asset_path}", "")
-    file_name = file_name.replace(".", "_").replace(" ", "_") + "." + file_representation.representation
+    file_name = (
+        file_name.replace(".", "_").replace(" ", "_")
+        + "."
+        + file_representation.representation
+    )
 
     content = do_request(url, access_token)
 
     with open(file_name, "wb") as file:
         file.write(content)
 
-    print(f"Representation {file_representation.representation} saved to {file_name}")
+    print(
+        f"Representation {file_representation.representation}",
+        f" saved to {file_name}",
+    )
 
 ```
 And finally use it in your main method:
@@ -243,6 +271,7 @@ And finally use it in your main method:
 def main():
     ...
 
+    # Download the representation
     access_token = client.auth.retrieve_token().access_token
     representation_download(access_token, file_docx_representations_png[0], file_docx.name)
 ```
@@ -279,7 +308,11 @@ The python SDK as a helper method to get the thumbnail representation of a file:
 Let's create a specific method for it:
 ```python
 def file_thumbnail(
-    client: Client, file: File, extension: GetFileThumbnailByIdExtension, min_h: int, min_w: int
+    client: Client,
+    file: File,
+    extension: GetFileThumbnailByIdExtension,
+    min_h: int,
+    min_w: int,
 ) -> bytes:
     """Get file thumbnail"""
     thumbnail = client.files.get_file_thumbnail_by_id(
@@ -299,18 +332,27 @@ Let's use it in our main method:
 def main():
     ...
 
-    file_docx_thumbnail = file_thumbnail(client, 
-                                        file_docx, 
-                                        GetFileThumbnailByIdExtension.JPG, 
-                                        min_h=94, 
-                                        min_w=94)
+    # Get thumbnail representation
+    file_docx_thumbnail = file_thumbnail(
+        client,
+        file_docx,
+        GetFileThumbnailByIdExtension.JPG,
+        min_h=94,
+        min_w=94,
+    )
 
-    with open(file_docx.name.replace(".", "_").replace(" ", "_") + "_thumbnail.jpg", "wb") as file:
+    with open(
+        file_docx.name.replace(".", "_").replace(" ", "_") + "_thumbnail.jpg",
+        "wb",
+    ) as file:
         shutil.copyfileobj(file_docx_thumbnail, file)
-    print(f"\nThumbnail for {file_docx.name} saved to {file_docx.name.replace('.', '_')}_thumbnail.jpg")
+    print(
+        f"\nThumbnail for {file_docx.name} ",
+        f"saved to {file_docx.name.replace('.', '_')}_thumbnail.jpg",
+    )
 ```
 Resulting in:
-```
+```yaml
 Thumbnail for Single Page.docx saved to Single Page_docx_thumbnail.jpg
 ```
 And I have a new file on my local folder:
@@ -327,6 +369,7 @@ def main():
     file_ppt = client.files.get_file_by_id(FILE_PPTX)
     print(f"\nFile {file_ppt.name} ({file_ppt.id})")
 
+    # Get PDF representation
     file_ppt_repr_pdf = file_representations(client, file_ppt, "[pdf]")
     file_representations_print(file_ppt.name, file_ppt_repr_pdf)
     access_token = client.auth.retrieve_token().access_token
@@ -345,12 +388,19 @@ Representations may not always be available.
 
 Let's create a method that lists the status for a certain representation for all files in a folder:
 ```python
-def folder_list_representation_status(client: Client, folder: Folder, representation: str):
+def folder_list_representation_status(
+    client: Client, folder: Folder, representation: str
+):
     items = client.folders.get_folder_items(folder.id).entries
-    print(f"\nChecking for {representation} status in folder [{folder.name}] ({folder.id})")
+    print(
+        f"\nChecking for {representation} ",
+        f"status in folder [{folder.name}] ({folder.id})",
+    )
     for item in items:
         if isinstance(item, FileMini):
-            file_repr = file_representations(client, item, "[" + representation + "]")
+            file_repr = file_representations(
+                client, item, "[" + representation + "]"
+            )
             if file_repr:
                 state = file_repr[0].status.state.value
             else:
@@ -362,11 +412,12 @@ And look for `extracted_text` representation on the `DEMO_FOLDER`:
 def main():
     ...
 
-    folder = client.folder(DEMO_FOLDER).get()
-    folder_list_representation_status(folder, "extracted_text")
+    # Generate representations
+    folder = client.folders.get_folder_by_id(DEMO_FOLDER)
+    folder_list_representation_status(client, folder, "extracted_text")
 ```
 Which results in:
-```
+```yaml
 Checking for extracted_text status in folder [file_representations] (223939315135)
 File Audio.mp3 (1294103505129) state: not available
 File Document (PDF).pdf (1294102659923) state: none

@@ -26,7 +26,7 @@ Create a `folders_init.py` file on the root of the project and execute the follo
 import logging
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
-from workshops.files.create_samples import create_samples
+from workshops.folders.create_samples import create_samples
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
@@ -42,9 +42,10 @@ def main():
 if __name__ == "__main__":
     main()
 
+
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 223095001439
 INFO:root:Folder folders with id: 233715688542
 ```
@@ -69,6 +70,7 @@ from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import Folder, FolderMini, FileMini, WebLinkMini
 from box_sdk_gen.managers.folders import Items, CreateFolderParent
 
+
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
@@ -86,14 +88,19 @@ if __name__ == "__main__":
 
 ## List folder content
 Create a method to list the content of a folder, by id.
-Make the default folder id the root folder id.
+Make the default folder id is the root folder id.
 List the contents of the root folder.
 Add a couple of methods to print the folder and it's objects.
 
 ```python
-def print_box_item(box_item: Union[FileMini, FolderMini, WebLinkMini], level: int = 0):
+def print_box_item(
+    box_item: Union[FileMini, FolderMini, WebLinkMini], level: int = 0
+):
     """Basic print of a Box Item attributes"""
-    print(f"{'   ' * level}({box_item.id}) {box_item.name}{'/' if box_item.type == 'folder' else ''}")
+    print(
+        f"{'   ' * level}({box_item.id}) {box_item.name}",
+        f"{'/' if box_item.type == 'folder' else ''}",
+    )
 
 
 def print_box_items(box_items: Items):
@@ -117,7 +124,7 @@ def main():
     print_box_items(items)
 ```
 Should result in something similar to:
-```
+```yaml
 --- Items ---
 (216797257531) My Signed Documents/
 (221723756896) UIE Samples/
@@ -128,7 +135,9 @@ Should result in something similar to:
 ## List folder content recursively
 Create a method to list the content of a folder, by id, recursively.
 ```python
-def print_folder_items_recursive(box_client: Client, folder_id: str, level: int = 0) -> Items:
+def print_folder_items_recursive(
+    box_client: Client, folder_id: str, level: int = 0
+):
     """Get folder items recursively"""
     folder = box_client.folders.get_folder_by_id(folder_id)
     print_box_item(folder, level)
@@ -144,11 +153,12 @@ Call the method with the root folder:
 def main():
     ...
     
+    # List folder content recursively
     # root folder id is always "0"
     print_folder_items_recursive(client, "0")
 ```
 Should result in something similar to:
-```
+```yaml
 (0) All Files/
    (223095001439) workshops/
       (233715688542) folders/
@@ -170,7 +180,9 @@ def get_workshop_folder(box_client: Client) -> Folder:
 
     folders_folder_list = [
         box_item
-        for box_item in box_client.folders.get_folder_items(workshops_folder_list[0].id).entries
+        for box_item in box_client.folders.get_folder_items(
+            workshops_folder_list[0].id
+        ).entries
         if box_item.name == "folders" and box_item.type == "folder"
     ]
     if folders_folder_list == []:
@@ -183,11 +195,12 @@ And then test it:
 def main():
     ...
 
+    # Get workshop folder
     workshop_folder = get_workshop_folder(client)
     print_box_item(workshop_folder)
 ```
 Result:
-```
+```yaml
 (233715688542) folders/
 ```
 This example serves to illustrate how to navigate the folder structure, and as you can see this is not very practical.
@@ -227,7 +240,7 @@ def main():
     print_folder_items_recursive(client, workshop_folder.id)
 ```
 Resulting in:
-```
+```yaml
 (233715688542) folders/
    (233720706445) my_documents/
 ```
@@ -246,6 +259,7 @@ Create a folder structure like this:
 def main():
     ...
 
+    # Create folders
     my_documents = create_box_folder(client, "my_documents", workshop_folder)
     work = create_box_folder(client, "work", my_documents)
 
@@ -255,7 +269,7 @@ def main():
     print_folder_items_recursive(client, workshop_folder.id)
 ```    
 Resulting in:
-```
+```yaml
 (233715688542) folders/
    (233716501320) downloads/
       (233715942209) personal/
@@ -270,15 +284,21 @@ This is an example of how to handle error in Box.
 def main():
     ...
 
-    # copy folder
+    # Copy folders
     try:
         parent_arg = CreateFolderParent(my_documents.id)
-        my_docs_personal = client.folders.copy_folder(personal.id, parent_arg, "personal")
+        my_docs_personal = client.folders.copy_folder(
+            personal.id, parent_arg, "personal"
+        )
     except APIException as err:
         if err.code == "item_name_in_use":
             folder_id = err.context_info["conflicts"]["id"]
             my_docs_personal = client.folders.get_folder_by_id(folder_id)
-            logging.info("Folder %s with id: %s already exists", my_docs_personal.name, my_docs_personal.id)
+            logging.info(
+                "Folder %s with id: %s already exists",
+                my_docs_personal.name,
+                my_docs_personal.id,
+            )
         else:
             raise err
     print_folder_items_recursive(client, workshop_folder.id)
@@ -286,7 +306,7 @@ def main():
 
 
 Resulting in:
-```
+```yaml
 (233715688542) folders/
    (233716501320) downloads/
       (233715942209) personal/
@@ -306,7 +326,7 @@ Add a description to the `downloads` folder.
     print(f"Description: {downloads.description}")
 ```
 Resulting in:
-```
+```yaml
 folder 233716501320 downloads
 Description: This is where my downloads go, remember to clean it once in a while
 ```
@@ -347,7 +367,7 @@ So `be careful` when using it.
 
 ```
 Resulting in:
-```
+```yaml
 --- Before the delete ---
 (233716501320) downloads/
    (233715942209) personal/
@@ -384,7 +404,7 @@ def main():
     print_folder_items_recursive(client, workshop_folder.id)
 ```
 Resulting in:
-```
+```yaml
 Renaming personal downloads to games
 (233716501320) downloads/
    (233738125394) games/

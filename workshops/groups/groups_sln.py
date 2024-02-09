@@ -1,4 +1,5 @@
 """Box Shared links"""
+
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
@@ -10,21 +11,21 @@ from box_sdk_gen.schemas import (
     Collaboration,
 )
 from box_sdk_gen.managers.groups import (
-    CreateGroupInvitabilityLevelArg,
-    CreateGroupMemberViewabilityLevelArg,
+    CreateGroupInvitabilityLevel,
+    CreateGroupMemberViewabilityLevel,
 )
 from box_sdk_gen.managers.memberships import (
-    CreateGroupMembershipUserArg,
-    CreateGroupMembershipGroupArg,
-    CreateGroupMembershipRoleArg,
+    CreateGroupMembershipUser,
+    CreateGroupMembershipGroup,
+    CreateGroupMembershipRole,
 )
 
 from box_sdk_gen.managers.user_collaborations import (
-    CreateCollaborationItemArgTypeField,
-    CreateCollaborationItemArg,
-    CreateCollaborationAccessibleByArg,
-    CreateCollaborationRoleArg,
-    CreateCollaborationAccessibleByArgTypeField,
+    CreateCollaborationItemTypeField,
+    CreateCollaborationItem,
+    CreateCollaborationAccessibleBy,
+    CreateCollaborationRole,
+    CreateCollaborationAccessibleByTypeField,
 )
 
 
@@ -46,9 +47,9 @@ def create_group(
 ) -> Group:
     """Create group"""
 
-    invitability_level = CreateGroupInvitabilityLevelArg.ADMINS_AND_MEMBERS
+    invitability_level = CreateGroupInvitabilityLevel.ADMINS_AND_MEMBERS
     member_viewability_level = (
-        CreateGroupMemberViewabilityLevelArg.ADMINS_AND_MEMBERS
+        CreateGroupMemberViewabilityLevel.ADMINS_AND_MEMBERS
     )
 
     try:
@@ -79,9 +80,9 @@ def list_groups(client: Client) -> None:
 
 def add_user_to_group(
     client: Client,
-    user: CreateGroupMembershipUserArg,
-    group: CreateGroupMembershipGroupArg,
-    role: CreateGroupMembershipRoleArg,
+    user: CreateGroupMembershipUser,
+    group: CreateGroupMembershipGroup,
+    role: CreateGroupMembershipRole,
 ) -> GroupMembership:
     """Add user to group"""
 
@@ -109,7 +110,9 @@ def list_group_members(client: Client, group: Group) -> None:
         group.id
     ).entries:
         print(
-            f" - {group_membership.user.name} as {group_membership.role.value} [{group_membership.user.id}] "
+            f" - {group_membership.user.name} as ",
+            f"{group_membership.role.value} ",
+            f"[{group_membership.user.id}] ",
         )
 
 
@@ -120,7 +123,9 @@ def list_user_groups(client: Client, user: User) -> None:
         user.id
     ).entries:
         print(
-            f" - {group_membership.group.name} as {group_membership.role.value} [{group_membership.group.id}] "
+            f" - {group_membership.group.name} as ",
+            f"{group_membership.role.value} ",
+            f"[{group_membership.group.id}] ",
         )
 
 
@@ -131,13 +136,13 @@ def share_folder_with_group(
 
     try:
         collaboration = client.user_collaborations.create_collaboration(
-            item=CreateCollaborationItemArg(
-                type=CreateCollaborationItemArgTypeField.FOLDER, id=DEMO_FOLDER
+            item=CreateCollaborationItem(
+                type=CreateCollaborationItemTypeField.FOLDER, id=DEMO_FOLDER
             ),
-            accessible_by=CreateCollaborationAccessibleByArg(
-                CreateCollaborationAccessibleByArgTypeField.GROUP, group.id
+            accessible_by=CreateCollaborationAccessibleBy(
+                CreateCollaborationAccessibleByTypeField.GROUP, group.id
             ),
-            role=CreateCollaborationRoleArg.EDITOR,
+            role=CreateCollaborationRole.EDITOR,
         )
     except APIException as err:
         if err.status == 409 and err.code == "conflict":
@@ -175,14 +180,15 @@ def main():
     # add me to group as administrator
     group_membership = add_user_to_group(
         client,
-        CreateGroupMembershipUserArg(me.id),
-        CreateGroupMembershipGroupArg(my_group.id),
-        CreateGroupMembershipRoleArg.ADMIN,
+        CreateGroupMembershipUser(me.id),
+        CreateGroupMembershipGroup(my_group.id),
+        CreateGroupMembershipRole.ADMIN,
     )
     print(
-        f"\nAdded {group_membership.user.name} ({group_membership.user.login}) "
+        f"\nAdded {group_membership.user.name} ",
+        f"({group_membership.user.login}) ",
         f"to {group_membership.group.name} ({group_membership.group.id}) "
-        f"as {group_membership.role.value}"
+        f"as {group_membership.role.value}",
     )
 
     # list group members
@@ -194,9 +200,11 @@ def main():
     # share DEMO_FOLDER with group
     collaboration = share_folder_with_group(client, DEMO_FOLDER, my_group)
     print(
-        f"\nShared folder <{collaboration.item.name}> ({collaboration.item.id}) "
-        f"with group <{collaboration.accessible_by.name}> ({collaboration.accessible_by.id}) "
-        f"as {collaboration.role.value}"
+        f"\nShared folder <{collaboration.item.name}> ",
+        f"({collaboration.item.id}) ",
+        f"with group <{collaboration.accessible_by.name}> ",
+        f"({collaboration.accessible_by.id}) "
+        f"as {collaboration.role.value}",
     )
 
     # delete group

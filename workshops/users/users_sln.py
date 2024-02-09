@@ -1,10 +1,11 @@
 """Box Shared links"""
+
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.fetch import APIException
 from box_sdk_gen.schemas import User
-from box_sdk_gen.managers.transfer import TransferOwnedFolderOwnedByArg
+from box_sdk_gen.managers.transfer import TransferOwnedFolderOwnedBy
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 
@@ -55,7 +56,7 @@ def update_user(
 def user_transfer(
     client: Client, source_user_id: str, destination_user_id: str
 ):
-    owned_by = TransferOwnedFolderOwnedByArg(destination_user_id)
+    owned_by = TransferOwnedFolderOwnedBy(destination_user_id)
     client.transfer.transfer_owned_folder(source_user_id, owned_by)
 
 

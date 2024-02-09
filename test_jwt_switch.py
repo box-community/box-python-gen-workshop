@@ -14,7 +14,9 @@ def main():
     config = ConfigJWT()
     jwt = JWTConfig.from_config_file(
         config_file_path=config.jwt_config_path,
-        token_storage=FileWithInMemoryCacheTokenStorage(".ent" + config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(
+            ".ent" + config.cache_file
+        ),
     )
 
     auth = BoxJWTAuth(jwt)

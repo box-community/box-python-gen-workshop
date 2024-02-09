@@ -1,5 +1,3 @@
-"""Uploads or Creates samples for exercises."""
-
 import pathlib
 import os
 import logging
@@ -95,18 +93,4 @@ def file_upload(client: Client, file_path: str, folder: Folder) -> File:
         )
         file = files.entries[0]
 
-    if "pineapple" in file.name:
-        client.files.update_file_by_id(file.id, description="aka ananas")
-
     return file
-
-
-def upload_content_sample(client: Client):
-    """Uploads sample content to Box."""
-    wks_folder = create_box_folder(
-        client, "workshops", client.folders.get_folder_by_id("0")
-    )
-
-    search_folder = create_box_folder(client, "search", wks_folder)
-
-    folder_upload(client, search_folder, "workshops/search/content_samples/")

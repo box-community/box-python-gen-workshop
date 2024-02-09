@@ -35,6 +35,7 @@ cd box-python-gen-workshop
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
@@ -87,10 +88,15 @@ You'll find the workshop exercises in the [workshops](workshops) folder.
 * [Folders](workshops/folders/folders.md) - List, recursion, create, update, rename, copy, error handling, and delete
 * [Files](workshops/files/files.md) - Upload, download, update, move, copy, error handling, and delete
 * [File Comments](workshops/comments/comments.md) - Interact with the activity feed and comments
+* [File Collaboration](workshops/collaboration/collaboration.md) - Create and manage collaborations
+* [File Requests](workshops/file_requests/file_requests.md) - Create and manage file requests
 * [Search](workshops/search/search.md) - Using search in the Box API
 * [Shared Links](workshops/shared_links/shared_links.md) - Create and manage shared links
 * [File Representations](workshops/file_representations/file_representations.md) - Working with file representations
-* [Sign - Unstructured documents](workshops/sign/) - Working with Sign, and simple documents. Includes most features of the Sign request.
-* [Sign Templates](workshops/sign_templates/) - Working with Sign Templates.
-* [Sign Structured documents](workshops/sign_structured/) - Working with Sign Structured documents.
-* [Tasks](workshops/tasks/) - Working with Tasks.
+* [Sign - Unstructured documents](workshops/sign/sign.md) - Working with Sign, and simple documents. Includes most features of the Sign request.
+* [Sign Templates](workshops/sign_templates/sign_templates.md) - Working with Sign Templates.
+* [Sign Structured documents](workshops/sign_structured/sign_structured.md) - Working with Sign Structured documents.
+* [Tasks](workshops/tasks/tasks.md) - Working with Tasks.
+* [Users](workshops/users/users.md) - Working with Users.
+* [Groups](workshops/groups/groups.md) - Working with Groups.
+* [Watermark](workshops/watermark/watermark.md) - Working with Watermark.

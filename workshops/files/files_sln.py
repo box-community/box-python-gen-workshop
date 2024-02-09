@@ -22,8 +22,8 @@ from box_sdk_gen.utils import ByteStream
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-SAMPLE_FOLDER = "223097997181"
-SAMPLE_FILE = "1289038683607"
+SAMPLE_FOLDER = "245746782643"
+SAMPLE_FILE = "1424120828836"
 
 
 def upload_file(client: Client, file_path: str, folder_id: str) -> File:
@@ -34,12 +34,14 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
 
     try:
         # pre-flight check
+
         pre_flight_arg = PreflightFileUploadCheckParent(id=folder_id)
         client.uploads.preflight_file_upload_check(file_name, file_size, pre_flight_arg)
 
         # upload new file
         upload_arg = UploadFileAttributes(file_name, UploadFileAttributesParentField(folder_id))
         files: Files = client.uploads.upload_file(upload_arg, file=open(file_path, "rb"))
+
         box_file = files.entries[0]
     except APIException as err:
         if err.code == "item_name_in_use":
@@ -47,8 +49,10 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
             box_file_id = err.context_info["conflicts"]["id"]
             try:
                 # upload new version
+
                 upload_arg = UploadFileAttributes(file_name, UploadFileAttributesParentField(folder_id))
                 files: Files = client.uploads.upload_file_version(box_file_id, upload_arg, file=open(file_path, "rb"))
+
                 box_file = files.entries[0]
             except APIException as err2:
                 logging.error("Failed to update %s: %s", box_file.name, err2)
@@ -67,7 +71,11 @@ def download_file(client: Client, file_id: str, local_path_to_file: str):
         shutil.copyfileobj(file_stream, file)
 
 
-def download_zip(client: Client, local_path_to_zip: str, items: List[CreateZipDownloadItemsArg]):
+def download_zip(
+    client: Client,
+    local_path_to_zip: str,
+    items: List[CreateZipDownloadItemsArg],
+):
     """Download a zip file from Box"""
 
     file_name = os.path.basename(local_path_to_zip)
@@ -82,7 +90,9 @@ def download_zip(client: Client, local_path_to_zip: str, items: List[CreateZipDo
     # url_parts = zip_download.download_url.split("/")
     # zip_download_id = url_parts[5]
 
-    file_stream: ByteStream = client.zip_downloads.get_zip_download_content(zip_download.download_url)
+    file_stream: ByteStream = client.zip_downloads.get_zip_download_content(
+        zip_download.download_url
+    )
 
     with open(local_path_to_zip, "wb") as file:
         shutil.copyfileobj(file_stream, file)
@@ -95,7 +105,9 @@ def file_to_json(client: Client, file_id: str) -> str:
     return file_json
 
 
-def file_update_description(client: Client, file_id: str, description: str) -> File:
+def file_update_description(
+    client: Client, file_id: str, description: str
+) -> File:
     return client.files.update_file_by_id(file_id, description=description)
 
 
@@ -117,7 +129,11 @@ def main():
     # make sure the folder exists
     sample_folder = client.folders.get_folder_by_id(SAMPLE_FOLDER)
 
-    sample_file = upload_file(client, "workshops/files/content_samples/sample_file.txt", sample_folder.id)
+    sample_file = upload_file(
+        client,
+        "workshops/files/content_samples/sample_file.txt",
+        sample_folder.id,
+    )
     print(f"Uploaded {sample_file.name} to folder [{sample_folder.name}]")
 
     download_file(client, sample_file.id, "./sample_file_downloaded.txt")
@@ -145,14 +161,20 @@ def main():
     file = client.files.get_file_by_id(SAMPLE_FILE)
     print(f"{file.id} {file.name} {file.description}")
 
-    file = file_update_description(client, SAMPLE_FILE, f"Updating the description at {datetime.datetime.now()}")
+    file = file_update_description(
+        client,
+        SAMPLE_FILE,
+        f"Updating the description at {datetime.datetime.now()}",
+    )
 
     file = client.files.get_file_by_id(SAMPLE_FILE)
     print(f"{file.id} {file.name} {file.description}")
 
     try:
         file_copied = client.files.copy_file(
-            SAMPLE_FILE, CopyFileParentArg(SAMPLE_FOLDER), name="sample_file_copy.txt"
+            SAMPLE_FILE,
+            CopyFileParentArg(SAMPLE_FOLDER),
+            name="sample_file_copy.txt",
         )
         file_copied_id = file_copied.id
     except APIException as err:
@@ -164,7 +186,9 @@ def main():
     folder_list_contents(client, SAMPLE_FOLDER)
 
     try:
-        file_moved = client.files.update_file_by_id(file_copied_id, parent=CopyFileParentArg("0"))
+        file_moved = client.files.update_file_by_id(
+            file_copied_id, parent=CopyFileParentArg("0")
+        )
         file_moved_id = file_moved.id
     except APIException as err:
         if err.code == "item_name_in_use":

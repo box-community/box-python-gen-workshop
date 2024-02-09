@@ -6,10 +6,10 @@ Make sure your Box app is configured to use the following scopes:
 ![Alt text](img/sign-specific-scope.png)
 
 > ### Note
-> If the application scope is not available, then your account can not use the Sign API and you wont be able to complete this exercise.
+> If the application scope is not available, then your account cannot use the Sign API and you won't be able to complete this exercise.
 
 ## Concepts
-Box Sign enables you to send documents to people for electronic signatures.  With Box Sign, you select who needs to sign, select the order in which people need to sign, and include additional fields such as date of signature, explanatory text, and checkboxes.
+Box Sign enables you to send documents to people for electronic signatures.  With Box Sign, you select who needs to sign, select the order in which people need to sign, and include additional fields such as date of signature, plain text, and checkboxes.
 
 To receive and sign documents, recipients do not need to have Box accounts — anyone with an email address can receive and sign the documents you send.
 
@@ -60,7 +60,7 @@ INFO:root:      Uploaded Simple-DOC.docx (1358077513913) 12409 bytes
 ```
 
 Next, create a `sign.py` file on the root of the project that you will use to write your code.
-Take note of the above document id's and include statics for them in the doc.
+Take note of the above document ids and include static variables for them in the script.
 Replace the `YOUR_EMAIL` with your email, or use a different email for each signer.
 
 ```python
@@ -118,9 +118,9 @@ Hello, I'm Rui Barbosa  [18622116055]
 ```
 
 ## Sign a document
-Imagine you need to have adhoc documents signed by a single person. 
+Imagine you need to have ad hoc documents signed by a single person. 
 
-These documents are typically not structured, the signature requirements and placement vary from document to document. 
+These documents are typically not structured, and the signature requirements and placement vary from document to document. 
 
 Create a method to sign a document with a single signer:
 ```python
@@ -149,7 +149,7 @@ def sign_doc_single(
 
     return sign_request
 ```
-And use it in the main method. In my case I'm using a different email for the signer from the one I'm in my Box account. Use an email that you have access to:
+And use it in the main method. In my case I'm using a different email for the signer from the one in my Box account. Use an email that you have access to:
 ```python
 def main():
     ...
@@ -167,24 +167,24 @@ Simple sign request: 97ac3486-5fe1-42e0-9ed2-3234e8e2129f
   Signers: ...@gmail.com
   Prepare url: None
 ```
-In the mean time check your Box Sign app and you should see something like this:
+In the meantime check your Box Sign app and you should see something like this:
 ![Alt text](img/sign-request-pending.png)
-Feel free to inspect the details of the sign request.
+Feel free to inspect the details of the signature request.
 
-You should have also received an email with the sign request:
+You should have also received an email with the signature request:
 ![Alt text](img/sign-request-email.png)
 
-Lets sign the document. Click on the link, click accept and continue, and you should see something like this:
+Let's sign the document. Click on the link, click accept and continue, and you should see something like this:
 
 ![Alt text](img/sign-unprepared-doc.png)
 
-To be able to complete the sign process, you need to at least drag a signature pad into your document:
+To be able to complete the Box Sign process, you need to at least drag a signature pad field into your document:
 
 ![Alt text](img/sign-preparing-doc.png)
 
-Go ahead, click the `Sign & Finish button` to complete the sign process.
+Go ahead, click the `Sign & Finish button` to complete the Box Sign process.
 
-Back to your Box.com account under Sign you should see the updated status (you might need to refresh the page):
+Go back to your Box.com account under Sign and you should see the updated status (you might need to refresh the page):
 
 ![Alt text](img/sing-pdf-status-signed.png)
 
@@ -199,9 +199,9 @@ You probably noticed that the application is forcing the signer to correctly pla
 This is not ideal.
 
 ## Sign a document with preparation
-For these unstructured document your app can require a document preparation so that the `sender` can define the signature requirements and placement.
+For these unstructured documents your app can require document preparation so that the `sender` can define the signature requirements and placement.
 
-This way when the `signer` receives the sign request, the document is already prepared and the signer only needs to sign the document.
+This way when the `signer` receives the signature request, the document is already prepared and the signer only needs to sign the document.
 
 Comment your previous section of code and add a section on you main for this:
 ```python
@@ -228,27 +228,27 @@ Simple sign request with prep: 1358028452508-f58485ec-6779-4456-8d83-fafcfb2165c
   Prepare url: https://app.box.com/sign/document/1358028452508-f58485ec-6779-4456-8d83-fafcfb2165c9/a8489c98bb3fbd5504482185a7a17f400d5964143fea37c5d27c0dee0c8ca31e/prepare_doc/
 ```
 
-And your browser should open with the document preparation page.
-Like before, drag the signature pad, the full name and the date to the appropriate places in the document, and click `Send Request`:
+Your browser should open with the document preparation page.
+Like before, drag the signature pad field, the full name and the date to the appropriate places in the document, and click `Send Request`:
 
 ![Alt text](img/sign-pdf-prep-doc.png)
 
-After the signer receives the email and opens the sign request, the document is already prepared and the signer only needs to sign the document:
+After the signer receives the email and opens the signature request, the document is already prepared and the signer only needs to sign the document:
 
 ![Alt text](img/sign-pdf-prep-finish-sign.png)
 
-Go ahead complete the sign process, and check your `Sign` status and the signed docs folder.
+Go ahead and complete the Box Sign process, and check your `Sign` status and the Signed Documents folder.
 
 ## Multiple signers
 What if you have a document that needs to be signed by multiple people? This is typical of contracts between two or more entities.
 
-Having multiple `signers` introduces another dimension to the sign process, the order in which the signers need to sign the document.
+Having multiple `signers` introduces another dimension to the Box Sign process, the order in which the signers need to sign the document.
 
-If you do not specify the order, the request is sent to everyone at the same time, and when all parties signed the document, they receive a copy with all signatures.
+If you do not specify the order, the signature request is sent to everyone at the same time, and when all parties sign the document, they receive a copy with all signatures.
 
-If you specify the order, the send request is sent to the first signer, and only when the first signer signs the document, the request is sent to the second signer, and so on.
+If you specify the order, the signature request is sent to the first signer, and only when the first signer signs the document, the signature request is sent to the second signer, and so on.
 
-Let's see this working with an example contract between an university and a student for a scholarship. In this case the institution must sign first.
+Let's see this working with an example contract between a university and a student for a scholarship. In this case the institution must sign first.
 
 Let create a method specific for this:
 
@@ -310,32 +310,32 @@ def main():
     if sign_contract_multi.prepare_url is not None:
         open_browser(sign_contract_multi.prepare_url)
 ```
-You browser should open with the document preparation page. 
+Your browser should open with the document preparation page. 
 
-Notice you now have two signers, with the order already specified. The color is also important to identify which signer is which (in this case the institution is blue and the student is green), determining which signer pad, name and date belongs to which signer.
+Notice you now have two signers, with the order already specified. The color is also important to identify which signer is which (in this case the institution is blue and the student is green), determining which signature pad field, name and date belongs to which signer.
 
 Like before, drag the signature pad, the full name and the date to the appropriate places in the document, and click `Send Request`:
 
 ![Alt text](img/sign-multi-prep.png)
 
-If you look at the sign request details, you should see something like this:
+If you look at the signature request details, you should see something like this:
 
 ![Alt text](img/sign-multi-prep-details.png)
 
-Indicating that the first request was sent, but the second is waiting for the first to be completed.
+Indicating that the first signature request was sent, but the second is waiting for the first to be completed.
 
-Go ahead and complete the sign process for both signers.
+Go ahead and complete the Box Sign process for both signers.
 
-Notice that when you get the second request it is already signed by the first signer.
+Notice that when you get the second signature request, the document is already signed by the first signer.
 
-## Resend sign requests
+## Resend signature requests
 What if the signer did not receive the email? Or the email was lost? Or the signer deleted the email by mistake?
 
-You can resend the sign request email to the `signer`, either manually or turn on the automatic resend option.
+You can resend the signature request email to the `signer`, either manually or by turning on the automatic resend option.
 
 The automatic resend option sends a reminder email to the `signers` that have not signed the document yet, after 3, 8, 13, and 18 days.
 
-You can also manually resend the sign request email to the signer, by calling the `resend_sign_request` method on the `sign_requests` object.
+You can also manually resend the signature request email to the signer, by calling the `resend_sign_request` method on the `sign_requests` object.
 >This can only be done once every 10 minutes.
 
 ### Manually sending a reminder
@@ -346,9 +346,9 @@ def sign_send_reminder(client: Client, sign_request_id: str):
     sign_request = client.sign_requests.resend_sign_request(sign_request_id)
     return sign_request
 ```
-It is difficult to test this in our workshop since we would need to wait at least 10 minutes to resend the sign request.
+It is difficult to test this in our workshop since we would need to wait at least 10 minutes to resend the signature request.
 
-You can however take note of the sign request id and use it in postman later.
+You can however take note of the signature request id and use it in Postman later.
 
 ### Automatic resend
 To enable automatic resend all you need to do is set the `are_reminders_enabled` parameter to `True`.
@@ -385,12 +385,12 @@ def sign_doc_single_more_options(
     return sign_request
 ```
 
-## Sign request expiration
-There are situations where you might need to set an expiration date for the sign request. 
+## Signature request expiration
+There are situations where you might need to set an expiration date for the signature request. 
 
-For example, imagine a quote for a service that is valid for 30 days. This proposal has to be signed by a certain date, and if not, the sign request is no longer valid.
+For example, imagine a quote for a service that is valid for 30 days. This proposal has to be signed by a certain date, and if not, the signature request is no longer valid.
 
-All you need todo is pass the `days_valid` parameter to the `create_sign_request` method.
+All you need to do is pass the `days_valid` parameter to the `create_sign_request` method.
 
 For example:
 ```python
@@ -411,8 +411,8 @@ def sign_doc_single_more_options(
     return sign_request
 ```
 
-## Customizing redirect URL's
-When the sign process is completed, the signer is redirected to a default page. The same happens when the signer `declines` the sign request.
+## Customizing redirect URLs
+When the Box Sign process is completed, the signer is redirected to a default page. The same happens when the signer `declines` the signature request.
 
 We can customize these pages by passing the `redirect_url` and `decline_redirect_url` parameters to the `create_sign_request` method.
 
@@ -437,7 +437,7 @@ def sign_doc_single_more_options(
     return sign_request
 ```
 
-Lets try this out. Add the following code to your main method:
+Let's try this out. Add the following code to your main method:
 ```python
 def main():
     ...
@@ -455,12 +455,12 @@ def main():
     check_sign_request(sign_with_redirects)
 ```
 
-Go ahead and complete the sign process, and you should be redirected to the forum page.
+Go ahead and complete the Box Sign process, and you should be redirected to the forum page.
 
 If you `sign` you'll be redirected to our forum page. If you `decline` you'll be redirected to our developer page.
 
 ## Customizing email messages
-You can customize the email messages sent to the signers by passing the `email_subject` and the `email_message` parameters to the `create_sign_request` method.
+You can customize the email messages sent to the signers by the signature request by passing the `email_subject` and the `email_message` parameters to the `create_sign_request` method.
 
 For example:
 ```python
@@ -485,12 +485,12 @@ def sign_doc_single_more_options(
 ```
 Both parameters accept simple strings, however the `email_message` parameter also accepts HTML with some limitations.
 
-Only some html tags are allowed. Links included in the message are also converted to hyperlinks in the email. The message may contain the following html tags including `a`, `abbr`, `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and `strong`. 
-Be aware that when the text to html ratio is too high, the email may end up in spam filters. 
+Only some HTML tags are allowed. Links included in the message are also converted to hyperlinks in the email. The message may contain the following HTML tags including `a`, `abbr`, `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and `strong`. 
+Be aware that when the text to HTML ratio is too high, the email may end up in spam filters. 
 Custom styles on these tags are not allowed. 
 If this field is not passed, a default message will be used.
 
-Lets test this:
+Let's test this:
 ```python
 def main():
     ...
@@ -509,8 +509,8 @@ def main():
 Resulting in the following email:
 ![Alt text](img/sign-simple-options-email.png)
 
-## Security in sign requests
-Emails are volatile and can be easily compromised. Imagine you want an additional layer of security for your sign requests, by requesting the signer to use a phone verification or a password to sign the document.
+## Security in signature requests
+Emails are volatile and can be easily compromised. Imagine you want an additional layer of security for your signature requests, by requesting the signer to use a phone verification or a password to sign the document.
 
 ### Phone verification (2FA)
 You can require the signer to use 2FA to sign the document by passing the `is_phone_verification_required_to_view` parameter to the `create_sign_request` method.
@@ -564,16 +564,16 @@ def main():
     )
     check_sign_request(sign_with_phone_verification)
 ```
-When you try to open the sign request you should see something like this:
+When you try to complete the signature request you should see something like this:
 
 ![Alt text](img/sign-simple-phone-verification.png)
 
-Enter the verification code and proceed with the sign process.
+Enter the verification code to complete the Box Sign process.
 
 ![Alt text](img/sign-simple-phone-verification-enter-code.png)
 
 ### Password verification
-You can also require the signer to use a password to sign the document by passing the `password` parameter in the `signer` object.
+You can require the signer to use a password to open the signature request by passing the `password` parameter in the `signer` object.
 
 For example:
 ```python
@@ -622,26 +622,26 @@ def main():
     )
     check_sign_request(sign_with_password_verification)
 ```
-Once you open the sign request you should see something like this:
+Once you open the signature request you should see something like this:
 
 ![Alt text](img/sign-simple-password.png)
 
-Enter the password and proceed with the sign process.
+Enter the password and proceed with the Box Sign process.
 
 ## Signer roles
-So far we have been working with the `signer` role. However there are other roles that you can use to customize the sign process.
+So far we have been working with the `signer` role. However there are other roles that you can use to customize the Box Sign process.
 The available roles are, `Signer`, `Approver`, and `Final copy reader`.
 
 From a developer perspective, this means:
 * `Signer` - Any person who is allowed to add data to the document. This includes adding a signature, initials, date, but also filling out text fields, checkboxes, and radio buttons, even if it does not include a signature.
-* `Approver` - This role will be asked if they approve the document.
-* `Final copy reader` - This role does not interact with the signature process, but will receive a copy of the signed document.
+* `Approver` - This role will be asked if they approve the document to be sent for signature.
+* `Final copy reader` - This role does not interact with the Box Sign process, but will receive a copy of the signed document.
 
 Using roles we can be a bit more creative in our scholarship example.
 
 Imagine that the scholarship needs to be approved by the dean and the legal department receives a final copy of the contract.
 
-Lets create a method for this:
+Let's create a method for this:
 ```python
 def sign_contract_step(
     client: Client,
@@ -714,26 +714,26 @@ def main():
 
 Like before we need to prepare the document, so open the prepare url in your browser.
 
-Notice in the example the institution is represented by the blue color in the left, and the student by green on the right, both are `signers`.
+Notice in the example the institution is represented by the blue color on the left, and the student by green on the right, and both are `signers`.
 
 Neither the `approver` nor the `final copy reader` can have inputs associated with them. If you do this, their roles will be adjusted to `signer`.
 
 
 ![Alt text](img/sign_multi-steps-prep.png)
 
-Continue the sign process.
+Continue the Box Sign process by sending the signature request.
 
 First the dean approves the scholarship:
 
 ![Alt text](img/sign-multi-steps-approve.png)
 
-Continue the sign process.
+Continue the Box Sign process.
 
 Next the institution signs the scholarship:
 
 ![Alt text](img/sign-multi-steps-teacher.png)
 
-Continue the sign process.
+Continue the Box Sign process.
 
 Next the student signs the scholarship:
 
@@ -744,7 +744,7 @@ Finally the legal department receives a copy of the signed document.
 
 ## Extra Credit
 There are a few features that we didn't cover in this workshop. Feel free to explore them on your own.
-* Sign request
+* Signature request
     * Multiple source files
     * Signature color
     * Disable text signature
@@ -754,9 +754,9 @@ There are a few features that we didn't cover in this workshop. Feel free to exp
     * In person
     * Embed URL
     * Box login required
-* Get sign request by id
-* List sign requests
-* Cancel sign request
+* Get signature request by id
+* List signature requests
+* Cancel signature request
 
 
 # Final thoughts
@@ -764,7 +764,7 @@ You only need a document and a signer email to send a signature request.
 
 When using unstructured documents your app should pass the `is_document_preparation_needed`, and redirect the user to the `preparation_url` to prepare the document.
 
-You can customize the sign process by using the `signer` roles, `signer`, `approver`, and `final copy reader.
+You can customize the Box Sign process by using the `signer` roles, `signer`, `approver`, and `final_copy_reader`.
 
-You can further customize it by using features such as `redirect_url`, `declined_redirect_url`, `email_subject`, `email_message`, `days_valid`, `are_reminders_enabled`, `is_phone_verification_required_to_view`, `password`, and so on.
+You can further customize the Box Sign process by using features such as `redirect_url`, `declined_redirect_url`, `email_subject`, `email_message`, `days_valid`, `are_reminders_enabled`, `is_phone_verification_required_to_view`, `password`, and so on.
 

@@ -50,7 +50,7 @@ if __name__ == "__main__":
     main()
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 223095001439
 INFO:root:Folder tasks with id: 237416051727
 INFO:root:      Uploaded sample_file_B.txt (1375072950363) 42 bytes
@@ -74,17 +74,17 @@ from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import Task, TaskAssignment, Tasks
 
 from box_sdk_gen.managers.tasks import (
-    CreateTaskItemArg,
-    CreateTaskItemArgTypeField,
-    CreateTaskActionArg,
-    CreateTaskCompletionRuleArg,
+    CreateTaskItem,
+    CreateTaskItemTypeField,
+    CreateTaskAction,
+    CreateTaskCompletionRule,
 )
 
 from box_sdk_gen.managers.task_assignments import (
-    CreateTaskAssignmentTaskArg,
-    CreateTaskAssignmentTaskArgTypeField,
-    CreateTaskAssignmentAssignToArg,
-    UpdateTaskAssignmentByIdResolutionStateArg,
+    CreateTaskAssignmentTask,
+    CreateTaskAssignmentTaskTypeField,
+    CreateTaskAssignmentAssignTo,
+    UpdateTaskAssignmentByIdResolutionState,
 )
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -118,20 +118,19 @@ Let us start by creating a task for a file.
 def create_task(
     client: Client,
     file_id: str,
-    action: CreateTaskActionArg,
+    action: CreateTaskAction,
     message: str,
     due_date: datetime,
-    rule: CreateTaskCompletionRuleArg,
+    rule: CreateTaskCompletionRule,
 ) -> Task:
     """Create a task"""
-    file = CreateTaskItemArg(
-        file_id=file_id, type=CreateTaskItemArgTypeField.FILE
-    )
+    file = CreateTaskItem(id=file_id, type=CreateTaskItemTypeField.FILE)
+    iso_date = due_date.isoformat(timespec="seconds")
     task = client.tasks.create_task(
         item=file,
         action=action,
         message=message,
-        due_at=due_date,
+        due_at=iso_date,
         completion_rule=rule,
     )
     return task
@@ -141,13 +140,14 @@ Using it to create a task for `sample_file_A.txt`:
 def main():
     ...
 
+    # create a complete task
     task_a = create_task(
         client,
         SAMPLE_FILE_A,
-        CreateTaskActionArg.COMPLETE,
+        CreateTaskAction.COMPLETE,
         "Please register this new customer",
         datetime.now(UTC) + timedelta(days=7),
-        CreateTaskCompletionRuleArg.ALL_ASSIGNEES,
+        CreateTaskCompletionRule.ANY_ASSIGNEE,
     )
     print(f"\nCreated task {task_a.id} for file {task_a.item.id}")
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     main()
 ```
 Result:
-```
+```yaml
 Hello, I'm Free Dev 001 (...@gmail.com) [25428698627]
 
 Created task 23863153599 for file 1375158910885
@@ -174,11 +174,11 @@ def assign_task_to_user(
 ) -> TaskAssignment:
     """assign task"""
 
-    task = task = CreateTaskAssignmentTaskArg(
-        id=task_id, type=CreateTaskAssignmentTaskArgTypeField.TASK
+    task = task = CreateTaskAssignmentTask(
+        id=task_id, type=CreateTaskAssignmentTaskTypeField.TASK
     )
 
-    assign_to = CreateTaskAssignmentAssignToArg(
+    assign_to = CreateTaskAssignmentAssignTo(
         id=user_id,
     )
     assignment = client.task_assignments.create_task_assignment(
@@ -192,24 +192,25 @@ And create a new task, this time for `SAMPLE_FILE_B`, and assign it to the user:
 def main():
     ...
 
-    # create and assign a review task and assign it
+    # create and assign a review task
     task_b = create_task(
         client,
         SAMPLE_FILE_B,
-        CreateTaskActionArg.REVIEW,
+        CreateTaskAction.REVIEW,
         "Please approve or reject this proposal",
         datetime.now(UTC) + timedelta(days=7),
-        CreateTaskCompletionRuleArg.ANY_ASSIGNEE,
+        CreateTaskCompletionRule.ANY_ASSIGNEE,
     )
     print(f"\nCreated task {task_b.id} for file {task_b.item.id}")
 
     assignment = assign_task_to_user(client, task_b.id, user.id)
     print(
-        f"\nCreated assignment {assignment.id} for user {assignment.assigned_to.name}"
+        f"\nCreated assignment {assignment.id} for user ",
+        f"{assignment.assigned_to.name}",
     )
 ```
 Resulting in:
-```
+```yaml
 Created task 23863571592 for file 1375072950363
 
 Created assignment 54406160867 for user Free Dev 001
@@ -260,7 +261,7 @@ dev main()
     print_tasks(tasks_b)
 ```
 Resulting in:
-```
+```yaml
 Tasks for file A:
 Task 23879977594 Please register this new customer
      complete done:[False]
@@ -295,8 +296,8 @@ def main():
 
     # delete tasks file A
     print("\nDeleting tasks for file A")
-    for task_a in tasks_a.entries:
-        delete_task(client, task_a.id)
+    for task_c in tasks_a.entries:
+        delete_task(client, task_c.id)
     tasks_a = get_tasks_from_file(client, SAMPLE_FILE_A)
     print("\nTasks for file A:")
     print_tasks(tasks_a)
@@ -310,7 +311,7 @@ def main():
     print_tasks(tasks_b)
 ```
 Resulting in:
-```
+```yaml
 Deleting tasks for file A
 
 Tasks for file A:
@@ -331,7 +332,7 @@ def update_task_assignment(
     client: Client,
     assignment_id: str,
     message: str,
-    resolution_state: UpdateTaskAssignmentByIdResolutionStateArg,
+    resolution_state: UpdateTaskAssignmentByIdResolutionState,
 ):
     """Update a task assignment"""
     try:
@@ -353,10 +354,10 @@ def main()
     task_c = create_task(
         client,
         SAMPLE_FILE_A,
-        CreateTaskActionArg.COMPLETE,
+        CreateTaskAction.COMPLETE,
         "Please register this new customer",
         datetime.now(UTC) + timedelta(days=7),
-        CreateTaskCompletionRuleArg.ANY_ASSIGNEE,
+        CreateTaskCompletionRule.ANY_ASSIGNEE,
     )
     print(f"\nCreated task {task_c.id} for file {task_c.item.id}")
 
@@ -367,7 +368,7 @@ def main()
         client,
         assignment_c.id,
         "All done boss",
-        UpdateTaskAssignmentByIdResolutionStateArg.COMPLETED,
+        UpdateTaskAssignmentByIdResolutionState.COMPLETED,
     )
     print(f"Updated assignment {assignment_c.id}")
 
@@ -376,7 +377,7 @@ def main()
     print_tasks(tasks_a)
 ```
 Resulting in:
-```
+```yaml
 Created task 23880184540 for file 1375158910885
 Assigned task 23880184540 to user Free Dev 001
 Updated assignment 54438381007

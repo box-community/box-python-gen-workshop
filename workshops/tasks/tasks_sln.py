@@ -1,4 +1,5 @@
 """Box Tasks API example"""
+
 from datetime import datetime, timedelta, UTC
 import logging
 from box_sdk_gen.fetch import APIException
@@ -6,17 +7,17 @@ from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import Task, TaskAssignment, Tasks
 
 from box_sdk_gen.managers.tasks import (
-    CreateTaskItemArg,
-    CreateTaskItemArgTypeField,
-    CreateTaskActionArg,
-    CreateTaskCompletionRuleArg,
+    CreateTaskItem,
+    CreateTaskItemTypeField,
+    CreateTaskAction,
+    CreateTaskCompletionRule,
 )
 
 from box_sdk_gen.managers.task_assignments import (
-    CreateTaskAssignmentTaskArg,
-    CreateTaskAssignmentTaskArgTypeField,
-    CreateTaskAssignmentAssignToArg,
-    UpdateTaskAssignmentByIdResolutionStateArg,
+    CreateTaskAssignmentTask,
+    CreateTaskAssignmentTaskTypeField,
+    CreateTaskAssignmentAssignTo,
+    UpdateTaskAssignmentByIdResolutionState,
 )
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -25,21 +26,21 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 
-TASKS_ROOT = "237416051727"
-SAMPLE_FILE_A = "1375158910885"
-SAMPLE_FILE_B = "1375072950363"
+TASKS_ROOT = "237424755849"
+SAMPLE_FILE_A = "1375106202533"
+SAMPLE_FILE_B = "1375106202533"
 
 
 def create_task(
     client: Client,
     file_id: str,
-    action: CreateTaskActionArg,
+    action: CreateTaskAction,
     message: str,
     due_date: datetime,
-    rule: CreateTaskCompletionRuleArg,
+    rule: CreateTaskCompletionRule,
 ) -> Task:
     """Create a task"""
-    file = CreateTaskItemArg(id=file_id, type=CreateTaskItemArgTypeField.FILE)
+    file = CreateTaskItem(id=file_id, type=CreateTaskItemTypeField.FILE)
     iso_date = due_date.isoformat(timespec="seconds")
     task = client.tasks.create_task(
         item=file,
@@ -56,11 +57,11 @@ def assign_task_to_user(
 ) -> TaskAssignment:
     """assign task"""
 
-    task = task = CreateTaskAssignmentTaskArg(
-        id=task_id, type=CreateTaskAssignmentTaskArgTypeField.TASK
+    task = task = CreateTaskAssignmentTask(
+        id=task_id, type=CreateTaskAssignmentTaskTypeField.TASK
     )
 
-    assign_to = CreateTaskAssignmentAssignToArg(
+    assign_to = CreateTaskAssignmentAssignTo(
         id=user_id,
     )
     assignment = client.task_assignments.create_task_assignment(
@@ -104,7 +105,7 @@ def update_task_assignment(
     client: Client,
     assignment_id: str,
     message: str,
-    resolution_state: UpdateTaskAssignmentByIdResolutionStateArg,
+    resolution_state: UpdateTaskAssignmentByIdResolutionState,
 ):
     """Update a task assignment"""
     try:
@@ -129,27 +130,28 @@ def main():
     task_a = create_task(
         client,
         SAMPLE_FILE_A,
-        CreateTaskActionArg.COMPLETE,
+        CreateTaskAction.COMPLETE,
         "Please register this new customer",
         datetime.now(UTC) + timedelta(days=7),
-        CreateTaskCompletionRuleArg.ANY_ASSIGNEE,
+        CreateTaskCompletionRule.ANY_ASSIGNEE,
     )
     print(f"\nCreated task {task_a.id} for file {task_a.item.id}")
 
-    # create and assign a review task and assign it
+    # create and assign a review task
     task_b = create_task(
         client,
         SAMPLE_FILE_B,
-        CreateTaskActionArg.REVIEW,
+        CreateTaskAction.REVIEW,
         "Please approve or reject this proposal",
         datetime.now(UTC) + timedelta(days=7),
-        CreateTaskCompletionRuleArg.ANY_ASSIGNEE,
+        CreateTaskCompletionRule.ANY_ASSIGNEE,
     )
     print(f"\nCreated task {task_b.id} for file {task_b.item.id}")
 
     assignment = assign_task_to_user(client, task_b.id, user.id)
     print(
-        f"\nCreated assignment {assignment.id} for user {assignment.assigned_to.name}"
+        f"\nCreated assignment {assignment.id} for user ",
+        f"{assignment.assigned_to.name}",
     )
 
     # list tasks
@@ -181,10 +183,10 @@ def main():
     task_c = create_task(
         client,
         SAMPLE_FILE_A,
-        CreateTaskActionArg.COMPLETE,
+        CreateTaskAction.COMPLETE,
         "Please register this new customer",
         datetime.now(UTC) + timedelta(days=7),
-        CreateTaskCompletionRuleArg.ANY_ASSIGNEE,
+        CreateTaskCompletionRule.ANY_ASSIGNEE,
     )
     print(f"\nCreated task {task_c.id} for file {task_c.item.id}")
 
@@ -195,7 +197,7 @@ def main():
         client,
         assignment_c.id,
         "All done boss",
-        UpdateTaskAssignmentByIdResolutionStateArg.COMPLETED,
+        UpdateTaskAssignmentByIdResolutionState.COMPLETED,
     )
     print(f"Updated assignment {assignment_c.id}")
 

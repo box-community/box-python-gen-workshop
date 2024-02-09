@@ -44,7 +44,7 @@ if __name__ == "__main__":
     main()
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 234108232105
 INFO:root:Folder file_requests with id: 241675595670
 INFO:root:Folder template with id: 241675434602
@@ -58,8 +58,17 @@ Next, create a `file_requests.py` file on the root of the project that you will 
 """Box Shared links"""
 import logging
 
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
+from box_sdk_gen.client import BoxClient as Client
+from box_sdk_gen.schemas import FileRequest
+
+from box_sdk_gen.managers.file_requests import (
+    CreateFileRequestCopyFolder,
+    CreateFileRequestCopyStatus,
+    CreateFileRequestCopyFolderTypeField,
+)
+
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 # from utils.oauth_callback import open_browser
 
@@ -83,7 +92,7 @@ if __name__ == "__main__":
     main()
 ```
 Resulting in:
-```
+```yaml
 Hello, I'm Rui Barbosa  [18622116055]
 ```
 
@@ -131,6 +140,7 @@ And using it on the main script:
 def main():
     ...
 
+    # File request details
     file_request_template = get_file_request(client, FILE_REQUEST_TEMPLATE)
     print_file_request(file_request_template)
 ```
@@ -157,10 +167,10 @@ def create_file_request(
     is_description_required: bool | None = None,
     expires_at: str | None = None,
 ) -> FileRequest:
-    folder = CreateFileRequestCopyFolderArg(
-        folder_id, CreateFileRequestCopyFolderArgTypeField.FOLDER
+    folder = CreateFileRequestCopyFolder(
+        folder_id, CreateFileRequestCopyFolderTypeField.FOLDER
     )
-    status = CreateFileRequestCopyStatusArg.ACTIVE
+    status = CreateFileRequestCopyStatus.ACTIVE
 
     file_request = client.file_requests.create_file_request_copy(
         from_file_request_id,
@@ -180,7 +190,7 @@ And using it on the main script:
 def main():
     ...
 
-    # create a file request
+    # Create a file request
     file_request = create_file_request(
         client,
         FILE_REQUEST_TEMPLATE,
@@ -222,7 +232,7 @@ def update_file_request(
     file_request_id: str,
     title: str | None = None,
     description: str | None = None,
-    status: CreateFileRequestCopyStatusArg | None = None,
+    status: CreateFileRequestCopyStatus | None = None,
     is_email_required: bool | None = None,
     is_description_required: bool | None = None,
     expires_at: str | None = None,

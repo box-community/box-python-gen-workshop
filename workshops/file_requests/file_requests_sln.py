@@ -1,4 +1,5 @@
 """Box Shared links"""
+
 import logging
 
 
@@ -6,9 +7,9 @@ from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import FileRequest
 
 from box_sdk_gen.managers.file_requests import (
-    CreateFileRequestCopyFolderArg,
-    CreateFileRequestCopyStatusArg,
-    CreateFileRequestCopyFolderArgTypeField,
+    CreateFileRequestCopyFolder,
+    CreateFileRequestCopyStatus,
+    CreateFileRequestCopyFolderTypeField,
 )
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -44,10 +45,10 @@ def create_file_request(
     is_description_required: bool | None = None,
     expires_at: str | None = None,
 ) -> FileRequest:
-    folder = CreateFileRequestCopyFolderArg(
-        folder_id, CreateFileRequestCopyFolderArgTypeField.FOLDER
+    folder = CreateFileRequestCopyFolder(
+        folder_id, CreateFileRequestCopyFolderTypeField.FOLDER
     )
-    status = CreateFileRequestCopyStatusArg.ACTIVE
+    status = CreateFileRequestCopyStatus.ACTIVE
 
     file_request = client.file_requests.create_file_request_copy(
         from_file_request_id,
@@ -67,7 +68,7 @@ def update_file_request(
     file_request_id: str,
     title: str | None = None,
     description: str | None = None,
-    status: CreateFileRequestCopyStatusArg | None = None,
+    status: CreateFileRequestCopyStatus | None = None,
     is_email_required: bool | None = None,
     is_description_required: bool | None = None,
     expires_at: str | None = None,
@@ -96,10 +97,11 @@ def main():
     user = client.users.get_user_me()
     print(f"\nHello, I'm {user.name} ({user.login}) [{user.id}]")
 
+    # File request details
     file_request_template = get_file_request(client, FILE_REQUEST_TEMPLATE)
     print_file_request(file_request_template)
 
-    # create a file request
+    # Create a file request
     file_request = create_file_request(
         client,
         FILE_REQUEST_TEMPLATE,

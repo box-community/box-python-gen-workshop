@@ -47,7 +47,7 @@ if __name__ == "__main__":
     main()
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 223095001439
 INFO:root:Folder comments with id: 223269791429
 INFO:root:      Uploaded sample_file.txt
@@ -69,7 +69,10 @@ from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.fetch import APIException
 from box_sdk_gen.schemas import File, Comment
 
-from box_sdk_gen.managers.comments import CreateCommentItem, CreateCommentItemTypeField
+from box_sdk_gen.managers.comments import (
+    CreateCommentItem,
+    CreateCommentItemTypeField,
+)
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
@@ -106,7 +109,10 @@ def file_comments_print(client: Client, file: File):
     for comment in comments.entries:
         if comment.is_reply_comment:
             print(">" * 2, end="")
-        print(f"{comment.message} by {comment.created_by.name} ({comment.created_at})")
+        print(
+            f"{comment.message} by {comment.created_by.name}",
+            f" ({comment.created_at})",
+        )
     print("-" * 10)
 ```
 Then use it in your main method:
@@ -118,7 +124,7 @@ def main():
     file_comments_print(client, file)
 ```
 Resulting in:
-```
+```yaml
 Hello, I'm Free Dev 001 [25428698627]
 
 Comments for file sample_file.txt (1290064263703):
@@ -130,7 +136,9 @@ Create a method to add a comment to a file.
 ```python
 def file_comment_add(client: Client, file: File, message: str) -> Comment:
     """Add a comment to a file"""
-    item_arg = CreateCommentItem(id=file.id, type=CreateCommentItemTypeField.FILE)
+    item_arg = CreateCommentItem(
+        id=file.id, type=CreateCommentItemTypeField.FILE
+    )
     return client.comments.create_comment(message, item=item_arg)
 ```
 And then add it to the main method:
@@ -147,7 +155,7 @@ def main():
     file_comments_print(client, file)
 ```
 Resulting in:
-```
+```yaml
 Comments for file sample_file.txt (1290064263703):
 ----------
 This is a comment by Free Dev 001 (2023-10-31T14:09:45-07:00)
@@ -162,9 +170,13 @@ What is this file about? by Free Dev 001 (2023-10-31T14:09:46-07:00)
 ## Reply to a comment
 You can also specifically reply to a comment. Let's create a reply method:
 ```python
-def file_comment_reply(client: Client, comment: Comment, message: str) -> Comment:
+def file_comment_reply(
+    client: Client, comment: Comment, message: str
+) -> Comment:
     """Reply to a comment"""
-    item_arg = CreateCommentItem(id=comment.id, type=CreateCommentItemTypeField.COMMENT)
+    item_arg = CreateCommentItem(
+        id=comment.id, type=CreateCommentItemTypeField.COMMENT
+    )
     return client.comments.create_comment(message, item_arg)
 ```
 and add it to the main method:
@@ -177,7 +189,7 @@ def main():
     file_comments_print(client, file)
 ```
 Resulting in:
-```
+```yaml
 Comments for file sample_file.txt (1290064263703):
 ----------
 This is a comment by Free Dev 001 (2023-10-31T14:09:45-07:00)
@@ -211,7 +223,7 @@ def main():
     file_comments_print(client, file)
 ```
 Resulting in:
-```
+```yaml
 Comments for file sample_file.txt (1290064263703):
 ----------
 ----------

@@ -1,4 +1,5 @@
 """Box Files workshop"""
+
 import datetime
 import logging
 import os
@@ -10,20 +11,20 @@ from box_sdk_gen.fetch import APIException
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import File, Files
-from box_sdk_gen.managers.files import CopyFileParentArg
+from box_sdk_gen.managers.files import CopyFileParent
 from box_sdk_gen.managers.uploads import (
     PreflightFileUploadCheckParent,
     UploadFileAttributes,
     UploadFileAttributesParentField,
 )
-from box_sdk_gen.managers.zip_downloads import CreateZipDownloadItemsArg
+from box_sdk_gen.managers.zip_downloads import CreateZipDownloadItems
 from box_sdk_gen.utils import ByteStream
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-SAMPLE_FOLDER = "245746782643"
-SAMPLE_FILE = "1424120828836"
+SAMPLE_FOLDER = "248388439006"
+SAMPLE_FILE = "1440473468727"
 
 
 def upload_file(client: Client, file_path: str, folder_id: str) -> File:
@@ -36,11 +37,17 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
         # pre-flight check
 
         pre_flight_arg = PreflightFileUploadCheckParent(id=folder_id)
-        client.uploads.preflight_file_upload_check(file_name, file_size, pre_flight_arg)
+        client.uploads.preflight_file_upload_check(
+            file_name, file_size, pre_flight_arg
+        )
 
         # upload new file
-        upload_arg = UploadFileAttributes(file_name, UploadFileAttributesParentField(folder_id))
-        files: Files = client.uploads.upload_file(upload_arg, file=open(file_path, "rb"))
+        upload_arg = UploadFileAttributes(
+            file_name, UploadFileAttributesParentField(folder_id)
+        )
+        files: Files = client.uploads.upload_file(
+            upload_arg, file=open(file_path, "rb")
+        )
 
         box_file = files.entries[0]
     except APIException as err:
@@ -50,8 +57,12 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
             try:
                 # upload new version
 
-                upload_arg = UploadFileAttributes(file_name, UploadFileAttributesParentField(folder_id))
-                files: Files = client.uploads.upload_file_version(box_file_id, upload_arg, file=open(file_path, "rb"))
+                upload_arg = UploadFileAttributes(
+                    file_name, UploadFileAttributesParentField(folder_id)
+                )
+                files: Files = client.uploads.upload_file_version(
+                    box_file_id, upload_arg, file=open(file_path, "rb")
+                )
 
                 box_file = files.entries[0]
             except APIException as err2:
@@ -74,21 +85,12 @@ def download_file(client: Client, file_id: str, local_path_to_file: str):
 def download_zip(
     client: Client,
     local_path_to_zip: str,
-    items: List[CreateZipDownloadItemsArg],
+    items: List[CreateZipDownloadItems],
 ):
     """Download a zip file from Box"""
 
     file_name = os.path.basename(local_path_to_zip)
     zip_download = client.zip_downloads.create_zip_download(items, file_name)
-
-    # # ## fix this hack ## #
-    # # the zip_download.download_url is a full url that includes the id like this:
-    # # https://dl.boxcloud.com/2.0/zip_downloads/2r6IQDsU33XfcSWpZ6I-Dug==rnTAVzm2vntcB4P1XK12QdfxYIRTQVYp47UbJoUdZfhPL0VfWxm0NSgDo9TH/content
-    # # we need to parse it and get only the id
-
-    # # get the id from the url
-    # url_parts = zip_download.download_url.split("/")
-    # zip_download_id = url_parts[5]
 
     file_stream: ByteStream = client.zip_downloads.get_zip_download_content(
         zip_download.download_url
@@ -129,6 +131,7 @@ def main():
     # make sure the folder exists
     sample_folder = client.folders.get_folder_by_id(SAMPLE_FOLDER)
 
+    # New file upload
     sample_file = upload_file(
         client,
         "workshops/files/content_samples/sample_file.txt",
@@ -136,19 +139,20 @@ def main():
     )
     print(f"Uploaded {sample_file.name} to folder [{sample_folder.name}]")
 
+    # Download file
     download_file(client, sample_file.id, "./sample_file_downloaded.txt")
 
     for local_file in os.listdir("./"):
         if local_file.endswith(".txt"):
             print(local_file)
 
-    # folder 0 represents the user root folder and is always available
-    user_root = client.folders.get_folder_by_id("0")
+    # Download zip
+    user_root = client.folders.get_folder_by_id(SAMPLE_FOLDER)
 
     zip_items_arg = []
 
     for item in client.folders.get_folder_items(user_root.id).entries:
-        item_arg = CreateZipDownloadItemsArg(type=item.type, id=item.id)
+        item_arg = CreateZipDownloadItems(type=item.type, id=item.id)
         zip_items_arg.append(item_arg)
 
     print("Downloading zip")
@@ -158,9 +162,14 @@ def main():
         if local_file.endswith(".zip"):
             print(local_file)
 
+    # File information
     file = client.files.get_file_by_id(SAMPLE_FILE)
     print(f"{file.id} {file.name} {file.description}")
 
+    file_json = file_to_json(client, SAMPLE_FILE)
+    print(file_json)
+
+    # Update a file
     file = file_update_description(
         client,
         SAMPLE_FILE,
@@ -170,10 +179,11 @@ def main():
     file = client.files.get_file_by_id(SAMPLE_FILE)
     print(f"{file.id} {file.name} {file.description}")
 
+    # Copy a file
     try:
         file_copied = client.files.copy_file(
             SAMPLE_FILE,
-            CopyFileParentArg(SAMPLE_FOLDER),
+            CopyFileParent(SAMPLE_FOLDER),
             name="sample_file_copy.txt",
         )
         file_copied_id = file_copied.id
@@ -185,9 +195,10 @@ def main():
             raise err
     folder_list_contents(client, SAMPLE_FOLDER)
 
+    # Move a file
     try:
         file_moved = client.files.update_file_by_id(
-            file_copied_id, parent=CopyFileParentArg("0")
+            file_copied_id, parent=CopyFileParent("0")
         )
         file_moved_id = file_moved.id
     except APIException as err:
@@ -199,6 +210,7 @@ def main():
 
     folder_list_contents(client, "0")
 
+    # Delete a file
     client.files.delete_file_by_id(file_moved_id)
     folder_list_contents(client, "0")
 

@@ -37,7 +37,7 @@ if __name__ == "__main__":
     main()
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 223095001439
 INFO:root:Folder files with id: 223097997181
 ```
@@ -55,21 +55,24 @@ Create a global constant named `SAMPLE_FOLDER` and make it equal to the id of th
 
 ```python
 """Box Files workshop"""
+import datetime
 import logging
 import os
-from typing import Iterable
+from typing import List
 import shutil
+import json
 
 from box_sdk_gen.fetch import APIException
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import File, Files, FileMini, Folder, FileFullRepresentationsEntriesStatusStateField
-from box_sdk_gen.managers.files import GetFileThumbnailByIdExtension
+from box_sdk_gen.schemas import File, Files
+from box_sdk_gen.managers.files import CopyFileParent
 from box_sdk_gen.managers.uploads import (
     PreflightFileUploadCheckParent,
     UploadFileAttributes,
     UploadFileAttributesParentField,
 )
+from box_sdk_gen.managers.zip_downloads import CreateZipDownloadItems
 from box_sdk_gen.utils import ByteStream
 
 logging.basicConfig(level=logging.INFO)
@@ -96,10 +99,16 @@ Create a method named `upload_file` that receives a `client` and a `file_path` a
 def upload_file(client: Client, file_path: str, folder_id: str) -> File:
     """Upload a file to a Box folder"""
 
+    file_name = os.path.basename(file_path)
+    
     # upload new file
     upload_arg = UploadFileAttributes(
-        file_name, UploadFileAttributesParentField(folder_id))
-    files: Files = client.uploads.upload_file(upload_arg, file=open(file_path, "rb"))
+        file_name, UploadFileAttributesParentField(folder_id)
+    )
+    files: Files = client.uploads.upload_file(
+        upload_arg, file=open(file_path, "rb")
+    )
+
     box_file = files.entries[0]
 
     return box_file
@@ -112,11 +121,16 @@ def main():
     # make sure the folder exists
     sample_folder = client.folders.get_folder_by_id(SAMPLE_FOLDER)
 
-    sample_file = upload_file(client, sample_folder.id, "workshops/files/content_samples/sample_file.txt")
+    # New file upload
+    sample_file = upload_file(
+        client,
+        "workshops/files/content_samples/sample_file.txt",
+        sample_folder.id,
+    )
     print(f"Uploaded {sample_file.name} to folder [{sample_folder.name}]")
 ```
 Should result in something similar to:
-```
+```yaml
 Uploaded sample_file.txt to folder [files]
 ```
 ## New file version upload
@@ -131,17 +145,29 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
 
     try:
         # upload new file
-        upload_arg = UploadFileAttributes(file_name, UploadFileAttributesParentField(folder_id))
-        files: Files = client.uploads.upload_file(upload_arg, file=open(file_path, "rb"))
+        upload_arg = UploadFileAttributes(
+            file_name, UploadFileAttributesParentField(folder_id)
+        )
+        files: Files = client.uploads.upload_file(
+            upload_arg, file=open(file_path, "rb")
+        )
+
         box_file = files.entries[0]
+
     except APIException as err:
         if err.code == "item_name_in_use":
             logging.warning("File already exists, updating contents")
             box_file_id = err.context_info["conflicts"]["id"]
             try:
                 # upload new version
-                upload_arg = UploadFileAttributes(file_name, UploadFileAttributesParentField(folder_id))
-                files: Files = client.uploads.upload_file_version(box_file_id, upload_arg, file=open(file_path, "rb"))
+
+                upload_arg = UploadFileAttributes(
+                    file_name, UploadFileAttributesParentField(folder_id)
+                )
+                files: Files = client.uploads.upload_file_version(
+                    box_file_id, upload_arg, file=open(file_path, "rb")
+                )
+
                 box_file = files.entries[0]
             except APIException as err2:
                 logging.error("Failed to update %s: %s", box_file.name, err2)
@@ -152,7 +178,7 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
     return box_file
 ```
 Then run your script again, it should result in something similar to:
-```
+```yaml
 WARNING:root:File already exists, updating contents
 Uploaded sample_file.txt to folder [files]
 ```
@@ -171,8 +197,11 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
 
     try:
         # pre-flight check
+
         pre_flight_arg = PreflightFileUploadCheckParent(id=folder_id)
-        client.uploads.preflight_file_upload_check(file_name, file_size, pre_flight_arg)
+        client.uploads.preflight_file_upload_check(
+            file_name, file_size, pre_flight_arg
+        )
 
         # upload new file
         upload_arg = UploadFileAttributes(file_name, UploadFileAttributesParentField(folder_id))
@@ -198,7 +227,7 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
 Then run the script again.
 
 Resulting in:
-```
+```yaml
 WARNING:root:File already exists, updating contents
 Uploaded sample_file.txt to folder [files]
 ```
@@ -221,6 +250,10 @@ def download_file(client: Client, file_id: str, local_path_to_file: str):
 ```
 Then download the `sample_file.txt` file to the root of your project.
 ```python
+def main():
+    ...
+
+    # Download file
     download_file(client, sample_file.id, "./sample_file_downloaded.txt")
 
     for local_file in os.listdir("./"):
@@ -228,7 +261,7 @@ Then download the `sample_file.txt` file to the root of your project.
             print(local_file)
 ```
 Resulting in:
-```
+```yaml
 WARNING:root:File already exists, updating contents
 Uploaded sample_file.txt to folder [files]
 requirements.txt
@@ -240,22 +273,19 @@ When you need to download multiple files and folders at once, you can use the `d
 Create a method named `download_zip` that receives a `client` and a list of `items` and downloads the folder as a zip file to a `local_path`.
 
 ```python
-def download_zip(client: Client, local_path_to_zip: str, items: List[CreateZipDownloadItemsArg]):
+def download_zip(
+    client: Client,
+    local_path_to_zip: str,
+    items: List[CreateZipDownloadItems],
+):
     """Download a zip file from Box"""
 
     file_name = os.path.basename(local_path_to_zip)
     zip_download = client.zip_downloads.create_zip_download(items, file_name)
 
-    # ## fix this hack ## #
-    # the zip_download.download_url is a full url that includes the id like this:
-    # https://dl.boxcloud.com/2.0/zip_downloads/2r6IQDsU33XfcSWpZ6I-Dug==rnTAVzm2vntcB4P1XK12QdfxYIRTQVYp47UbJoUdZfhPL0VfWxm0NSgDo9TH/content
-    # we need to parse it and get only the id
-
-    # get the id from the url
-    url_parts = zip_download.download_url.split("/")
-    zip_download_id = url_parts[5]
-
-    file_stream: ByteStream = client.zip_downloads.get_zip_download_content(zip_download_id)
+    file_stream: ByteStream = client.zip_downloads.get_zip_download_content(
+        zip_download.download_url
+    )
 
     with open(local_path_to_zip, "wb") as file:
         shutil.copyfileobj(file_stream, file)
@@ -265,13 +295,13 @@ Then lets zip the entire `root` folder:
 def main():
     ...
 
-    # folder 0 represents the user root folder and is always available
-    user_root = client.folders.get_folder_by_id("0")
+    # Download zip
+    user_root = client.folders.get_folder_by_id(SAMPLE_FOLDER)
 
     zip_items_arg = []
 
     for item in client.folders.get_folder_items(user_root.id).entries:
-        item_arg = CreateZipDownloadItemsArg(type=item.type, id=item.id)
+        item_arg = CreateZipDownloadItems(type=item.type, id=item.id)
         zip_items_arg.append(item_arg)
 
     print("Downloading zip")
@@ -279,10 +309,10 @@ def main():
 
     for local_file in os.listdir("./"):
         if local_file.endswith(".zip"):
-            print(local_file)    
+            print(local_file) 
 ```
 Resulting in:
-```
+```yaml
 Downloading zip
 sample_zip_downloaded.zip
 
@@ -342,7 +372,9 @@ Now that we have a file object, let's try to update it.
 
 Create a method that updates the description of a file:
 ```python
-def file_update_description(client: Client, file_id: str, description: str) -> File:
+def file_update_description(
+    client: Client, file_id: str, description: str
+) -> File:
     return client.files.update_file_by_id(file_id, description=description)
 ```
 Change the description of the previous file:
@@ -350,16 +382,18 @@ Change the description of the previous file:
 def main():
     ...
 
-    file = client.files.get_file_by_id(SAMPLE_FILE)
-    print(f"{file.id} {file.name} {file.description}")
-
-    file = file_update_description(client, SAMPLE_FILE, f"Updating the description at {datetime.datetime.now()}")
+    # Update a file
+    file = file_update_description(
+        client,
+        SAMPLE_FILE,
+        f"Updating the description at {datetime.datetime.now()}",
+    )
 
     file = client.files.get_file_by_id(SAMPLE_FILE)
     print(f"{file.id} {file.name} {file.description}")
 ```
 Resulting in:
-```
+```yaml
 1289038683607 sample_file.txt
 1289038683607 sample_file.txt Updating the description at 2023-11-02 17:21:05.377487
 ```
@@ -382,11 +416,18 @@ We can do this directly in our main method:
 def main():
     ...
 
-try:
-        client.files.copy_file(SAMPLE_FILE, CopyFileParentArg(SAMPLE_FOLDER), name="sample_file_copy.txt")
+    # Copy a file
+    try:
+        file_copied = client.files.copy_file(
+            SAMPLE_FILE,
+            CopyFileParent(SAMPLE_FOLDER),
+            name="sample_file_copy.txt",
+        )
+        file_copied_id = file_copied.id
     except APIException as err:
         if err.code == "item_name_in_use":
             logging.warning("Duplicate File already exists")
+            file_copied_id = err.context_info["conflicts"]["id"]
         else:
             raise err
     folder_list_contents(client, SAMPLE_FOLDER)
@@ -394,7 +435,7 @@ try:
 The try block is there to prevent the script from copying the file, if the file duplicate already exists, since we'll be running this script multiple times.
 
 Resulting in:
-```
+```yaml
 Folder [files] content:
    file 1289038683607 sample_file.txt
    file 1351886955787 sample_file_copy.txt
@@ -406,8 +447,11 @@ Now lets move the file we just copied to the root of the box account:
 def main():
     ...
 
+    # Move a file
     try:
-        file_moved = client.files.update_file_by_id(file_copied_id, parent=CopyFileParentArg("0"))
+        file_moved = client.files.update_file_by_id(
+            file_copied_id, parent=CopyFileParent("0")
+        )
         file_moved_id = file_moved.id
     except APIException as err:
         if err.code == "item_name_in_use":
@@ -421,7 +465,7 @@ def main():
 Again we need a `try` block.
 
 Resulting in:
-```
+```yaml
 Folder [All Files] content:
    folder 216797257531 My Signed Documents
    folder 221723756896 UIE Samples
@@ -440,7 +484,7 @@ def main():
     folder_list_contents(client, "0")
 ```
 Resulting in:
-```
+```yaml
 Folder [All Files] content:
    folder 216797257531 My Signed Documents
    folder 221723756896 UIE Samples

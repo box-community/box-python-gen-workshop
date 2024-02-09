@@ -70,7 +70,7 @@ def file_upload(client: Client, file_path: str, folder: Folder) -> File:
     file_id = None
     try:
         pre_flight_arg = PreflightFileUploadCheckParent(id=folder.id)
-        client.uploads.preflight_file_upload(
+        client.uploads.preflight_file_upload_check(
             file_name, file_size, pre_flight_arg
         )
     except APIException as err:

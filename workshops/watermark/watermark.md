@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 234108232105
 INFO:root:Folder watermark with id: 244791570933
 INFO:root:Folder demo_folder with id: 244798382350
@@ -67,13 +67,13 @@ from box_sdk_gen.schemas import (
 )
 
 from box_sdk_gen.managers.file_watermarks import (
-    UpdateFileWatermarkWatermarkArg,
-    UpdateFileWatermarkWatermarkArgImprintField,
+    UpdateFileWatermarkWatermark,
+    UpdateFileWatermarkWatermarkImprintField,
 )
 
 from box_sdk_gen.managers.folder_watermarks import (
-    UpdateFolderWatermarkWatermarkArg,
-    UpdateFolderWatermarkWatermarkArgImprintField,
+    UpdateFolderWatermarkWatermark,
+    UpdateFolderWatermarkWatermarkImprintField,
 )
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -110,8 +110,8 @@ Let's start by creating a method to turn on the watermark for a file. Add the fo
 ```python
 def add_watermark_to_file(client: Client, file_id: str) -> Watermark:
     """Watermark a file"""
-    update_watermark = UpdateFileWatermarkWatermarkArg(
-        UpdateFileWatermarkWatermarkArgImprintField.DEFAULT
+    update_watermark = UpdateFileWatermarkWatermark(
+        UpdateFileWatermarkWatermarkImprintField.DEFAULT
     )
     return client.file_watermarks.update_file_watermark(
         file_id=file_id,
@@ -174,8 +174,8 @@ Applying watermarks to individual files is a tedious task. Let's now create a me
 ```python
 def add_watermark_to_folder(client: Client, folder_id: str) -> Watermark:
     """Watermark a folder"""
-    update_watermark = UpdateFileWatermarkWatermarkArg(
-        UpdateFileWatermarkWatermarkArgImprintField.DEFAULT
+    update_watermark = UpdateFolderWatermarkWatermark(
+        UpdateFolderWatermarkWatermarkImprintField.DEFAULT
     )
     return client.folder_watermarks.update_folder_watermark(
         folder_id=folder_id,

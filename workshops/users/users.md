@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 234108232105
 INFO:root:Folder users with id: 241838082529
 ```
@@ -94,7 +94,7 @@ def main():
 ```
 
 Resulting in:
-```
+```yaml
 Hello, I'm Rui Barbosa (barduinor@gmail.com) [18622116055]
 ```
 

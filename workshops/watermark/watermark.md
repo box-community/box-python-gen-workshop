@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
 Resulting in:
 
-```
+```yaml
 Hello, I'm Rui Barbosa (barduinor@gmail.com) [18622116055]
 ```
 

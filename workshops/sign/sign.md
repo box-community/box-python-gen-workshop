@@ -49,7 +49,7 @@ if __name__ == "__main__":
     main()
 ```
 Result:
-```
+```yaml
 INFO:root:Folder workshops with id: 234108232105
 INFO:root:Folder sign with id: 234103953351
 INFO:root:Folder signed docs with id: 234102987614
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     main()
 ```
 Resulting in:
-```
+```yaml
 Hello, I'm Rui Barbosa  [18622116055]
 ```
 

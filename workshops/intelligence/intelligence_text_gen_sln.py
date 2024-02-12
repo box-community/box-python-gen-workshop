@@ -1,4 +1,4 @@
-"""Box Shared links"""
+"""Box Text Generation API example."""
 
 import logging
 
@@ -59,6 +59,7 @@ def main():
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 
+    # Text gen dialog
     dialog_history = []
     while True:
         question = input(

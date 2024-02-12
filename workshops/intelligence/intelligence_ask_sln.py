@@ -1,4 +1,4 @@
-"""Box Shared links"""
+"""Box AI Client - Ask a question to the AI"""
 
 import logging
 

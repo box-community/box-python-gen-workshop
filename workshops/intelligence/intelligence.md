@@ -1,19 +1,20 @@
-# Intelligence (Box AI)
+# Box AI (Intelligence)
 
 
 
 ## Pre-requisites
-
+The Box AI API hasn't been released yet, and it is currently undergoing a closed beta.
+To complete this workshop you will need to have a Box application specifically enabled for the Box AI API.
 
 ## Concepts
+The Box AI api has 2 main concepts:
 
-
-
-
+* **Ask** - Enables you app to ask questions around some context.
+* **Text Generation** - Enables you app to have a conversation with the AI, building on the previous questions and answers.
+* **Context** - The context is the information that the AI will use to answer the questions. It can be a document, multiple documents or a snippet of text.
 
 ## Box AI documentation
-References to our documentation:
-* 
+This API doesn't have a public documentation yet, stay tunned for updates.
 
 # Exercises
 ## Setup
@@ -47,11 +48,20 @@ INFO:root:Folder workshops with id: 234108232105
 INFO:root:Folder intelligence with id: 248676986369
 INFO:root:      Uploaded Box-Dive-Waiver.docx (1442379637774) 7409 bytes
 ```
+A sample document was uploaded to the Box folder `All files -> Workshops -> intelligence`. Open your Box app and check the content of the file.
 
-Next, create a `intelligence.py` file on the root of the project that you will use to write your code.
+![Sample dive waiver](img/dive_waiver.png)
+
+## Ask
+
+Create a `intelligence_ask.py` file on the root of the project that you will use to write your code.
+
+For the DEMO_FILE constant, use the file id from the previous step, in my case it is `1442379637774`.
 
 
 ```python
+"""Box Shared links"""
+
 import logging
 
 from utils.box_ai_client import BoxAIClient as Client
@@ -61,7 +71,6 @@ from box_sdk_gen.fetch import APIException
 from utils.ai_schemas import (
     IntelligenceResponse,
     IntelligenceMode,
-    IntelligenceDialogueHistory,
 )
 
 
@@ -77,7 +86,7 @@ DEMO_FILE = "1442379637774"
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
     conf = ConfigOAuth()
-    client = get_client_oauth(conf)
+    client = get_ai_client_oauth(conf)
 
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
@@ -89,287 +98,245 @@ if __name__ == "__main__":
 
 Resulting in:
 
-```
-Hello, I'm Rui Barbosa (barduinor@gmail.com) [18622116055]
-```
-## Creating a group
-Let's start by creating a group.
-Consider this method:
-```python
-def create_group(
-    client: Client,
-    name: str,
-    provenance: str = "box_sdk_gen",
-    external_sync_identifier: str = None,
-    description: str = None,
-) -> Group:
-    """Create group"""
-
-    invitability_level = CreateGroupInvitabilityLevel.ADMINS_AND_MEMBERS
-    member_viewability_level = (
-        CreateGroupMemberViewabilityLevel.ADMINS_AND_MEMBERS
-    )
-
-    try:
-        group = client.groups.create_group(
-            name,
-            provenance,
-            external_sync_identifier,
-            description,
-            invitability_level,
-            member_viewability_level,
-        )
-    except APIException as err:
-        if err.status == 409 and err.code == "conflict":
-            # group already exists
-            groups = client.groups.get_groups(filter_term=name)
-            for group in groups.entries:
-                if group.name == name:
-                    return group
-    return group
-```
-
-Using this method, we can create a group with the following code:
-```python
-def main():
-    ...
-
-    # create group
-    my_group = create_group(client, "My Group")
-    print(f"Created group {my_group.name} ({my_group.id})")
-``` 
-
-Resulting in:
 ```yaml
 Hello, I'm Rui Barbosa (barduinor@gmail.com) [18622116055]
-Created group My Group (18394127658)
 ```
 
-## Listing groups
-Now that we have a group, we are going to need a method to list all groups.
-Consider this method:
+Now, let's create a method to ask a question to the AI.
+
 ```python
-def list_groups(client: Client) -> None:
-    """List groups"""
-    print("\nGroups:")
-    for group in client.groups.get_groups().entries:
-        print(f" - {group.name} ({group.id})")
+def ask(
+    client: Client, question: str, file_id: str, content: str = None
+) -> IntelligenceResponse:
+    """Ask a question to the AI"""
 
-def main():
-    ...
+    if file_id is None:
+        raise ValueError("file_id must be provided")
 
-    # list groups
-    list_groups(client)
-```
+    mode = IntelligenceMode.SINGLE_ITEM_QA
+    items = [{"id": file_id, "type": "file"}]
 
-Results in:
-```yaml
-Groups:
- - My Group (18394127658)
-```
-## Adding a user to a group
-A group wouldn't be very useful if we couldn't add users to it. Let's create a method to add a user to a group:
-```python
-def add_user_to_group(
-    client: Client,
-    user: CreateGroupMembershipUser,
-    group: CreateGroupMembershipGroup,
-    role: CreateGroupMembershipRole,
-) -> GroupMembership:
-    """Add user to group"""
+    # add content if provided
+    if content is not None:
+        items[0]["content"] = content
 
     try:
-        group_membership = client.memberships.create_group_membership(
-            user, group, role
+        response = client.intelligence.intelligence_ask(
+            mode=mode,
+            prompt=question,
+            items=items,
         )
-    except APIException as err:
-        if err.status == 409 and err.code == "conflict":
-            # user already in group
-            group_memberships = client.memberships.get_group_memberships(
-                group.id
-            )
-            for group_membership in group_memberships.entries:
-                if group_membership.user.id == user.id:
-                    return group_membership
+    except APIException as e:
+        print(f"Error: {e}")
 
-    return group_membership
+    return response
 ```
 
-Using this method, we can add a user to a group with the following code:
+Next, let's create a input prompt cycle in our main method, so the user can interact with the AI.
+
 ```python
 def main():
     ...
 
-    # add me to group as administrator
-    group_membership = add_user_to_group(
+    # Summarize the file
+    response = ask(
         client,
-        CreateGroupMembershipUser(me.id),
-        CreateGroupMembershipGroup(my_group.id),
-        CreateGroupMembershipRole.ADMIN,
+        "Summarize document.",
+        DEMO_FILE,
     )
-    print(
-        f"\nAdded {group_membership.user.name} ",
-        f"({group_membership.user.login}) ",
-        f"to {group_membership.group.name} ({group_membership.group.id}) "
-        f"as {group_membership.role.value}",
-    )
-```
+    print(f"\nResponse: {response.answer}")
 
-Resulting in:
-```yaml
-Added Rui Barbosa (barduinor@gmail.com) to My Group (18394127658) as admin
-```
-
-## Listing group members
-Now let's create a method to list all members of a group:
-```python
-def list_group_members(client: Client, group: Group) -> None:
-    """List group members"""
-    print(f"\nGroup members for {group.name} ({group.id}):")
-    for group_membership in client.memberships.get_group_memberships(
-        group.id
-    ).entries:
-        print(
-            f" - {group_membership.user.name} as ",
-            f"{group_membership.role.value} ",
-            f"[{group_membership.user.id}] ",
+    while True:
+        question = input("\nAsk a question (type 'exit' to quit): ")
+        if question == "exit":
+            break
+        response = ask(
+            client,
+            question,
+            DEMO_FILE,
         )
+        print(f"\nResponse: {response.answer}")
 ```
 
-Using it in the main method:
-```python
-def main():
-    ...
+This will result in:
 
-    # list group members
-    list_group_members(client, my_group)
-```
-
-Results in:
 ```yaml
-Group members for My Group (18394127658):
- - Rui Barbosa as admin [18622116055] 
+Response: The document outlines the requirements and responsibilities for participants in water activities, particularly scuba diving. It emphasizes the need for swimmers to be in good physical condition and understand the risks involved. For certified divers, it specifies safety measures such as diving with a buddy, carrying necessary equipment, monitoring air supply, and responding appropriately to distress situations. The document also includes an agreement section where individuals can acknowledge their understanding of these conditions by signing their full name.
+
+If you have any specific questions or need further details from the document provided above please let me know!
+
+Ask a question (type 'exit' to quit): 
 ```
 
-## Listing user groups
-We can also list all groups a user is a member of:
-```python
-def list_user_groups(client: Client, user: User) -> None:
-    """List groups for user"""
-    print(f"\nGroups for {user.name} ({user.id}):")
-    for group_membership in client.memberships.get_user_memberships(
-        user.id
-    ).entries:
-        print(
-            f" - {group_membership.group.name} as ",
-            f"{group_membership.role.value} ",
-            f"[{group_membership.group.id}] ",
-        )
-```
+You can now continue to asks questions to the AI, and it will answer based on the context of the document.
 
-Using it in the main method:
-```python
-def main():
-    ...
+For example:
 
-    # list groups for me
-    list_user_groups(client, me)
-```
-
-Results in:
 ```yaml
-Groups for Rui Barbosa (18622116055):
- - My Group as admin [18394127658] 
+Ask a question (type 'exit' to quit): do I need to know how to swim?
+
+Response: Yes, you must be able to swim to participate in any in water activities.
+
+Ask a question (type 'exit' to quit): 
+```
+Feel free to ask more questions for fun. You can refer to the document for inspiration. Once you're done type exit to terminate the program.
+
+## Text Generation
+
+The text generation mode allows you to have a conversation with the AI, building on the previous questions and answers.
+
+Create a `intelligence_text_gen.py` file on the root of the project that you will use to write your code.
+
+For the DEMO_FILE constant, use the file id from the previous step, in my case it is `1442379637774`.
+
+```python
+"""Box Text Generation API example."""
+
+import logging
+
+from utils.box_ai_client import BoxAIClient as Client
+
+from box_sdk_gen.fetch import APIException
+
+from utils.ai_schemas import (
+    IntelligenceResponse,
+    IntelligenceDialogueHistory,
+)
+
+
+from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
+
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
+
+DEMO_FILE = "1442379637774"
+
+def main():
+    """Simple script to demonstrate how to use the Box SDK"""
+    conf = ConfigOAuth()
+    client = get_ai_client_oauth(conf)
+
+    me = client.users.get_user_me()
+    print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
+
+if __name__ == "__main__":
+    main()
+
+```
+Executing this script will result in:
+    
+```yaml
+Hello, I'm Rui Barbosa (barduinor@gmail.com) [18622116055]
 ```
 
-## Sharing a folder with a group
-Now that we understand the mechanics of groups and memberships, let's put it to use by sharing a folder with a group.
-Consider this method:
+Now, let's create a method to generate text based on a prompt.
+
 ```python
-def share_folder_with_group(
-    client: Client, folder_id: str, group: Group
-) -> Collaboration:
-    """Share folder with group"""
+def text_gen(
+    client: Client,
+    prompt: str,
+    file_id: str,
+    content: str = None,
+    dialogue_history: IntelligenceDialogueHistory = None,
+) -> IntelligenceResponse:
+    """Ask a question to the AI"""
+
+    if file_id is None:
+        raise ValueError("file_id must be provided")
+
+    items = [{"id": file_id, "type": "file"}]
+
+    # add content if provided
+    if content is not None:
+        items[0]["content"] = content
 
     try:
-        collaboration = client.user_collaborations.create_collaboration(
-            item=CreateCollaborationItem(
-                type=CreateCollaborationItemTypeField.FOLDER, id=DEMO_FOLDER
-            ),
-            accessible_by=CreateCollaborationAccessibleBy(
-                CreateCollaborationAccessibleByTypeField.GROUP, group.id
-            ),
-            role=CreateCollaborationRole.EDITOR,
+        response = client.intelligence.intelligence_text_gen(
+            prompt=prompt,
+            items=items,
+            dialogue_history=dialogue_history,
         )
-    except APIException as err:
-        if err.status == 409 and err.code == "conflict":
-            # folder already shared with group
-            collaborations = (
-                client.list_collaborations.get_folder_collaborations(folder_id)
+    except APIException as e:
+        print(f"Error: {e}")
+
+    return response
+```
+
+Finally, let's create a input prompt cycle in our main method, so the user can interact with the AI.
+
+```python
+def main():
+    ...
+
+    # Text gen dialog
+    dialog_history = []
+    while True:
+        question = input(
+            "\nWhat would you like to talk about? (type 'exit' to quit): "
+        )
+        if question == "exit":
+            break
+
+        response = text_gen(
+            client,
+            question,
+            DEMO_FILE,
+            dialogue_history=dialog_history,
+        )
+        print(f"\nResponse: {response.answer}")
+
+        dialog_history.append(
+            IntelligenceDialogueHistory(
+                prompt=question,
+                answer=response.answer,
+                created_at=response.created_at,
             )
-            for collaboration in collaborations.entries:
-                if collaboration.accessible_by.id == group.id:
-                    return collaboration
-
-    return collaboration
-```
-Using this method, we can share a folder with a group with the following code:
-```python
-def main():
-    ...
-
-    # share DEMO_FOLDER with group
-    collaboration = share_folder_with_group(client, DEMO_FOLDER, my_group)
-    print(
-        f"\nShared folder <{collaboration.item.name}> ",
-        f"({collaboration.item.id}) ",
-        f"with group <{collaboration.accessible_by.name}> ",
-        f"({collaboration.accessible_by.id}) "
-        f"as {collaboration.role.value}",
-    )
+        )
 ```
 
-Resulting in:
+Here is an interaction example:
+
 ```yaml
-Shared folder <groups> (244395947100) with group <My Group> (18394127658) as editor
+What would you like to talk about? (type 'exit' to quit): how to learn how to fly
+
+Response: To learn how to fly, you can follow these steps:
+
+1. Research flight schools in your area or online courses for pilot training.
+2. Enroll in a reputable flight school or sign up for an online course with good reviews.
+3. Obtain the necessary medical certificate from an aviation medical examiner.
+4. Start ground school to learn about aircraft systems, navigation, weather patterns, and regulations.
+5. Begin flight training with a certified flight instructor to gain hands-on experience in the cockpit.
+6. Study for and pass the written knowledge test and practical flying exam administered by the Federal Aviation Administration (FAA) or relevant aviation authority.
+
+Remember that learning to fly requires dedication, time commitment, and financial investment but can be incredibly rewarding!
+
+What would you like to talk about? (type 'exit' to quit): tell me about navigation
+
+Response: Navigation is the process of determining and controlling a craft's position and direction. It involves using various tools, techniques, and systems to ensure that the craft reaches its intended destination safely.
+
+There are several methods of navigation:
+
+1. **Pilotage**: This method involves visually identifying landmarks or using maps to navigate.
+2. **Dead Reckoning**: Dead reckoning involves calculating current position based on previously determined positions, taking into account speed, time, and course changes.
+3. **Radio Navigation**: Using radio signals from ground-based navigational aids such as VOR (VHF Omnidirectional Range) or NDB (Non-Directional Beacon).
+4. **Inertial Navigation Systems (INS)**: These use gyroscopes and accelerometers to continuously calculate position based on initial starting point.
+5. **Global Positioning System (GPS)**: GPS uses satellites to determine precise location anywhere on Earth.
+
+Modern aircraft often use a combination of these methods for redundancy and accuracy in navigation.
+
+It's important for pilots to be proficient in all aspects of navigation to ensure safe travels from takeoff to landing!
+
+What would you like to talk about? (type 'exit' to quit): 
 ```
+In my example notice how the AI followed up on the previous question and answered with a detailed response about navigation.
 
-Navigating in the box.com app to the workshops folder, we can see that the groups folder is now shared since it shows up in blue. 
-
-![Groups folder shared](img/groups-folder.png)
-
-We can inspect the collaboration to see that it is shared with `My Group` that we created, by clicking on the `manage collaborators` in the sub menu:
-
-![Groups folder collaborator](img/groups-folder-collaborators.png)
-
-## Deleting a group
-Finally, let's create a method to delete a group:
-```python
-def delete_group(client: Client, group: Group) -> None:
-    """Delete group"""
-    client.groups.delete_group_by_id(group.id)
-```
-
-Using it in the main method:
-```python
-def main():
-    ...
-
-    # delete group
-    delete_group(client, my_group)
-    print(f"\nDeleted group {my_group.name} ({my_group.id})")
-```
-
-Results in:
-```yaml
-Deleted group My Group (18394127658)
-```
+You can now continue to have a conversation with the AI, and it will answer based on the context of the document. Type exit to terminate the program.
 
 ## Extra credit
 There are more operations available in the SDK, try implementing these:
-* Update a group name and description
-* Update a group membership role
-* Remove a user from a group
+* Ask questions on multiple files
+* Ask question using a snippet of text as context
 
 
 

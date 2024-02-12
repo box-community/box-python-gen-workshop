@@ -1,50 +1,30 @@
-# Groups
+# Intelligence (Box AI)
 
-With Groups, you have the ability to add multiple users to folders and assign access permissions quickly and easily. When implemented effectively, groups streamline deployment and make long-term user management much simpler.
+
 
 ## Pre-requisites
-The free Box accounts do not support multiple users, so you will need to have a Box paid account, or a full developer account to be able to use this feature.
+
 
 ## Concepts
 
-Dealing with groups can be divided in two parts, and it is reflected in the SDK by importing two different modules:
-### Groups manager
-The groups managers implements CRUD operations with groups
-
-Besides `name` and `description`, groups have more attributes that can be used to control access to content:
-
-* `provenance` - an optional string, was designed to keep track of which external source this group is coming, for example Active Directory, or Okta. Setting this will also prevent Box admins from editing the group name and its members directly via the Box web application. This is desirable for one-way syncing of groups.
-
-* `external_sync_identifier`, an optional string, represents arbitrary identifier that can be used by external group sync tools to link this Box Group to an external group. Example values of this field could be an Active Directory Object ID or a Google Group ID. We recommend you use of this field in order to avoid issues when group names are updated in either Box or external systems.
-
-* `invitability_level`, an optional `enum`, specifies who can invite the group to collaborate on folders. Administrators only, administrator and members of the groups or all managed users in the enterprise.
-
-* `member_viewability_level`, and optional `enum`, specifies who can see the members of the group. Administrators only, administrator and members of the groups or all managed users in the enterprise.
-
-### Group memberships manager
-A group membership represents the users associated to a group, and the membership manager implements CRUD operations to group memberships.
-
-A user exists in a group with a role, which can be either a `member` or an `admin`, where admins can add and remove members from the group.
 
 
-## Groups and membership documentation
+
+
+## Box AI documentation
 References to our documentation:
-* [SDK groups manager](https://github.com/box/box-python-sdk-gen/blob/main/docs/groups.md)
-* [SDK memberships manager](https://github.com/box/box-python-sdk-gen/blob/main/docs/memberships.md)
-* [Guide](https://developer.box.com/guides/collaborations/groups/)
-* [Group API](https://developer.box.com/reference/resources/group/)
-* [Group membership API](https://developer.box.com/reference/resources/group-membership/)
-* [Admin operations](https://support.box.com/hc/en-us/articles/360043694554-Creating-and-Managing-Groups)
+* 
 
 # Exercises
 ## Setup
-Create a `groups_init.py` file on the root of the project and execute the following code:
+Create a `intelligence_init.py` file on the root of the project and execute the following code:
 ```python
 """create sample content to box"""
+
 import logging
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
-from workshops.groups.create_samples import create_samples
+from workshops.intelligence.create_samples import create_samples
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
@@ -64,58 +44,43 @@ if __name__ == "__main__":
 Result:
 ```yaml
 INFO:root:Folder workshops with id: 234108232105
-INFO:root:Folder groups with id: 244395947100
-INFO:root:      Uploaded sample_file.txt (1416059157146) 11 bytes
+INFO:root:Folder intelligence with id: 248676986369
+INFO:root:      Uploaded Box-Dive-Waiver.docx (1442379637774) 7409 bytes
 ```
 
-Next, create a `groups.py` file on the root of the project that you will use to write your code.
-Create a DEMO_FOLDER constant with the id of the `groups` folder you got from the previous step.
+Next, create a `intelligence.py` file on the root of the project that you will use to write your code.
+
 
 ```python
 import logging
 
-from box_sdk_gen.client import BoxClient as Client
+from utils.box_ai_client import BoxAIClient as Client
+
 from box_sdk_gen.fetch import APIException
-from box_sdk_gen.schemas import (
-    User,
-    Group,
-    GroupMembership,
-    Collaboration,
-)
-from box_sdk_gen.managers.groups import (
-    CreateGroupInvitabilityLevel,
-    CreateGroupMemberViewabilityLevel,
-)
-from box_sdk_gen.managers.memberships import (
-    CreateGroupMembershipUser,
-    CreateGroupMembershipGroup,
-    CreateGroupMembershipRole,
-)
 
-from box_sdk_gen.managers.user_collaborations import (
-    CreateCollaborationItemTypeField,
-    CreateCollaborationItem,
-    CreateCollaborationAccessibleBy,
-    CreateCollaborationRole,
-    CreateCollaborationAccessibleByTypeField,
+from utils.ai_schemas import (
+    IntelligenceResponse,
+    IntelligenceMode,
+    IntelligenceDialogueHistory,
 )
 
 
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
+from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
 
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FOLDER = "244395947100"
+DEMO_FILE = "1442379637774"
 
 
 def main():
+    """Simple script to demonstrate how to use the Box SDK"""
     conf = ConfigOAuth()
     client = get_client_oauth(conf)
 
-    user = client.users.get_user_me()
-    print(f"\nHello, I'm {user.name} ({user.login}) [{user.id}]")   
+    me = client.users.get_user_me()
+    print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 
 
 if __name__ == "__main__":

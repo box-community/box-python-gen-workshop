@@ -24,15 +24,18 @@ def main():
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 
-    auth.as_user(config.jwt_user_id)
+    auth = auth.as_user(config.jwt_user_id)
+    client = BoxClient(auth)
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 
-    auth.as_user("29598695136")
+    auth = auth.as_user("29598695136")
+    client = BoxClient(auth)
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
 
-    auth.as_enterprise(config.enterprise_id)
+    auth = auth.as_enterprise(config.enterprise_id)
+    client = BoxClient(auth)
     me = client.users.get_user_me()
     print(f"\nHello, I'm back to {me.name} ({me.login}) [{me.id}]")
 

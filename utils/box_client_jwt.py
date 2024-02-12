@@ -2,6 +2,7 @@
 Handles the box client object creation
 orchestrates the authentication process
 """
+
 import os
 import dotenv
 from box_sdk_gen.client import BoxClient
@@ -34,7 +35,9 @@ def get_jwt_enterprise_client(config: ConfigJWT) -> BoxClient:
 
     jwt = JWTConfig.from_config_file(
         config_file_path=config.jwt_config_path,
-        token_storage=FileWithInMemoryCacheTokenStorage(".ent" + config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(
+            ".ent" + config.cache_file
+        ),
     )
     auth = BoxJWTAuth(jwt)
 
@@ -48,10 +51,12 @@ def get_jwt_user_client(config: ConfigJWT, user_id: str) -> BoxClient:
 
     jwt = JWTConfig.from_config_file(
         config_file_path=config.jwt_config_path,
-        token_storage=FileWithInMemoryCacheTokenStorage(".user" + config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(
+            ".user" + config.cache_file
+        ),
     )
     auth = BoxJWTAuth(jwt)
-    auth.as_user(user_id)
+    auth = auth.as_user(user_id)
 
     client = BoxClient(auth)
 

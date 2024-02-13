@@ -1,7 +1,7 @@
 Invoice #Q8888
 Supplier: Quantum Quirks Co.
 Invoice Number: Q8888
-PO Number: #005
+Purchase Order #005
 Line Items:
 Higgs Boson Bubble Bath: $30
 Cosmic String Yo-Yo: $15

@@ -1,151 +1,268 @@
 """ Metadata Box exercises"""
 
 import logging
-from typing import List, Union
+from typing import Dict
 
-from box_sdk_gen.client import BoxClient as Client
 
-from box_sdk_gen.schemas import (
-    Items,
-    FileMini,
-    FolderMini,
-    WebLinkMini,
-    SearchResults,
-    SearchResultsWithSharedLinks,
+from utils.box_ai_client import BoxAIClient as Client
+from box_sdk_gen.fetch import APIException
+
+from box_sdk_gen.schemas import MetadataTemplate
+from utils.ai_schemas import IntelligenceMetadataSuggestions
+from box_sdk_gen.managers.metadata_templates import (
+    CreateMetadataTemplateFields,
+    CreateMetadataTemplateFieldsTypeField,
+    CreateMetadataTemplateFieldsOptionsField,
 )
 
-from box_sdk_gen.managers.search import SearchForContentContentTypes
 
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
+from box_sdk_gen.managers.file_metadata import (
+    CreateFileMetadataByIdScope,
+    UpdateFileMetadataByIdScope,
+    UpdateFileMetadataByIdRequestBody,
+    UpdateFileMetadataByIdRequestBodyOpField,
+)
+
+from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
+INVOICE_FOLDER = "248887218023"
+PO_FOLDER = "248891043873"
+ENTERPRISE_SCOPE = "enterprise_1133807781"
 
-def print_box_item(box_item: Union[FileMini, FolderMini, WebLinkMini]):
-    """Basic print of a Box Item attributes"""
-    print(
-        f"Type: {box_item.type.value} ID: {box_item.id} Name: {box_item.name}"
+
+def get_template_by_key(client: Client, template_key: str) -> MetadataTemplate:
+    """Get a metadata template by key"""
+
+    scope = "enterprise"
+
+    try:
+        template = client.metadata_templates.get_metadata_template(
+            scope=scope, template_key=template_key
+        )
+    except APIException as e:
+        if e.status == 404:
+            template = None
+        else:
+            raise e
+
+    return template
+
+
+def delete_template_by_key(client: Client, template_key: str):
+    """Delete a metadata template by key"""
+
+    scope = "enterprise"
+
+    try:
+        client.metadata_templates.delete_metadata_template(
+            scope=scope, template_key=template_key
+        )
+    except APIException as e:
+        if e.status == 404:
+            pass
+        else:
+            raise e
+
+
+def create_invoice_po_template(
+    client: Client, template_key: str, display_name: str
+) -> MetadataTemplate:
+    """Create a metadata template"""
+
+    scope = "enterprise"
+
+    fields = []
+
+    # Document type
+    fields.append(
+        CreateMetadataTemplateFields(
+            type=CreateMetadataTemplateFieldsTypeField.ENUM,
+            key="documentType",
+            display_name="Document Type",
+            options=[
+                CreateMetadataTemplateFieldsOptionsField(key="Invoice"),
+                CreateMetadataTemplateFieldsOptionsField(key="Purchase Order"),
+            ],
+        )
+    )
+
+    # Date
+    fields.append(
+        CreateMetadataTemplateFields(
+            type=CreateMetadataTemplateFieldsTypeField.DATE,
+            key="documentDate",
+            display_name="Document Date",
+        )
+    )
+
+    # Document total
+    fields.append(
+        CreateMetadataTemplateFields(
+            type=CreateMetadataTemplateFieldsTypeField.STRING,
+            key="total",
+            display_name="Total: $",
+            description="Total: $",
+        )
+    )
+
+    # Supplier
+    fields.append(
+        CreateMetadataTemplateFields(
+            type=CreateMetadataTemplateFieldsTypeField.STRING,
+            key="supplier",
+            display_name="Supplier",
+            description="Supplier name or designation",
+        )
+    )
+
+    # Invoice number
+    fields.append(
+        CreateMetadataTemplateFields(
+            type=CreateMetadataTemplateFieldsTypeField.STRING,
+            key="invoice",
+            display_name="Invoice #",
+            description="Document number or associated invoice",
+        )
+    )
+
+    # PO number
+    fields.append(
+        CreateMetadataTemplateFields(
+            type=CreateMetadataTemplateFieldsTypeField.STRING,
+            key="purchaseOrder",
+            display_name="Purchase Order #",
+            description="Document number or associated purchase order",
+        )
+    )
+
+    template = client.metadata_templates.create_metadata_template(
+        scope=scope,
+        template_key=template_key,
+        display_name=display_name,
+        fields=fields,
+    )
+
+    return template
+
+
+def get_metadata_suggestions_for_file(
+    client: Client, file_id: str, enterprise_scope: str, template_key: str
+) -> IntelligenceMetadataSuggestions:
+    """Get metadata suggestions for a file"""
+    return client.intelligence.intelligence_metadata_suggestion(
+        item=file_id,
+        scope=enterprise_scope,
+        template_key=template_key,
+        confidence="experimental",
     )
 
 
-def print_search_results(items: Items):
-    """Print search results"""
-    print("--- Search Results ---")
-    for item in items.entries:
-        print_box_item(item)
-    print("--- End Search Results ---")
+def apply_template_to_file(
+    client: Client, file_id: str, template_key: str, data: Dict[str, str]
+):
+    """Apply a metadata template to a folder"""
 
-
-def simple_search(
-    client: Client,
-    query: str,
-    content_types: List[SearchForContentContentTypes] = None,
-    result_type: str = None,
-    ancestor_folder_ids: List[str] = None,
-) -> Union[SearchResults, SearchResultsWithSharedLinks]:
-    """Search by query in any Box content"""
-
-    return client.search.search_for_content(
-        query=query,
-        content_types=content_types,
-        type=result_type,
-        ancestor_folder_ids=ancestor_folder_ids,
-    )
+    try:
+        client.file_metadata.create_file_metadata_by_id(
+            file_id=file_id,
+            scope=CreateFileMetadataByIdScope.ENTERPRISE,
+            template_key=template_key,
+            request_body=data,
+        )
+    except APIException as e:
+        if e.status == 409:
+            # Update the metadata
+            update_data = []
+            for key, value in data.items():
+                update_item = UpdateFileMetadataByIdRequestBody(
+                    op=UpdateFileMetadataByIdRequestBodyOpField.ADD,
+                    path=f"/{key}",
+                    value=value,
+                )
+                update_data.append(update_item)
+            try:
+                client.file_metadata.update_file_metadata_by_id(
+                    file_id=file_id,
+                    scope=UpdateFileMetadataByIdScope.ENTERPRISE,
+                    template_key=template_key,
+                    request_body=update_data,
+                )
+            except APIException as e:
+                print(
+                    f"Error updating metadata: {e.status}:{e.code}:{file_id}"
+                )
+                print(f"Error updating metadata: {update_data}")
+        else:
+            raise e
 
 
 def main():
     conf = ConfigOAuth()
-    client = get_client_oauth(conf)
+    client = get_ai_client_oauth(conf)
 
     user = client.users.get_user_me()
     print(f"\nHello, I'm {user.name} ({user.login}) [{user.id}]")
 
-    # Simple Search
-    search_results = simple_search(client, "apple")
-    print_search_results(search_results)
+    # check if template exists
+    template_key = "rbInvoicePO"
+    template_display_name = "RB: Invoice & POs"
+    template = get_template_by_key(client, template_key)
 
-    # Expanded Search
-    search_results = simple_search(client, "apple banana")
-    print_search_results(search_results)
-
-    # "Exact" Search
-    search_results = simple_search(client, '"apple banana"')
-    print_search_results(search_results)
-
-    # Operators Search
-    search_results = simple_search(client, "apple NOT banana")
-    print_search_results(search_results)
-
-    # Operators Search
-    search_results = simple_search(client, "apple AND pineapple")
-    print_search_results(search_results)
-
-    # Operators Search
-    search_results = simple_search(client, "pineapple OR banana")
-    print_search_results(search_results)
-
-    # More Searches
-    search_results = simple_search(client, "ananas")
-    print_search_results(search_results)
-
-    # Search only in name
-    search_results = simple_search(
-        client,
-        "ananas",
-        content_types=[
-            "name",
-        ],
-    )
-    print_search_results(search_results)
-
-    # Search in name and description
-    search_results = simple_search(
-        client,
-        "ananas",
-        content_types=[
-            "name",
-            "description",
-        ],
-    )
-    print_search_results(search_results)
-
-    # Search for folders only
-    search_results = simple_search(client, "apple", result_type="folder")
-    print_search_results(search_results)
-
-    # Search banana
-    search_results = simple_search(client, "banana")
-
-    print("--- Search Results ---")
-    for item in search_results.entries:
+    if template:
         print(
-            f"Type: {item.type.value} ID: {item.id} ",
-            f"Name: {item.name} Folder: {item.parent.name}",
+            f"\nMetadata template exists: {template.display_name} ",
+            f"[{template.id}]",
         )
-    print("--- End Search Results ---")
+    else:
+        print("\nMetadata template does not exist, creating...")
 
-    # Ancestor Search
-
-    # Make sure folders exist
-    folder_apple_banana = client.folders.get_folder_by_id("199903162104")
-    folder_banana_apple = client.folders.get_folder_by_id("199904090719")
-
-    # But we only need the ids
-    search_results = simple_search(
-        client,
-        "banana",
-        ancestor_folder_ids=[folder_apple_banana.id, folder_banana_apple.id],
-        result_type="file",
-    )
-
-    print("--- Search Results ---")
-    for item in search_results.entries:
+        # create a metadata template
+        template = create_invoice_po_template(
+            client, template_key, template_display_name
+        )
         print(
-            f"Type: {item.type.value} ID: {item.id} ",
-            f"Name: {item.name} Folder: {item.parent.name}",
+            f"\nMetadata template created: {template.display_name} ",
+            f"[{template.id}]",
         )
-    print("--- End Search Results ---")
+
+    # Scan the purchase folder for metadata suggestions
+    folder_items = client.folders.get_folder_items(PO_FOLDER)
+    for item in folder_items.entries:
+        print(f"\nItem: {item.name} [{item.id}]")
+        suggestions = get_metadata_suggestions_for_file(
+            client, item.id, ENTERPRISE_SCOPE, template_key
+        )
+        print(f"Suggestions: {suggestions.suggestions}")
+        metadata = suggestions.suggestions
+        apply_template_to_file(
+            client,
+            item.id,
+            template_key,
+            metadata,
+        )
+
+    # Scan the invoice folder for metadata suggestions
+    folder_items = client.folders.get_folder_items(INVOICE_FOLDER)
+    for item in folder_items.entries:
+        print(f"\nItem: {item.name} [{item.id}]")
+        suggestions = get_metadata_suggestions_for_file(
+            client, item.id, ENTERPRISE_SCOPE, template_key
+        )
+        print(f"Suggestions: {suggestions.suggestions}")
+        metadata = suggestions.suggestions
+        apply_template_to_file(
+            client,
+            item.id,
+            template_key,
+            metadata,
+        )
+
+    # delete the metadata template
+    # delete_template_by_key(client, "rbInvoicePO")
+    # print("\nMetadata template deleted")
 
 
 if __name__ == "__main__":

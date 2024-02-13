@@ -1,7 +1,7 @@
 Invoice #W9999
 Supplier: Warp Drive Widgets
 Invoice Number: W9999
-PO Number: #008
+Purchase Order #08
 Line Items:
 Quantum Tachyon Toothbrush: $60
 Plasma-Powered Pocket Protector: $20

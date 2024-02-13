@@ -1,7 +1,7 @@
 Invoice #N7777
 Supplier: Nebula Novelties
 Invoice Number: N7777
-PO Number: #006
+Purchase Order #006
 Line Items:
 Dark Matter Donuts (Assorted Pack): $10
 Quantum Entanglement Fidget Spinner: $8

@@ -1,7 +1,7 @@
 Invoice #C1111
 Supplier: Celestial Curiosities
 Invoice Number: C1111
-PO Number: #010
+Purchase Order #010
 Line Items:
 Quantum Quill Pen: $30
 Supernova Snow Globe: $40

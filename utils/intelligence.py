@@ -5,6 +5,8 @@ from typing import List
 
 from typing import Dict
 
+from box_sdk_gen.utils import to_string
+
 from box_sdk_gen.serialization import serialize
 
 from box_sdk_gen.serialization import deserialize
@@ -13,6 +15,7 @@ from utils.ai_schemas import (
     IntelligenceResponse,
     IntelligenceMode,
     IntelligenceItem,
+    IntelligenceMetadataSuggestions,
 )
 
 from box_sdk_gen.auth import Authentication
@@ -125,3 +128,40 @@ class IntelligenceManager:
             ),
         )
         return deserialize(response.data, IntelligenceResponse)
+
+    def intelligence_metadata_suggestion(
+        self,
+        item: str,
+        scope: str,
+        template_key: str,
+        confidence: str = "experimental",
+        extra_headers: Optional[Dict[str, Optional[str]]] = None,
+    ) -> IntelligenceResponse:
+        if extra_headers is None:
+            extra_headers = {}
+        query_params_map: Dict[str, str] = prepare_params(
+            {
+                "item": to_string("file_" + item),
+                "scope": to_string(scope),
+                "template_key": to_string(template_key),
+                "confidence": to_string(confidence),
+            }
+        )
+        headers_map: Dict[str, str] = prepare_params({**extra_headers})
+        response: FetchResponse = fetch(
+            "".join(
+                [
+                    self.network_session.base_urls.base_url,
+                    "/metadata_instances/suggestions",
+                ]
+            ),
+            FetchOptions(
+                method="GET",
+                params=query_params_map,
+                headers=headers_map,
+                response_format="json",
+                auth=self.auth,
+                network_session=self.network_session,
+            ),
+        )
+        return deserialize(response.data, IntelligenceMetadataSuggestions)

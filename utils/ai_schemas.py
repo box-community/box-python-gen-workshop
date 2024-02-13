@@ -4,11 +4,7 @@ from typing import Optional
 
 from box_sdk_gen.base_object import BaseObject
 
-from typing import List
-
-from typing import Dict
-
-from typing import Union
+from typing import List, Dict
 
 
 class IntelligenceMode(str, Enum):
@@ -26,7 +22,7 @@ class IntelligenceItem(BaseObject):
         id: Optional[str] = None,
         type: Optional[IntelligenceItemType] = None,
         content: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         :param id: The id of the item
@@ -48,7 +44,7 @@ class Intelligence(BaseObject):
         mode: IntelligenceMode,
         prompt: str,
         items: List[IntelligenceItem],
-        **kwargs
+        **kwargs,
     ):
         """
         :param mode: The mode specifies if this request is qa or hubs_qa
@@ -66,39 +62,13 @@ class Intelligence(BaseObject):
         self.items = items
 
 
-# class IntelligenceTextGenItemsFieldTypeField(str, Enum):
-#     FILE = "file"
-
-
-# class IntelligenceTextGenItemsField(BaseObject):
-#     def __init__(
-#         self,
-#         id: Optional[str] = None,
-#         type: Optional[IntelligenceItemType] = None,
-#         content: Optional[str] = None,
-#         **kwargs
-#     ):
-#         """
-#         :param id: The id of the item
-#         :type id: Optional[str], optional
-#         :param type: The type of the item
-#         :type type: Optional[IntelligenceTextGenItemsFieldTypeField], optional
-#         :param content: The content of the item, often the text representation.
-#         :type content: Optional[str], optional
-#         """
-#         super().__init__(**kwargs)
-#         self.id = id
-#         self.type = type
-#         self.content = content
-
-
 class IntelligenceDialogueHistory(BaseObject):
     def __init__(
         self,
         prompt: Optional[str] = None,
         answer: Optional[str] = None,
         created_at: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         :param prompt: The prompt provided by the client to be answered
@@ -122,7 +92,7 @@ class IntelligenceTextGen(BaseObject):
         prompt: str,
         items: List[IntelligenceItem],
         dialogue_history: Optional[List[IntelligenceDialogueHistory]] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         :param prompt: The prompt provided by the client to be answered
@@ -150,7 +120,7 @@ class IntelligenceResponse(BaseObject):
         answer: str,
         created_at: str,
         completion_reason: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         :param answer: The answer provided by the LLM.
@@ -165,3 +135,32 @@ class IntelligenceResponse(BaseObject):
         self.answer = answer
         self.created_at = created_at
         self.completion_reason = completion_reason
+
+
+# Key value pair for metadata suggestion item
+class IntelligenceMetadataSuggestionItem(BaseObject):
+    def __init__(self, key: str, value: str, **kwargs):
+        """
+        :param key: The key of the metadata suggestion
+        :type key: str
+        :param value: The value of the metadata suggestion
+        :type value: str
+        """
+        super().__init__(**kwargs)
+        self.key = key
+        self.value = value
+
+
+# Suggestions as a dictionary of suggestion items
+class IntelligenceMetadataSuggestions(BaseObject):
+    def __init__(
+        self,
+        suggestions: Dict[str, IntelligenceMetadataSuggestionItem],
+        **kwargs,
+    ):
+        """
+        :param suggestions: The suggestions for the metadata
+        :type suggestions: Dict[str, IntelligenceMetadataSuggestionItem]
+        """
+        super().__init__(**kwargs)
+        self.suggestions = suggestions

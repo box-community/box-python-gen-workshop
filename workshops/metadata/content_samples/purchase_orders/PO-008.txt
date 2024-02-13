@@ -1,8 +1,0 @@
-Purchase Order #008
-Date: February 13, 2024
-Supplier: Warp Drive Widgets
-Address: 42 Warp Lane, Hyperspace Hub
-Line Items:
-Quantum Tachyon Toothbrush: $60
-Plasma-Powered Pocket Protector: $20
-Total: $80

@@ -1,8 +1,0 @@
-Purchase Order #009
-Date: February 13, 2024
-Supplier: NebulaTech Labs
-Address: 101 Quasar Quadrant, Starship Nexus
-Line Items:
-Cosmic Calculator: $75
-Astro-Tea Infuser: $12
-Total: $87

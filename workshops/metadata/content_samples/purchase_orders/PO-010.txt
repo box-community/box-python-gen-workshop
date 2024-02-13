@@ -1,8 +1,0 @@
-Purchase Order #010
-Date: February 13, 2024
-Supplier: Celestial Curiosities
-Address: 8 Pulsar Place, Aurora Asteroid
-Line Items:
-Quantum Quill Pen: $30
-Supernova Snow Globe: $40
-Total: $70

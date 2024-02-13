@@ -85,6 +85,7 @@ def create_invoice_po_template(
             options=[
                 CreateMetadataTemplateFieldsOptionsField(key="Invoice"),
                 CreateMetadataTemplateFieldsOptionsField(key="Purchase Order"),
+                CreateMetadataTemplateFieldsOptionsField(key="Unknown"),
             ],
         )
     )
@@ -164,6 +165,16 @@ def apply_template_to_file(
     client: Client, file_id: str, template_key: str, data: Dict[str, str]
 ):
     """Apply a metadata template to a folder"""
+    default_data = {
+        "documentType": "Unknown",
+        "documentDate": "1900-01-01T00:00:00Z",
+        "total": "Unknown",
+        "supplier": "Unknown",
+        "invoice": "Unknown",
+        "purchaseOrder": "Unknown",
+    }
+    # Merge the default data with the data
+    data = {**default_data, **data}
 
     try:
         client.file_metadata.create_file_metadata_by_id(

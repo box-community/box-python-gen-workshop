@@ -1,0 +1,8 @@
+Purchase Order #007
+Date: February 13, 2024
+Supplier: AstroBling Accessories
+Address: 777 Meteorite Avenue, Cometville
+Line Items:
+Stellar Sunglasses: $40
+Meteor Shower Earrings: $25
+Total: $65

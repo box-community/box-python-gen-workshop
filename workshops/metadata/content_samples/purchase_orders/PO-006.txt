@@ -1,0 +1,8 @@
+Purchase Order #006
+Date: February 13, 2024
+Supplier: Nebula Novelties
+Address: 55 Supernova Street, Galaxy Grove
+Line Items:
+Dark Matter Donuts (Assorted Pack): $10
+Quantum Entanglement Fidget Spinner: $8
+Total: $18

@@ -1,0 +1,8 @@
+Invoice #A2222
+Supplier: AstroBling Accessories
+Invoice Number: A2222
+PO Number: #007
+Line Items:
+Stellar Sunglasses: $40
+Meteor Shower Earrings: $25
+Total: $65

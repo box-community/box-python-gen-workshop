@@ -1,0 +1,8 @@
+Invoice #N3333
+Supplier: NebulaTech Labs
+Invoice Number: N3333
+PO Number: #009
+Line Items:
+Cosmic Calculator: $75
+Astro-Tea Infuser: $12
+Total: $87

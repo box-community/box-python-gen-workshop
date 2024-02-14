@@ -40,30 +40,20 @@ Result:
 ```yaml
 INFO:root:Folder workshops with id: 248851586376
 INFO:root:Folder metadata with id: 248847004564
-INFO:root:Folder invoices with id: 248846701954
+INFO:root:Folder invoices with id: 248887218023
 INFO:root: Folder invoices
-INFO:root:      Uploaded Invoice-Q8888.txt (1443478591184) 158 bytes
-INFO:root:      Uploaded Invoice-B1234.txt (1443446103636) 162 bytes
-INFO:root:      Uploaded Invoice-C9876.txt (1443455423129) 183 bytes
-INFO:root:      Uploaded Invoice-A5555.txt (1443449154029) 170 bytes
-INFO:root:      Uploaded Invoice-Q2468.txt (1443455656177) 170 bytes
-INFO:root:      Uploaded Invoice-W9999.txt (1443450068472) 173 bytes
-INFO:root:      Uploaded Invoice-N7777.txt (1443446363085) 182 bytes
-INFO:root:      Uploaded Invoice-N3333.txt (1443478787777) 147 bytes
-INFO:root:      Uploaded Invoice-C1111.txt (1443478857049) 156 bytes
-INFO:root:      Uploaded Invoice-A2222.txt (1443477560466) 160 bytes
-INFO:root:Folder purchase_orders with id: 248852070443
+INFO:root:      Uploaded Invoice-Q8888.txt (1443719236185) 164 bytes
+INFO:root:      Uploaded Invoice-B1234.txt (1443724064462) 168 bytes
+INFO:root:      Uploaded Invoice-C9876.txt (1443729681339) 189 bytes
+INFO:root:      Uploaded Invoice-A5555.txt (1443738625223) 150 bytes
+INFO:root:      Uploaded Invoice-Q2468.txt (1443721424754) 176 bytes
+INFO:root:Folder purchase_orders with id: 248891043873
 INFO:root: Folder purchase_orders
-INFO:root:      Uploaded PO-008.txt (1443446236634) 202 bytes
-INFO:root:      Uploaded PO-009.txt (1443452445097) 183 bytes
-INFO:root:      Uploaded PO-001.txt (1443479464395) 195 bytes
-INFO:root:      Uploaded PO-002.txt (1443447637477) 212 bytes
-INFO:root:      Uploaded PO-003.txt (1443452989216) 205 bytes
-INFO:root:      Uploaded PO-007.txt (1443477075692) 193 bytes
-INFO:root:      Uploaded PO-006.txt (1443455828977) 216 bytes
-INFO:root:      Uploaded PO-010.txt (1443480075910) 188 bytes
-INFO:root:      Uploaded PO-004.txt (1443453421426) 200 bytes
-INFO:root:      Uploaded PO-005.txt (1443454854559) 194 bytes
+INFO:root:      Uploaded PO-001.txt (1443731848797) 212 bytes
+INFO:root:      Uploaded PO-002.txt (1443739645222) 229 bytes
+INFO:root:      Uploaded PO-003.txt (1443724777261) 222 bytes
+INFO:root:      Uploaded PO-004.txt (1443739415948) 217 bytes
+INFO:root:      Uploaded PO-005.txt (1443724550074) 211 bytes
 ```
 
 Next, create a `metadata.py` file on the root of the project that you will use to write your code.

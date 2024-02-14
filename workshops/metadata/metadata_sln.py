@@ -1,9 +1,7 @@
 """ Metadata Box exercises"""
 
 import logging
-from typing import Dict
-import json
-
+from typing import Dict, List
 
 from utils.box_ai_client import BoxAIClient as Client
 from box_sdk_gen.fetch import APIException
@@ -16,6 +14,10 @@ from box_sdk_gen.managers.metadata_templates import (
     CreateMetadataTemplateFieldsOptionsField,
 )
 
+from box_sdk_gen.managers.search import (
+    SearchByMetadataQueryOrderBy,
+    SearchByMetadataQueryOrderByDirectionField,
+)
 
 from box_sdk_gen.managers.file_metadata import (
     CreateFileMetadataByIdScope,
@@ -186,8 +188,8 @@ def apply_template_to_file(
             template_key=template_key,
             request_body=data,
         )
-    except APIException as e:
-        if e.status == 409:
+    except APIException as error_a:
+        if error_a.status == 409:
             # Update the metadata
             update_data = []
             for key, value in data.items():
@@ -204,12 +206,61 @@ def apply_template_to_file(
                     template_key=template_key,
                     request_body=update_data,
                 )
-            except APIException as e:
+            except APIException as error_b:
                 logging.error(
-                    f"Error updating metadata: {e.status}:{e.code}:{file_id}"
+                    f"Error updating metadata: {error_b.status}:{error_b.code}:{file_id}"
                 )
         else:
-            raise e
+            raise error_a
+
+
+def get_file_metadata(client: Client, file_id: str, template_key: str):
+    """Get file metadata"""
+    metadata = client.file_metadata.get_file_metadata_by_id(
+        file_id=file_id,
+        scope=CreateFileMetadataByIdScope.ENTERPRISE,
+        template_key=template_key,
+    )
+    return metadata
+
+
+def search_metadata(
+    client: Client,
+    template_key: str,
+    folder_id: str,
+    query: str,
+    query_params: Dict[str, str],
+    order_by: List[Dict[str, str]] = None,
+):
+    """Search for files with metadata"""
+
+    from_ = ENTERPRISE_SCOPE + "." + template_key
+
+    if order_by is None:
+        order_by = [
+            SearchByMetadataQueryOrderBy(
+                field_key="invoiceNumber",
+                direction=SearchByMetadataQueryOrderByDirectionField.ASC,
+            )
+        ]
+
+    fields = [
+        "type",
+        "id",
+        "name",
+        "metadata." + from_ + ".invoiceNumber",
+        "metadata." + from_ + ".purchaseOrderNumber",
+    ]
+
+    search_result = client.search.search_by_metadata_query(
+        from_=from_,
+        query=query,
+        query_params=query_params,
+        ancestor_folder_id=folder_id,
+        order_by=order_by,
+        fields=fields,
+    )
+    return search_result
 
 
 def main():
@@ -241,21 +292,21 @@ def main():
             f"[{template.id}]",
         )
 
-    # # Scan the purchase folder for metadata suggestions
-    # folder_items = client.folders.get_folder_items(PO_FOLDER)
-    # for item in folder_items.entries:
-    #     print(f"\nItem: {item.name} [{item.id}]")
-    #     suggestions = get_metadata_suggestions_for_file(
-    #         client, item.id, ENTERPRISE_SCOPE, template_key
-    #     )
-    #     print(f"Suggestions: {suggestions.suggestions}")
-    #     metadata = suggestions.suggestions
-    #     apply_template_to_file(
-    #         client,
-    #         item.id,
-    #         template_key,
-    #         metadata,
-    #     )
+    # Scan the purchase folder for metadata suggestions
+    folder_items = client.folders.get_folder_items(PO_FOLDER)
+    for item in folder_items.entries:
+        print(f"\nItem: {item.name} [{item.id}]")
+        suggestions = get_metadata_suggestions_for_file(
+            client, item.id, ENTERPRISE_SCOPE, template_key
+        )
+        print(f"Suggestions: {suggestions.suggestions}")
+        metadata = suggestions.suggestions
+        apply_template_to_file(
+            client,
+            item.id,
+            template_key,
+            metadata,
+        )
 
     # Scan the invoice folder for metadata suggestions
     folder_items = client.folders.get_folder_items(INVOICE_FOLDER)
@@ -272,6 +323,19 @@ def main():
             template_key,
             metadata,
         )
+
+    # get metadata for a file
+    metadata = get_file_metadata(client, "1443738625223", template_key)
+    print(f"\nMetadata for file: {metadata.extra_data}")
+
+    # search for invoices without purchase orders
+    query = "documentType = :docType AND purchaseOrderNumber = :poNumber"
+    query_params = {"docType": "Invoice", "poNumber": "Unknown"}
+
+    search_result = search_metadata(
+        client, template_key, INVOICE_FOLDER, query, query_params
+    )
+    print(f"\nSearch results: {search_result.entries}")
 
     # delete the metadata template
     # delete_template_by_key(client, "rbInvoicePO")

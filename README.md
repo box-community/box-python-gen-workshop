@@ -124,3 +124,4 @@ You'll find the workshop exercises in the [workshops](workshops) folder.
 * [Groups](workshops/groups/groups.md) - Working with Groups.
 * [Watermark](workshops/watermark/watermark.md) - Working with Watermark.
 * [Box AI](workshops/intelligence/intelligence.md) - Working with Box AI.
+* [Metadata](workshops/metadata/metadata.md) - Working with Metadata.

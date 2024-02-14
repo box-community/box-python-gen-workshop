@@ -2,6 +2,7 @@
 
 import logging
 from typing import Dict
+import json
 
 
 from utils.box_ai_client import BoxAIClient as Client
@@ -113,9 +114,9 @@ def create_invoice_po_template(
     fields.append(
         CreateMetadataTemplateFields(
             type=CreateMetadataTemplateFieldsTypeField.STRING,
-            key="supplier",
-            display_name="Supplier",
-            description="Supplier name or designation",
+            key="vendor",
+            display_name="Vendor",
+            description="Vendor name or designation",
         )
     )
 
@@ -123,8 +124,8 @@ def create_invoice_po_template(
     fields.append(
         CreateMetadataTemplateFields(
             type=CreateMetadataTemplateFieldsTypeField.STRING,
-            key="invoice",
-            display_name="Invoice #",
+            key="invoiceNumber",
+            display_name="Invoice Number",
             description="Document number or associated invoice",
         )
     )
@@ -133,8 +134,8 @@ def create_invoice_po_template(
     fields.append(
         CreateMetadataTemplateFields(
             type=CreateMetadataTemplateFieldsTypeField.STRING,
-            key="purchaseOrder",
-            display_name="Purchase Order #",
+            key="purchaseOrderNumber",
+            display_name="Purchase Order Number",
             description="Document number or associated purchase order",
         )
     )
@@ -169,10 +170,12 @@ def apply_template_to_file(
         "documentType": "Unknown",
         "documentDate": "1900-01-01T00:00:00Z",
         "total": "Unknown",
-        "supplier": "Unknown",
-        "invoice": "Unknown",
-        "purchaseOrder": "Unknown",
+        "vendor": "Unknown",
+        "invoiceNumber": "Unknown",
+        "purchaseOrderNumber": "Unknown",
     }
+    # remove empty values
+    data = {k: v for k, v in data.items() if v}
     # Merge the default data with the data
     data = {**default_data, **data}
 
@@ -202,10 +205,9 @@ def apply_template_to_file(
                     request_body=update_data,
                 )
             except APIException as e:
-                print(
+                logging.error(
                     f"Error updating metadata: {e.status}:{e.code}:{file_id}"
                 )
-                print(f"Error updating metadata: {update_data}")
         else:
             raise e
 
@@ -239,21 +241,21 @@ def main():
             f"[{template.id}]",
         )
 
-    # Scan the purchase folder for metadata suggestions
-    folder_items = client.folders.get_folder_items(PO_FOLDER)
-    for item in folder_items.entries:
-        print(f"\nItem: {item.name} [{item.id}]")
-        suggestions = get_metadata_suggestions_for_file(
-            client, item.id, ENTERPRISE_SCOPE, template_key
-        )
-        print(f"Suggestions: {suggestions.suggestions}")
-        metadata = suggestions.suggestions
-        apply_template_to_file(
-            client,
-            item.id,
-            template_key,
-            metadata,
-        )
+    # # Scan the purchase folder for metadata suggestions
+    # folder_items = client.folders.get_folder_items(PO_FOLDER)
+    # for item in folder_items.entries:
+    #     print(f"\nItem: {item.name} [{item.id}]")
+    #     suggestions = get_metadata_suggestions_for_file(
+    #         client, item.id, ENTERPRISE_SCOPE, template_key
+    #     )
+    #     print(f"Suggestions: {suggestions.suggestions}")
+    #     metadata = suggestions.suggestions
+    #     apply_template_to_file(
+    #         client,
+    #         item.id,
+    #         template_key,
+    #         metadata,
+    #     )
 
     # Scan the invoice folder for metadata suggestions
     folder_items = client.folders.get_folder_items(INVOICE_FOLDER)

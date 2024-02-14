@@ -1,8 +1,7 @@
-Invoice #B1234
-Supplier: Galactic Gizmos Inc.
+Vendor: Galactic Gizmos Inc.
 Invoice Number: B1234
-Purchase Order #001
+Purchase Order Number: 001
 Line Items:
-Quantum Flux Capacitor: $500
-Anti-Gravity Pen Set: $75
+    - Quantum Flux Capacitor: $500
+    - Anti-Gravity Pen Set: $75
 Total: $575

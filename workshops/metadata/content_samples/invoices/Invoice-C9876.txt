@@ -1,8 +1,7 @@
-Invoice #C9876
-Supplier: Cosmic Contraptions Ltd.
+Vendor: Cosmic Contraptions Ltd.
 Invoice Number: C9876
-Purchase Order #002
+Purchase Order Number: 002
 Line Items:
-Neutrino-Powered Toasters (Set of 3): $150
-Rocket-Powered Slippers: $80
+    - Neutrino-Powered Toasters (Set of 3): $150
+    - Rocket-Powered Slippers: $80
 Total: $230

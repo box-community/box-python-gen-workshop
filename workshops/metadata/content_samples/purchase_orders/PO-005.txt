@@ -1,8 +1,8 @@
-Purchase Order #005
+Purchase Order Number: 005
 Date: February 13, 2024
-Supplier: Quantum Quirks Co.
+Vendor: Quantum Quirks Co.
 Address: 9 Wormhole Way, Singularity Station
 Line Items:
-Higgs Boson Bubble Bath: $30
-Cosmic String Yo-Yo: $15
+    - Higgs Boson Bubble Bath: $30
+    - Cosmic String Yo-Yo: $15
 Total: $45

@@ -1,5 +1,7 @@
 # Box AI (Intelligence)
+In today's data-rich landscape, extracting meaningful insights from unstructured documents is crucial. The Box AI API provides a powerful toolkit for developers to tap into the content of documents, enabling summarization, and conversational AI. 
 
+In this workshop, we'll dive deep into the capabilities of Box AI API, exploring how it empowers applications to swiftly analyze and comprehend textual content.
 
 
 ## Pre-requisites
@@ -7,11 +9,11 @@ The Box AI API hasn't been released yet, and it is currently undergoing a closed
 To complete this workshop you will need to have a Box application specifically enabled for the Box AI API.
 
 ## Concepts
-The Box AI api has 2 main concepts:
+The Box AI api has 3 main concepts:
 
-* **Ask** - Enables you app to ask questions around some context.
-* **Text Generation** - Enables you app to have a conversation with the AI, building on the previous questions and answers.
-* **Context** - The context is the information that the AI will use to answer the questions. It can be a document, multiple documents or a snippet of text.
+* **Ask** - Enables your app to ask questions around some context.
+* **Text Generation** - Enables your app to have a conversation with the AI, building on the previous questions and answers.
+* **Context** - The context is the information that the Box AI will use to answer the questions. It can be a document, multiple documents or a snippet of text.
 
 ## Box AI documentation
 This API doesn't have a public documentation yet, stay tunned for updates.
@@ -331,7 +333,7 @@ What would you like to talk about? (type 'exit' to quit):
 ```
 In my example notice how the AI followed up on the previous question and answered with a detailed response about navigation.
 
-You can now continue to have a conversation with the AI, and it will answer based on the context of the document. Type exit to terminate the program.
+You can now continue to have a conversation with the AI, and it will answer with or without the context of the document. Type exit to terminate the program.
 
 ## Extra credit
 There are more operations available in the SDK, try implementing these:
@@ -339,7 +341,12 @@ There are more operations available in the SDK, try implementing these:
 * Ask question using a snippet of text as context
 
 
+## Final thoughts
+The Box AI API offers a robust toolkit for developers to leverage the power of natural language processing in their applications. 
 
+Through its capabilities in question answering and text generation, developers can unlock new ways to extract insights from unstructured documents and engage users in meaningful conversations. 
+
+Whether it's summarizing documents, answering specific questions, or generating text based on prompts, the Box AI API provides a versatile solution for a wide range of use cases, from building chatbots to knowledge management systems.
 
 
 

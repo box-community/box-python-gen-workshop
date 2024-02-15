@@ -3,7 +3,7 @@
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 from box_sdk_gen.schemas import User
 from box_sdk_gen.managers.transfer import TransferOwnedFolderOwnedBy
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -25,8 +25,12 @@ def create_user(client: Client, name: str, login: str) -> User:
     """Create a user"""
     try:
         user = client.users.create_user(name, login)
-    except APIException as err:
-        if err.status == 409 and err.code == "user_login_already_used":
+    except BoxAPIError as err:
+        if (
+            err.response_info.status_code == 409
+            and err.response_info.body.get("code", None)
+            == "user_login_already_used"
+        ):
             # User already exists, let's get it
             user = client.users.get_users(login).entries[0]
         else:

@@ -7,7 +7,7 @@ from typing import List
 import shutil
 import json
 
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import File, Files
@@ -50,10 +50,12 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
         )
 
         box_file = files.entries[0]
-    except APIException as err:
-        if err.code == "item_name_in_use":
+    except BoxAPIError as err:
+        if err.response_info.body.get("code", None) == "item_name_in_use":
             logging.warning("File already exists, updating contents")
-            box_file_id = err.context_info["conflicts"]["id"]
+            box_file_id = err.response_info.body["context_info"]["conflicts"][
+                "id"
+            ]
             try:
                 # upload new version
 
@@ -65,7 +67,7 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
                 )
 
                 box_file = files.entries[0]
-            except APIException as err2:
+            except BoxAPIError as err2:
                 logging.error("Failed to update %s: %s", box_file.name, err2)
                 raise err2
         else:
@@ -187,10 +189,12 @@ def main():
             name="sample_file_copy.txt",
         )
         file_copied_id = file_copied.id
-    except APIException as err:
-        if err.code == "item_name_in_use":
+    except BoxAPIError as err:
+        if err.response_info.body.get("code", None) == "item_name_in_use":
             logging.warning("Duplicate File already exists")
-            file_copied_id = err.context_info["conflicts"]["id"]
+            file_copied_id = err.response_info.body["context_info"][
+                "conflicts"
+            ]["id"]
         else:
             raise err
     folder_list_contents(client, SAMPLE_FOLDER)
@@ -201,10 +205,12 @@ def main():
             file_copied_id, parent=CopyFileParent("0")
         )
         file_moved_id = file_moved.id
-    except APIException as err:
-        if err.code == "item_name_in_use":
+    except BoxAPIError as err:
+        if err.response_info.body.get("code", None) == "item_name_in_use":
             logging.warning("File already exists, we'll use it")
-            file_moved_id = err.context_info["conflicts"]["id"]
+            file_moved_id = err.response_info.body["context_info"][
+                "conflicts"
+            ]["id"]
         else:
             raise err
 

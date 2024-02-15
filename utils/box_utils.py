@@ -10,7 +10,7 @@ from box_sdk_gen.managers.uploads import (
     UploadFileAttributes,
     UploadFileAttributesParentField,
 )
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 
 logging.getLogger(__name__)
 
@@ -24,9 +24,11 @@ def create_box_folder(
         folder = client.folders.create_folder(
             folder_name, CreateFolderParent(id=parent_folder.id)
         )
-    except APIException as err:
-        if err.code == "item_name_in_use":
-            folder_id = err.context_info["conflicts"][0]["id"]
+    except BoxAPIError as err:
+        if err.response_info.body.get("code", None) == "item_name_in_use":
+            folder_id = err.response_info.body["context_info"]["conflicts"][0][
+                "id"
+            ]
             folder = client.folders.get_folder_by_id(folder_id)
         else:
             raise err
@@ -71,9 +73,9 @@ def file_upload(client: Client, file_path: str, folder: Folder) -> File:
         client.uploads.preflight_file_upload_check(
             file_name, file_size, pre_flight_arg
         )
-    except APIException as err:
-        if err.code == "item_name_in_use":
-            file_id = err.context_info["conflicts"]["id"]
+    except BoxAPIError as err:
+        if err.response_info.body.get("code", None) == "item_name_in_use":
+            file_id = err.response_info.body["context_info"]["conflicts"]["id"]
         else:
             raise err
 

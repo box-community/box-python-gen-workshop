@@ -4,7 +4,7 @@ import logging
 
 from utils.box_ai_client import BoxAIClient as Client
 
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 
 from utils.ai_schemas import (
     IntelligenceResponse,
@@ -45,7 +45,7 @@ def text_gen(
             items=items,
             dialogue_history=dialogue_history,
         )
-    except APIException as e:
+    except BoxAPIError as e:
         print(f"Error: {e}")
 
     return response

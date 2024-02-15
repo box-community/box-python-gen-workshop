@@ -3,7 +3,7 @@
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 from box_sdk_gen.schemas import (
     Watermark,
 )

@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta, UTC
 import logging
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import Task, TaskAssignment, Tasks
 
@@ -97,7 +97,7 @@ def delete_task(client: Client, task_id: str):
     """Delete a task"""
     try:
         client.tasks.delete_task_by_id(task_id=task_id)
-    except APIException as err:
+    except BoxAPIError as err:
         print(f"Error deleting task {task_id}: {err}")
 
 
@@ -114,7 +114,7 @@ def update_task_assignment(
             message=message,
             resolution_state=resolution_state,
         )
-    except APIException as err:
+    except BoxAPIError as err:
         print(f"Error updating task assignment {assignment_id}: {err}")
 
 

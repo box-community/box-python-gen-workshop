@@ -4,7 +4,7 @@ import logging
 from typing import Dict, List
 
 from utils.box_ai_client import BoxAIClient as Client
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 
 from box_sdk_gen.schemas import MetadataTemplate
 from utils.ai_schemas import IntelligenceMetadataSuggestions
@@ -45,11 +45,11 @@ def get_template_by_key(client: Client, template_key: str) -> MetadataTemplate:
         template = client.metadata_templates.get_metadata_template(
             scope=scope, template_key=template_key
         )
-    except APIException as e:
-        if e.status == 404:
+    except BoxAPIError as err:
+        if err.response_info.status_code == 404:
             template = None
         else:
-            raise e
+            raise err
 
     return template
 
@@ -63,11 +63,11 @@ def delete_template_by_key(client: Client, template_key: str):
         client.metadata_templates.delete_metadata_template(
             scope=scope, template_key=template_key
         )
-    except APIException as e:
-        if e.status == 404:
+    except BoxAPIError as err:
+        if err.response_info.status_code == 404:
             pass
         else:
-            raise e
+            raise err
 
 
 def create_invoice_po_template(
@@ -188,8 +188,8 @@ def apply_template_to_file(
             template_key=template_key,
             request_body=data,
         )
-    except APIException as error_a:
-        if error_a.status == 409:
+    except BoxAPIError as error_a:
+        if error_a.response_info.status_code == 409:
             # Update the metadata
             update_data = []
             for key, value in data.items():
@@ -206,7 +206,7 @@ def apply_template_to_file(
                     template_key=template_key,
                     request_body=update_data,
                 )
-            except APIException as error_b:
+            except BoxAPIError as error_b:
                 logging.error(
                     f"Error updating metadata: {error_b.status}:{error_b.code}:{file_id}"
                 )

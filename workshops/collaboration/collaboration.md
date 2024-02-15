@@ -61,7 +61,7 @@ We'll also need an email address to collaborate with, so create a global constan
 ```python
 """Box Collaborations"""
 import logging
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import (
     Collaborations,
@@ -134,8 +134,12 @@ def create_file_collaboration(
             role=role,
         )
     # return collaboration if user is already a collaborator
-    except APIException as err:
-        if err.status == 400 and err.code == "user_already_collaborator":
+    except BoxAPIError as err:
+        if (
+            err.response_info.status_code == 400
+            and err.response_info.body.get("code", None)
+            == "user_already_collaborator"
+        ):
             # User is already a collaborator let's update the role
             collaborations = (
                 client.list_collaborations.get_file_collaborations(

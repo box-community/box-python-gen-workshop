@@ -3,7 +3,7 @@
 import logging
 from typing import Union
 
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import Folder, FolderMini, FileMini, WebLinkMini
@@ -86,9 +86,11 @@ def create_box_folder(
             folder_name,
             parent_arg,
         )
-    except APIException as box_err:
-        if box_err.code == "item_name_in_use":
-            box_folder_id = box_err.context_info["conflicts"][0]["id"]
+    except BoxAPIError as box_err:
+        if box_err.response_info.body.get("code", None) == "item_name_in_use":
+            box_folder_id = box_err.response_info.body["context_info"][
+                "conflicts"
+            ][0]["id"]
             folder = box_client.folders.get_folder_by_id(box_folder_id)
         else:
             raise box_err
@@ -131,9 +133,11 @@ def main():
         my_docs_personal = client.folders.copy_folder(
             personal.id, parent_arg, "personal"
         )
-    except APIException as err:
-        if err.code == "item_name_in_use":
-            folder_id = err.context_info["conflicts"]["id"]
+    except BoxAPIError as err:
+        if err.response_info.body.get("code", None) == "item_name_in_use":
+            folder_id = err.response_info.body["context_info"]["conflicts"][
+                "id"
+            ]
             my_docs_personal = client.folders.get_folder_by_id(folder_id)
             logging.info(
                 "Folder %s with id: %s already exists",
@@ -162,15 +166,15 @@ def main():
 
     try:
         client.folders.delete_folder_by_id(tmp.id)
-    except APIException as err:
-        if err.code == "folder_not_empty":
+    except BoxAPIError as err:
+        if err.response_info.body.get("code", None) == "folder_not_empty":
             logging.info(
                 f"Folder {tmp.name} is not empty, deleting recursively"
             )
             # print(f"Folder {tmp.name} is not empty, deleting recursively")
             try:
                 client.folders.delete_folder_by_id(tmp.id, recursive=True)
-            except APIException as err_l2:
+            except BoxAPIError as err_l2:
                 raise err_l2
         else:
             raise err

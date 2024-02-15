@@ -75,7 +75,7 @@ Create a DEMO_FOLDER constant with the id of the `groups` folder you got from th
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 from box_sdk_gen.schemas import (
     User,
     Group,
@@ -154,8 +154,11 @@ def create_group(
             invitability_level,
             member_viewability_level,
         )
-    except APIException as err:
-        if err.status == 409 and err.code == "conflict":
+    except BoxAPIError as err:
+        if (
+            err.response_info.status_code == 409
+            and err.response_info.body.get("code", None) == "conflict"
+        ):
             # group already exists
             groups = client.groups.get_groups(filter_term=name)
             for group in groups.entries:
@@ -217,8 +220,11 @@ def add_user_to_group(
         group_membership = client.memberships.create_group_membership(
             user, group, role
         )
-    except APIException as err:
-        if err.status == 409 and err.code == "conflict":
+    except BoxAPIError as err:
+        if (
+            err.response_info.status_code == 409
+            and err.response_info.body.get("code", None) == "conflict"
+        ):
             # user already in group
             group_memberships = client.memberships.get_group_memberships(
                 group.id
@@ -336,8 +342,11 @@ def share_folder_with_group(
             ),
             role=CreateCollaborationRole.EDITOR,
         )
-    except APIException as err:
-        if err.status == 409 and err.code == "conflict":
+    except BoxAPIError as err:
+        if (
+            err.response_info.status_code == 409
+            and err.response_info.body.get("code", None) == "conflict"
+        ):
             # folder already shared with group
             collaborations = (
                 client.list_collaborations.get_folder_collaborations(folder_id)

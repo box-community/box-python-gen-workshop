@@ -3,7 +3,7 @@
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.fetch import APIException
+from box_sdk_gen.errors import BoxAPIError
 from box_sdk_gen.schemas import File, Comment
 
 from box_sdk_gen.managers.comments import (
@@ -58,8 +58,8 @@ def file_comment_delete(client: Client, comment: Comment):
     """Delete a comment"""
     try:
         client.comments.delete_comment_by_id(comment.id)
-    except APIException as err:
-        if err.status != 404:
+    except BoxAPIError as err:
+        if err.response_info.status_code != 404:
             raise err
 
 

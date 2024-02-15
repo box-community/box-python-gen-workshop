@@ -15,7 +15,12 @@ For example, a user might assign the same `invoiceData` metadata template to a p
 The advantage of using metadata to provide structure to your content makes it much easier to create processes, integrations and workflows. Search also benefits from metadata making it much more accurate.
 
 References to our documentation:
-* 
+* [Guides](https://developer.box.com/guides/metadata/)
+* API Reference
+    * [Metadata templates](https://developer.box.com/reference/resources/metadata-template/)
+    * [Metadata instances (Files)](https://developer.box.com/reference/resources/metadata/)
+    * [Metadata instances (Folders)](https://developer.box.com/reference/get-folders-id-metadata/)
+    * [Metadata cascade policies](https://developer.box.com/reference/resources/metadata-cascade-policy/)
 
 # Use Case
 To illustrate the usage of metadata we consider a simplified procurement process for an enterprise:

@@ -1,16 +1,35 @@
 # Metadata
-
-
+In the ever-evolving landscape of enterprise documents, metadata plays a pivotal role in organizing, discovering, and extracting value from unstructured content. 
+In this workshop we will dive deep into metadata templates, creation, and extraction using the Box Platform API.
 
 ## Pre-requisites
-
-
+At the moment the Box Metadata Suggestions API is only available via private beta. 
+All the other Metadata related end points are available for use.
 ## Concepts
+When working with Box Metadata there are quite a few concepts we need to keep in mind.
+* **The Metadata Template** represents the structure of the data you want to associate to an unstructured document. Templates are created at enterprise level.
+* A **Metadata Instance** represent the association of a template with a document or folder. You can also have multiple templates associated to a single document.
+* Administrators can even create **Metadata Cascade Policies**, allowing a metadata instance to automatically be applied to the content of a folder.
+For example, a user might assign the same `invoiceData` metadata template to a project folder allowing it to automatically apply to all the files and folders within that project folder.
 
-
+The advantage of using metadata to provide structure to your content makes it much easier to create processes, integrations and workflows. Search also benefits from metadata making it much more accurate.
 
 References to our documentation:
 * 
+
+# Use Case
+To illustrate the usage of metadata we consider a simplified procurement process for an enterprise:
+
+![Procurement process](img/procurement-process.png)
+
+* A company issues a purchase order to a vendor for goods or services
+* The vendor completes the order and sends an invoice to the company
+* Company matches the invoice to the purchase order
+* Company checks invoice, purchase order, goods or services received, and if all checks out issues a payment to vendor.
+
+Typically the Vendor includes the purchase order number in the invoice, making life easier for the company to match with a purchase order, so they can complete the process.
+
+We are going to use the Box Metadata APIs, to extract metadata from the invoice and purchase order, and figure out which ones do not match.
 
 # Exercises
 ## Setup
@@ -495,7 +514,7 @@ Metadata for file: {'invoiceNumber': 'A5555', 'vendor': 'Unknown', 'documentType
 
 
 ## Finding unmatched invoices
-We may have invoices that do not have a matching purchase order. Let's create a method to search in our metadata template::
+We may have invoices that do not have a matching purchase order. Let's create a method to search in our metadata template:
 
 ```python
 def search_metadata(
@@ -560,12 +579,18 @@ Search results: [{'metadata': {'enterprise_1133807781': {'rbInvoicePO': {'$scope
 
 It may take 10 to 15 minutes for the metadata to be indexed and available for search. If you don't see any results, wait a few minutes and try again.
 
-
-
 ## Extra credit
 * Create a method that for each purchase order, finds the invoices that match the purchase order and updates the purchase order metadata with the invoice number.
 * Create a method that for each invoice without purchase order, finds the purchase orders that match the invoice vendor without a purchase order.
 
+## Final thoughts
+Metadata is not just a technical detail, it's a strategic asset that can transform the way how your company works. 
+
+Metadata templates enable maintaining consistency across the enterprise. Whether it's purchase orders, legal contracts, or creative assets, predefined templates streamline processes and minimize errors.
+
+As your organization evolves, metadata becomes even more critical. Adaptability, integration with other systems, and maintaining a robust information architecture - all made possible by metadata.
+
+Team members collaborating seamlessly because they understand the context behind each document. Metadata provides that context.
 
 
 

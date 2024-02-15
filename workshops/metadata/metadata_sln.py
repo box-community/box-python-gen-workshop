@@ -35,6 +35,10 @@ INVOICE_FOLDER = "248887218023"
 PO_FOLDER = "248891043873"
 ENTERPRISE_SCOPE = "enterprise_1133807781"
 
+# INVOICE_FOLDER = "248844558038"
+# PO_FOLDER = "248842775394"
+# ENTERPRISE_SCOPE = "enterprise_877840855"
+
 
 def get_template_by_key(client: Client, template_key: str) -> MetadataTemplate:
     """Get a metadata template by key"""

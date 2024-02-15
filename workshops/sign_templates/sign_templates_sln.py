@@ -23,6 +23,7 @@ SIMPLE_PDF = "1424134015035"
 SIMPLE_DOC = "1424119907834"
 CONTRACT = "1424145227112"
 
+
 SIGNER_A = "Signer+A@example.com"
 SIGNER_A_PHONE = "+15554443322"
 
@@ -123,9 +124,9 @@ def main():
     # List all sign templates
     sign_templates_list(client)
 
-    # Create sign request from template
-    sign_request = create_sign_request(client, TEMPLATE_SIMPLE, SIGNER_A)
-    check_sign_request(sign_request)
+    # # Create sign request from template
+    # sign_request = create_sign_request(client, TEMPLATE_SIMPLE, SIGNER_A)
+    # check_sign_request(sign_request)
 
     # # Create sign request from template with name
     # sign_request_name = create_sign_request_name_default(

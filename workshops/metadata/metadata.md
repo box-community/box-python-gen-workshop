@@ -380,9 +380,22 @@ def apply_template_to_file(
         "invoiceNumber": "Unknown",
         "purchaseOrderNumber": "Unknown",
     }
+
     # remove empty values
     data = {k: v for k, v in data.items() if v}
-    # Merge the default data with the suggestions
+
+    # Check if data has a date
+    if "documentDate" in data:
+        try:
+            date_string = data["documentDate"]
+            date2 = datetime.fromisoformat(date_string)
+            data["documentDate"] = (
+                date2.isoformat().replace("+00:00", "") + "Z"
+            )
+        except ValueError:
+            data["documentDate"] = "1900-01-01T00:00:00Z"
+
+    # Merge the default data with the data
     data = {**default_data, **data}
 
     try:
@@ -508,7 +521,9 @@ def main():
     ...
 
     # get metadata for a file
-    metadata = get_file_metadata(client, "1443738625223", template_key)
+    metadata = get_file_metadata(
+        client, folder_items.entries[0].id, template_key
+    )
     print(f"\nMetadata for file: {metadata.extra_data}")
 ```
 

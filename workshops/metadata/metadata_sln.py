@@ -2,6 +2,7 @@
 
 import logging
 from typing import Dict, List
+from datetime import datetime
 
 from utils.box_ai_client import BoxAIClient as Client
 from box_sdk_gen.errors import BoxAPIError
@@ -31,13 +32,13 @@ from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-INVOICE_FOLDER = "248887218023"
-PO_FOLDER = "248891043873"
-ENTERPRISE_SCOPE = "enterprise_1133807781"
+# INVOICE_FOLDER = "248887218023"
+# PO_FOLDER = "248891043873"
+# ENTERPRISE_SCOPE = "enterprise_1133807781"
 
-# INVOICE_FOLDER = "248844558038"
-# PO_FOLDER = "248842775394"
-# ENTERPRISE_SCOPE = "enterprise_877840855"
+INVOICE_FOLDER = "248844558038"
+PO_FOLDER = "248842775394"
+ENTERPRISE_SCOPE = "enterprise_877840855"
 
 
 def get_template_by_key(client: Client, template_key: str) -> MetadataTemplate:
@@ -180,8 +181,21 @@ def apply_template_to_file(
         "invoiceNumber": "Unknown",
         "purchaseOrderNumber": "Unknown",
     }
+
     # remove empty values
     data = {k: v for k, v in data.items() if v}
+
+    # Check if data has a date
+    if "documentDate" in data:
+        try:
+            date_string = data["documentDate"]
+            date2 = datetime.fromisoformat(date_string)
+            data["documentDate"] = (
+                date2.isoformat().replace("+00:00", "") + "Z"
+            )
+        except ValueError:
+            data["documentDate"] = "1900-01-01T00:00:00Z"
+
     # Merge the default data with the data
     data = {**default_data, **data}
 
@@ -329,7 +343,9 @@ def main():
         )
 
     # get metadata for a file
-    metadata = get_file_metadata(client, "1443738625223", template_key)
+    metadata = get_file_metadata(
+        client, folder_items.entries[0].id, template_key
+    )
     print(f"\nMetadata for file: {metadata.extra_data}")
 
     # search for invoices without purchase orders
@@ -341,7 +357,7 @@ def main():
     )
     print(f"\nSearch results: {search_result.entries}")
 
-    # delete the metadata template
+    # # delete the metadata template
     # delete_template_by_key(client, "rbInvoicePO")
     # print("\nMetadata template deleted")
 

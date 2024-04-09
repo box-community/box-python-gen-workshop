@@ -295,11 +295,11 @@ def main():
 
     if template:
         print(
-            f"\nMetadata template exists: {template.display_name} ",
+            f"\nMetadata template created: {template.display_name} ",
             f"[{template.id}]",
         )
     else:
-        print("\nMetadata template does not exist, creating...")
+        # print("\nMetadata template does not exist, creating...")
 
         # create a metadata template
         template = create_invoice_po_template(

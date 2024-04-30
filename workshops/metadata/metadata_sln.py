@@ -36,9 +36,9 @@ logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 # PO_FOLDER = "248891043873"
 # ENTERPRISE_SCOPE = "enterprise_1133807781"
 
-INVOICE_FOLDER = "248844558038"
-PO_FOLDER = "248842775394"
-ENTERPRISE_SCOPE = "enterprise_877840855"
+INVOICE_FOLDER = "261456614253"
+PO_FOLDER = "261457585224"
+ENTERPRISE_SCOPE = "enterprise_1134207681"
 
 
 def get_template_by_key(client: Client, template_key: str) -> MetadataTemplate:

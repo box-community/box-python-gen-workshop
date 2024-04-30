@@ -18,7 +18,7 @@ from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FILE = "1442379637774"
+DEMO_FILE = "1514587167701"
 
 
 def ask(

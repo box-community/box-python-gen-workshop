@@ -18,7 +18,7 @@ from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FILE = "1514587167701"
+DEMO_FILE = "1530265998769"
 
 
 def text_gen(
@@ -62,9 +62,7 @@ def main():
     # Text gen dialog
     dialog_history = []
     while True:
-        question = input(
-            "\nWhat would you like to talk about? (type 'exit' to quit): "
-        )
+        question = input("\nWhat would you like to talk about? (type 'exit' to quit): ")
         if question == "exit":
             break
 

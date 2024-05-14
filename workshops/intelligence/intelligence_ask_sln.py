@@ -18,12 +18,10 @@ from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FILE = "1514587167701"
+DEMO_FILE = "1530265998769"
 
 
-def ask(
-    client: Client, question: str, file_id: str, content: str = None
-) -> IntelligenceResponse:
+def ask(client: Client, question: str, file_id: str, content: str = None) -> IntelligenceResponse:
     """Ask a question to the AI"""
 
     if file_id is None:

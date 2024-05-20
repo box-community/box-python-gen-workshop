@@ -328,7 +328,7 @@ def main():
     metadata = get_file_metadata(client, folder_items.entries[0].id, template_key)
     print(f"\nMetadata for file: {metadata.extra_data}")
 
-    # search for invoices without purchase orders
+    # # search for invoices without purchase orders
     query = "documentType = :docType AND purchaseOrderNumber = :poNumber"
     query_params = {"docType": "Invoice", "poNumber": "Unknown"}
 

@@ -56,7 +56,7 @@ def get_client_oauth(config: ConfigOAuth) -> BoxClient:
             redirect_uri=config.redirect_uri,
             state=state,
         )
-        auth_url = auth.get_authorize_url(options)
+        auth_url = auth.get_authorize_url(options=options)
         logging.info("auth url: %s", auth_url)
         open_browser(auth_url)
         callback_handle_request(auth, config.callback_hostname, config.callback_port, state)

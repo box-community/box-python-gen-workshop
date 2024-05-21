@@ -3,7 +3,7 @@
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from box_sdk_gen.schemas import File, Comment
 
 from box_sdk_gen.managers.comments import (
@@ -38,19 +38,13 @@ def file_comments_print(client: Client, file: File):
 
 def file_comment_add(client: Client, file: File, message: str) -> Comment:
     """Add a comment to a file"""
-    item_arg = CreateCommentItem(
-        id=file.id, type=CreateCommentItemTypeField.FILE
-    )
+    item_arg = CreateCommentItem(id=file.id, type=CreateCommentItemTypeField.FILE)
     return client.comments.create_comment(message, item=item_arg)
 
 
-def file_comment_reply(
-    client: Client, comment: Comment, message: str
-) -> Comment:
+def file_comment_reply(client: Client, comment: Comment, message: str) -> Comment:
     """Reply to a comment"""
-    item_arg = CreateCommentItem(
-        id=comment.id, type=CreateCommentItemTypeField.COMMENT
-    )
+    item_arg = CreateCommentItem(id=comment.id, type=CreateCommentItemTypeField.COMMENT)
     return client.comments.create_comment(message, item_arg)
 
 
@@ -85,9 +79,7 @@ def main():
     file_comments_print(client, file)
 
     # reply to the last comment
-    comment_reply = file_comment_reply(
-        client, comment, "I hear you!!! This is a sample file"
-    )
+    comment_reply = file_comment_reply(client, comment, "I hear you!!! This is a sample file")
     file_comments_print(client, file)
 
     # delete all comments

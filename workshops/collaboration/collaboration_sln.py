@@ -1,7 +1,7 @@
 """Box Collaborations"""
 
 import logging
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import (
     Collaborations,
@@ -24,9 +24,9 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 
-COLLABORATION_ROOT = "237014955712"
-SAMPLE_FILE = "1372950973232"
-SAMPLE_EMAIL = "YOUR_EMAIL+collab@gmail.com"
+COLLABORATION_ROOT = "265383071019"
+SAMPLE_FILE = "1537376413878"
+SAMPLE_EMAIL = "barbasr+collab@gmail.com"
 
 
 def create_file_collaboration(
@@ -54,33 +54,26 @@ def create_file_collaboration(
     except BoxAPIError as err:
         if (
             err.response_info.status_code == 400
-            and err.response_info.body.get("code", None)
-            == "user_already_collaborator"
+            and err.response_info.body.get("code", None) == "user_already_collaborator"
         ):
             # User is already a collaborator let's update the role
-            collaborations = (
-                client.list_collaborations.get_file_collaborations(
-                    file_id=item_id,
-                )
+            collaborations = client.list_collaborations.get_file_collaborations(
+                file_id=item_id,
             )
             for collaboration in collaborations.entries:
                 # pending collaborations have no accessible_by.login
                 if collaboration.invite_email == user_email:
-                    collaboration_updated = (
-                        client.user_collaborations.update_collaboration_by_id(
-                            collaboration_id=collaboration.id,
-                            role=role,
-                        )
+                    collaboration_updated = client.user_collaborations.update_collaboration_by_id(
+                        collaboration_id=collaboration.id,
+                        role=role,
                     )
                     return collaboration_updated
 
                 # accepted collaborations have accessible_by.login
                 if collaboration.accessible_by.login == user_email:
-                    collaboration_updated = (
-                        client.user_collaborations.update_collaboration_by_id(
-                            collaboration_id=collaboration.id,
-                            role=role,
-                        )
+                    collaboration_updated = client.user_collaborations.update_collaboration_by_id(
+                        collaboration_id=collaboration.id,
+                        role=role,
                     )
                     return collaboration_updated
     return collaboration
@@ -99,9 +92,7 @@ def print_file_collaboration(client: Client, collaboration: Collaboration):
 
 
 def list_file_collaborations(client: Client, file_id: str) -> Collaborations:
-    collaborations = client.list_collaborations.get_file_collaborations(
-        file_id=file_id
-    )
+    collaborations = client.list_collaborations.get_file_collaborations(file_id=file_id)
     print(f"\nFile {file_id} has {len(collaborations.entries)} collaborations")
     for collaboration in collaborations.entries:
         print_file_collaboration(client=client, collaboration=collaboration)

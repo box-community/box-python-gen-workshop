@@ -26,7 +26,7 @@ logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 COLLABORATION_ROOT = "265383071019"
 SAMPLE_FILE = "1537376413878"
-SAMPLE_EMAIL = "barbasr+collab@gmail.com"
+SAMPLE_EMAIL = "YOUR_EMAIL+collab@gmail.com"
 
 
 def create_file_collaboration(

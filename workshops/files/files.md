@@ -62,7 +62,7 @@ from typing import List
 import shutil
 import json
 
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import File, Files
@@ -73,7 +73,7 @@ from box_sdk_gen.managers.uploads import (
     UploadFileAttributesParentField,
 )
 from box_sdk_gen.managers.zip_downloads import CreateZipDownloadItems
-from box_sdk_gen.utils import ByteStream
+from box_sdk_gen import ByteStream
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
@@ -201,24 +201,25 @@ def upload_file(client: Client, file_path: str, folder_id: str) -> File:
         # pre-flight check
 
         pre_flight_arg = PreflightFileUploadCheckParent(id=folder_id)
-        client.uploads.preflight_file_upload_check(
-            file_name, file_size, pre_flight_arg
-        )
+        client.uploads.preflight_file_upload_check(name=file_name, size=file_size, parent=pre_flight_arg)
 
         # upload new file
         upload_arg = UploadFileAttributes(file_name, UploadFileAttributesParentField(folder_id))
         files: Files = client.uploads.upload_file(upload_arg, file=open(file_path, "rb"))
+
         box_file = files.entries[0]
     except BoxAPIError as err:
         if err.response_info.body.get("code", None) == "item_name_in_use":
             logging.warning("File already exists, updating contents")
-            box_file_id = err.response_info.body["context_info"]["conflicts"][
-                "id"
-            ]            
+            box_file_id = err.response_info.body["context_info"]["conflicts"]["id"]
             try:
                 # upload new version
+
                 upload_arg = UploadFileAttributes(file_name, UploadFileAttributesParentField(folder_id))
-                files: Files = client.uploads.upload_file_version(box_file_id, upload_arg, file=open(file_path, "rb"))
+                files: Files = client.uploads.upload_file_version(
+                    box_file_id, upload_arg, file=open(file_path, "rb")
+                )
+
                 box_file = files.entries[0]
             except BoxAPIError as err2:
                 logging.error("Failed to update %s: %s", box_file.name, err2)
@@ -285,11 +286,9 @@ def download_zip(
     """Download a zip file from Box"""
 
     file_name = os.path.basename(local_path_to_zip)
-    zip_download = client.zip_downloads.create_zip_download(items, file_name)
+    zip_download = client.zip_downloads.create_zip_download(items, download_file_name=file_name)
 
-    file_stream: ByteStream = client.zip_downloads.get_zip_download_content(
-        zip_download.download_url
-    )
+    file_stream: ByteStream = client.zip_downloads.get_zip_download_content(zip_download.download_url)
 
     with open(local_path_to_zip, "wb") as file:
         shutil.copyfileobj(file_stream, file)

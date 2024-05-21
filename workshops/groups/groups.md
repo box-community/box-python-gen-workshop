@@ -75,7 +75,7 @@ Create a DEMO_FOLDER constant with the id of the `groups` folder you got from th
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from box_sdk_gen.schemas import (
     User,
     Group,
@@ -141,18 +141,16 @@ def create_group(
     """Create group"""
 
     invitability_level = CreateGroupInvitabilityLevel.ADMINS_AND_MEMBERS
-    member_viewability_level = (
-        CreateGroupMemberViewabilityLevel.ADMINS_AND_MEMBERS
-    )
+    member_viewability_level = CreateGroupMemberViewabilityLevel.ADMINS_AND_MEMBERS
 
     try:
         group = client.groups.create_group(
             name,
-            provenance,
-            external_sync_identifier,
-            description,
-            invitability_level,
-            member_viewability_level,
+            provenance=provenance,
+            external_sync_identifier=external_sync_identifier,
+            description=description,
+            invitability_level=invitability_level,
+            member_viewability_level=member_viewability_level,
         )
     except BoxAPIError as err:
         if (
@@ -217,9 +215,8 @@ def add_user_to_group(
     """Add user to group"""
 
     try:
-        group_membership = client.memberships.create_group_membership(
-            user, group, role
-        )
+        group_membership = client.memberships.create_group_membership(user, group, role=role)
+        
     except BoxAPIError as err:
         if (
             err.response_info.status_code == 409

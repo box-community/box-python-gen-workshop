@@ -90,7 +90,7 @@ import logging
 from typing import Dict
 
 from utils.box_ai_client import BoxAIClient as Client
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 
 from box_sdk_gen.schemas import MetadataTemplate
 from utils.ai_schemas import IntelligenceMetadataSuggestions

@@ -5,7 +5,7 @@ from typing import List
 
 from typing import Dict
 
-from box_sdk_gen.utils import to_string
+from box_sdk_gen import to_string
 
 from box_sdk_gen.serialization import serialize
 
@@ -18,17 +18,17 @@ from utils.ai_schemas import (
     IntelligenceMetadataSuggestions,
 )
 
-from box_sdk_gen.auth import Authentication
+from box_sdk_gen import Authentication
 
-from box_sdk_gen.network import NetworkSession
+from box_sdk_gen import NetworkSession
 
-from box_sdk_gen.utils import prepare_params
+from box_sdk_gen import prepare_params
 
-from box_sdk_gen.fetch import fetch
+from box_sdk_gen import fetch
 
-from box_sdk_gen.fetch import FetchOptions
+from box_sdk_gen import FetchOptions
 
-from box_sdk_gen.fetch import FetchResponse
+from box_sdk_gen import FetchResponse
 
 
 class IntelligenceManager:
@@ -142,6 +142,7 @@ class IntelligenceManager:
         query_params_map: Dict[str, str] = prepare_params(
             {
                 "item": to_string("file_" + item),
+                # "item": to_string("file_" + item),
                 "scope": to_string(scope),
                 "template_key": to_string(template_key),
                 "confidence": to_string(confidence),
@@ -152,7 +153,7 @@ class IntelligenceManager:
             "".join(
                 [
                     self.network_session.base_urls.base_url,
-                    "/metadata_instances/suggestions",
+                    "/2.0/metadata_instances/suggestions",
                 ]
             ),
             FetchOptions(

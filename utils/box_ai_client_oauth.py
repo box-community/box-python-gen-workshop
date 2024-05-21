@@ -9,8 +9,8 @@ import dotenv
 import uuid
 from utils.box_ai_client import BoxAIClient
 
-from box_sdk_gen.oauth import OAuthConfig, BoxOAuth, GetAuthorizeUrlOptions
-from box_sdk_gen.token_storage import FileWithInMemoryCacheTokenStorage
+from box_sdk_gen import OAuthConfig, BoxOAuth, GetAuthorizeUrlOptions
+from box_sdk_gen import FileWithInMemoryCacheTokenStorage
 
 from utils.oauth_callback import callback_handle_request, open_browser
 
@@ -56,12 +56,10 @@ def get_ai_client_oauth(config: ConfigOAuth) -> BoxAIClient:
             redirect_uri=config.redirect_uri,
             state=state,
         )
-        auth_url = auth.get_authorize_url(options)
+        auth_url = auth.get_authorize_url(options=options)
         logging.info("auth url: %s", auth_url)
         open_browser(auth_url)
-        callback_handle_request(
-            auth, config.callback_hostname, config.callback_port, state
-        )
+        callback_handle_request(auth, config.callback_hostname, config.callback_port, state)
 
     access_token = auth.token_storage.get()
     if not access_token:

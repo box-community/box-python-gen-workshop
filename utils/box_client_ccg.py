@@ -2,12 +2,13 @@
 Handles the box client object creation
 orchestrates the authentication process
 """
+
 import os
 import dotenv
 
-from box_sdk_gen.client import BoxClient
-from box_sdk_gen.ccg_auth import BoxCCGAuth, CCGConfig
-from box_sdk_gen.token_storage import FileWithInMemoryCacheTokenStorage
+from box_sdk_gen import BoxClient
+from box_sdk_gen import BoxCCGAuth, CCGConfig
+from box_sdk_gen import FileWithInMemoryCacheTokenStorage
 
 
 ENV_CCG = ".ccg.env"
@@ -34,7 +35,7 @@ def __repr__(self) -> str:
 
 
 def get_ccg_enterprise_client(config: ConfigCCG) -> BoxClient:
-    """Returns a boxsdk Client object"""
+    """Returns a box sdk Client object"""
 
     ccg = CCGConfig(
         client_id=config.client_id,
@@ -50,7 +51,7 @@ def get_ccg_enterprise_client(config: ConfigCCG) -> BoxClient:
 
 
 def get_ccg_user_client(config: ConfigCCG, user_id: str) -> BoxClient:
-    """Returns a boxsdk Client object"""
+    """Returns a box sdk Client object"""
 
     ccg = CCGConfig(
         client_id=config.client_id,
@@ -59,7 +60,7 @@ def get_ccg_user_client(config: ConfigCCG, user_id: str) -> BoxClient:
         token_storage=FileWithInMemoryCacheTokenStorage(".user" + config.cache_file),
     )
     auth = BoxCCGAuth(ccg)
-    # auth.as_user(user_id)
+    auth.with_user_subject(user_id)
 
     client = BoxClient(auth)
 

@@ -31,7 +31,7 @@ class ConfigJWT:
 
 
 def get_jwt_enterprise_client(config: ConfigJWT) -> BoxClient:
-    """Returns a boxsdk Client object"""
+    """Returns a box sdk Client object"""
 
     jwt = JWTConfig.from_config_file(
         config_file_path=config.jwt_config_path,
@@ -45,7 +45,7 @@ def get_jwt_enterprise_client(config: ConfigJWT) -> BoxClient:
 
 
 def get_jwt_user_client(config: ConfigJWT, user_id: str) -> BoxClient:
-    """Returns a boxsdk Client object"""
+    """Returns a box sdk Client object"""
 
     jwt = JWTConfig.from_config_file(
         config_file_path=config.jwt_config_path,

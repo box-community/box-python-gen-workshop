@@ -64,7 +64,7 @@ Next, create a `folders.py` file on the root of the project that you will use to
 import logging
 from typing import Union
 
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import Folder, FolderMini, FileMini, WebLinkMini

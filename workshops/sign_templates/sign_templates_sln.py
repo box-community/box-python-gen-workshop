@@ -17,11 +17,11 @@ from box_sdk_gen.schemas import (
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-SIGN_DOCS_FOLDER = "245752394169"
+SIGN_DOCS_FOLDER = "249194622181"
 
-SIMPLE_PDF = "1424134015035"
-SIMPLE_DOC = "1424119907834"
-CONTRACT = "1424145227112"
+SIMPLE_PDF = "1445561259986"
+SIMPLE_DOC = "1445560726821"
+CONTRACT = "1445563382130"
 
 
 SIGNER_A = "Signer+A@example.com"
@@ -32,7 +32,7 @@ SIGNER_B = "Signer+B@example.com"
 APPROVER = "APPROVER@example.com"
 FINAL_COPY = "FINAL_COPY@example.com"
 
-TEMPLATE_SIMPLE = "21dd330e-f2aa-4b51-a747-ae09626a1269"
+TEMPLATE_SIMPLE = "80438f4a-40c0-427e-8368-98df9d5fa4b0"
 
 
 def check_sign_request(sign_request: SignRequest):
@@ -61,16 +61,12 @@ def sign_template_print_info(client: Client, template_id: str):
         if len(signer.inputs) > 0:
             print("      Tag ID\t Type\t Required")
         for input in signer.inputs:
-            print(
-                f"      {input.document_tag_id} {input.type.value} {input.is_required}"
-            )
+            print(f"      {input.document_tag_id} {input.type.value} {input.is_required}")
 
 
 def create_sign_request(client: Client, template_id: str, signer_email: str):
     """Create sign request from template"""
-    parent_folder = FolderMini(
-        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER
-    )
+    parent_folder = FolderMini(id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER)
 
     signer = SignRequestCreateSigner(
         email=signer_email,
@@ -89,9 +85,7 @@ def create_sign_request_name_default(
     client: Client, template_id: str, signer_name, signer_email: str
 ) -> SignRequest:
     """Create sign request from template"""
-    parent_folder = FolderMini(
-        id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER
-    )
+    parent_folder = FolderMini(id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER)
 
     signer = SignRequestCreateSigner(
         email=signer_email,
@@ -129,9 +123,7 @@ def main():
     # check_sign_request(sign_request)
 
     # # Create sign request from template with name
-    # sign_request_name = create_sign_request_name_default(
-    #     client, TEMPLATE_SIMPLE, "Signer A", SIGNER_A
-    # )
+    # sign_request_name = create_sign_request_name_default(client, TEMPLATE_SIMPLE, "Signer A", SIGNER_A)
     # check_sign_request(sign_request_name)
 
     # # Print sign template details

@@ -1,5 +1,6 @@
-black==23.10.1
-box-sdk-gen==0.5.1
+aiofiles==23.2.1
+black==24.4.2
+box-sdk-gen==1.0.0
 certifi==2023.7.22
 cffi==1.16.0
 charset-normalizer==3.3.1

@@ -150,7 +150,7 @@ def create_sign_request_structured(
     parent_folder = FolderMini(
         id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER
     )
-    signer = SignRequestCreateSigner(signer_email)
+    signer = SignRequestCreateSigner(email=signer_email)
 
     # Create a sign request
     sign_request = client.sign_requests.create_sign_request(
@@ -205,7 +205,7 @@ def create_sign_request_structured_with_prefill(
     parent_folder = FolderMini(
         id=SIGN_DOCS_FOLDER, type=FolderBaseTypeField.FOLDER
     )
-    signer = SignRequestCreateSigner(signer_email)
+    signer = SignRequestCreateSigner(email=signer_email)
 
     # tags
     tag_full_name = SignRequestPrefillTag(

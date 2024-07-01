@@ -5,6 +5,9 @@
     "python.formatting.provider": "none",
     "cSpell.words": [
         "chatbots",
-        "etag"
+        "dotenv",
+        "etag",
+        "getsize",
+        "shutil"
     ]
 }

@@ -4,8 +4,9 @@ import logging
 from typing import Dict, List
 from datetime import datetime
 
-from utils.box_ai_client import BoxAIClient as Client
-from box_sdk_gen.errors import BoxAPIError
+from utils.box_ai_client import BoxAIClient as ClientAI
+
+from box_sdk_gen import BoxAPIError
 
 from box_sdk_gen.schemas import MetadataTemplate
 from utils.ai_schemas import IntelligenceMetadataSuggestions
@@ -32,16 +33,12 @@ from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-# INVOICE_FOLDER = "248887218023"
-# PO_FOLDER = "248891043873"
-# ENTERPRISE_SCOPE = "enterprise_1133807781"
-
 INVOICE_FOLDER = "248887218023"
 PO_FOLDER = "248891043873"
 ENTERPRISE_SCOPE = "enterprise_1133807781"
 
 
-def get_template_by_key(client: Client, template_key: str) -> MetadataTemplate:
+def get_template_by_key(client: ClientAI, template_key: str) -> MetadataTemplate:
     """Get a metadata template by key"""
 
     scope = "enterprise"
@@ -57,7 +54,7 @@ def get_template_by_key(client: Client, template_key: str) -> MetadataTemplate:
     return template
 
 
-def delete_template_by_key(client: Client, template_key: str):
+def delete_template_by_key(client: ClientAI, template_key: str):
     """Delete a metadata template by key"""
 
     scope = "enterprise"
@@ -71,7 +68,7 @@ def delete_template_by_key(client: Client, template_key: str):
             raise err
 
 
-def create_invoice_po_template(client: Client, template_key: str, display_name: str) -> MetadataTemplate:
+def create_invoice_po_template(client: ClientAI, template_key: str, display_name: str) -> MetadataTemplate:
     """Create a metadata template"""
 
     scope = "enterprise"
@@ -152,10 +149,11 @@ def create_invoice_po_template(client: Client, template_key: str, display_name: 
 
 
 def get_metadata_suggestions_for_file(
-    client: Client, file_id: str, enterprise_scope: str, template_key: str
+    client_ai: ClientAI, file_id: str, enterprise_scope: str, template_key: str
 ) -> IntelligenceMetadataSuggestions:
     """Get metadata suggestions for a file"""
-    return client.intelligence.intelligence_metadata_suggestion(
+
+    return client_ai.intelligence.intelligence_metadata_suggestion(
         item=file_id,
         scope=enterprise_scope,
         template_key=template_key,
@@ -163,7 +161,7 @@ def get_metadata_suggestions_for_file(
     )
 
 
-def apply_template_to_file(client: Client, file_id: str, template_key: str, data: Dict[str, str]):
+def apply_template_to_file(client: ClientAI, file_id: str, template_key: str, data: Dict[str, str]):
     """Apply a metadata template to a folder"""
     default_data = {
         "documentType": "Unknown",
@@ -220,7 +218,7 @@ def apply_template_to_file(client: Client, file_id: str, template_key: str, data
             raise error_a
 
 
-def get_file_metadata(client: Client, file_id: str, template_key: str):
+def get_file_metadata(client: ClientAI, file_id: str, template_key: str):
     """Get file metadata"""
     metadata = client.file_metadata.get_file_metadata_by_id(
         file_id=file_id,
@@ -231,7 +229,7 @@ def get_file_metadata(client: Client, file_id: str, template_key: str):
 
 
 def search_metadata(
-    client: Client,
+    client: ClientAI,
     template_key: str,
     folder_id: str,
     query: str,

@@ -3,7 +3,7 @@
 import logging
 from typing import Union
 
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import Folder, FolderMini, FileMini, WebLinkMini
@@ -14,9 +14,7 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 
-def print_box_item(
-    box_item: Union[FileMini, FolderMini, WebLinkMini], level: int = 0
-):
+def print_box_item(box_item: Union[FileMini, FolderMini, WebLinkMini], level: int = 0):
     """Basic print of a Box Item attributes"""
     print(
         f"{'   ' * level}({box_item.id}) {box_item.name}",
@@ -37,9 +35,7 @@ def get_folder_items(box_client: Client, box_folder_id: str = "0") -> Items:
     return box_client.folders.get_folder_items(folder_id=box_folder_id)
 
 
-def print_folder_items_recursive(
-    box_client: Client, folder_id: str, level: int = 0
-):
+def print_folder_items_recursive(box_client: Client, folder_id: str, level: int = 0):
     """Get folder items recursively"""
     folder = box_client.folders.get_folder_by_id(folder_id)
     print_box_item(folder, level)
@@ -64,9 +60,7 @@ def get_workshop_folder(box_client: Client) -> Folder:
 
     folders_folder_list = [
         box_item
-        for box_item in box_client.folders.get_folder_items(
-            workshops_folder_list[0].id
-        ).entries
+        for box_item in box_client.folders.get_folder_items(workshops_folder_list[0].id).entries
         if box_item.name == "folders" and box_item.type == "folder"
     ]
     if folders_folder_list == []:
@@ -75,9 +69,7 @@ def get_workshop_folder(box_client: Client) -> Folder:
     return folders_folder_list[0]
 
 
-def create_box_folder(
-    box_client: Client, folder_name: str, parent_folder: Folder
-) -> Folder:
+def create_box_folder(box_client: Client, folder_name: str, parent_folder: Folder) -> Folder:
     """create a folder in box"""
 
     try:
@@ -88,9 +80,7 @@ def create_box_folder(
         )
     except BoxAPIError as box_err:
         if box_err.response_info.body.get("code", None) == "item_name_in_use":
-            box_folder_id = box_err.response_info.body["context_info"][
-                "conflicts"
-            ][0]["id"]
+            box_folder_id = box_err.response_info.body["context_info"]["conflicts"][0]["id"]
             folder = box_client.folders.get_folder_by_id(box_folder_id)
         else:
             raise box_err
@@ -130,14 +120,10 @@ def main():
     # Copy folders
     try:
         parent_arg = CreateFolderParent(my_documents.id)
-        my_docs_personal = client.folders.copy_folder(
-            personal.id, parent_arg, "personal"
-        )
+        my_docs_personal = client.folders.copy_folder(personal.id, parent_arg, "personal")
     except BoxAPIError as err:
         if err.response_info.body.get("code", None) == "item_name_in_use":
-            folder_id = err.response_info.body["context_info"]["conflicts"][
-                "id"
-            ]
+            folder_id = err.response_info.body["context_info"]["conflicts"]["id"]
             my_docs_personal = client.folders.get_folder_by_id(folder_id)
             logging.info(
                 "Folder %s with id: %s already exists",
@@ -168,9 +154,7 @@ def main():
         client.folders.delete_folder_by_id(tmp.id)
     except BoxAPIError as err:
         if err.response_info.body.get("code", None) == "folder_not_empty":
-            logging.info(
-                f"Folder {tmp.name} is not empty, deleting recursively"
-            )
+            logging.info(f"Folder {tmp.name} is not empty, deleting recursively")
             # print(f"Folder {tmp.name} is not empty, deleting recursively")
             try:
                 client.folders.delete_folder_by_id(tmp.id, recursive=True)

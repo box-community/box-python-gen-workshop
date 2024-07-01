@@ -2,7 +2,7 @@ from enum import Enum
 
 from typing import Optional
 
-from box_sdk_gen.base_object import BaseObject
+from box_sdk_gen import BaseObject
 
 from typing import List, Dict
 

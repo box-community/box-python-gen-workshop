@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta, UTC
 import logging
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import Task, TaskAssignment, Tasks
 
@@ -28,7 +28,7 @@ logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 TASKS_ROOT = "237424755849"
 SAMPLE_FILE_A = "1375106202533"
-SAMPLE_FILE_B = "1375106202533"
+SAMPLE_FILE_B = "1375116033188"
 
 
 def create_task(
@@ -52,21 +52,15 @@ def create_task(
     return task
 
 
-def assign_task_to_user(
-    client: Client, task_id: str, user_id: str
-) -> TaskAssignment:
+def assign_task_to_user(client: Client, task_id: str, user_id: str) -> TaskAssignment:
     """assign task"""
 
-    task = task = CreateTaskAssignmentTask(
-        id=task_id, type=CreateTaskAssignmentTaskTypeField.TASK
-    )
+    task = task = CreateTaskAssignmentTask(id=task_id, type=CreateTaskAssignmentTaskTypeField.TASK)
 
     assign_to = CreateTaskAssignmentAssignTo(
         id=user_id,
     )
-    assignment = client.task_assignments.create_task_assignment(
-        task=task, assign_to=assign_to
-    )
+    assignment = client.task_assignments.create_task_assignment(task=task, assign_to=assign_to)
 
     return assignment
 

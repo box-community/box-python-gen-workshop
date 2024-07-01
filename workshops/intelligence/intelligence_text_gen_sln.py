@@ -2,17 +2,17 @@
 
 import logging
 
-from utils.box_ai_client import BoxAIClient as Client
+from box_sdk_gen.client import BoxClient as Client
 
-from box_sdk_gen.errors import BoxAPIError
-
-from utils.ai_schemas import (
-    IntelligenceResponse,
-    IntelligenceDialogueHistory,
+from box_sdk_gen import BoxAPIError
+from box_sdk_gen.client import BoxClient as Client
+from box_sdk_gen.managers.ai import (
+    CreateAiAskItems,
+    AiResponse,
+    CreateAiTextGenDialogueHistory,
 )
 
-
-from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 
 logging.basicConfig(level=logging.INFO)
@@ -26,21 +26,22 @@ def text_gen(
     prompt: str,
     file_id: str,
     content: str = None,
-    dialogue_history: IntelligenceDialogueHistory = None,
-) -> IntelligenceResponse:
+    dialogue_history: CreateAiTextGenDialogueHistory = None,
+) -> AiResponse:
     """Ask a question to the AI"""
 
     if file_id is None:
         raise ValueError("file_id must be provided")
 
-    items = [{"id": file_id, "type": "file"}]
+    items = [CreateAiAskItems(id=file_id, type="file")]
 
     # add content if provided
     if content is not None:
         items[0]["content"] = content
 
     try:
-        response = client.intelligence.intelligence_text_gen(
+        # response = client.intelligence.intelligence_text_gen(
+        response = client.ai.create_ai_text_gen(
             prompt=prompt,
             items=items,
             dialogue_history=dialogue_history,
@@ -54,7 +55,7 @@ def text_gen(
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
     conf = ConfigOAuth()
-    client = get_ai_client_oauth(conf)
+    client = get_client_oauth(conf)
 
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
@@ -75,7 +76,7 @@ def main():
         print(f"\nResponse: {response.answer}")
 
         dialog_history.append(
-            IntelligenceDialogueHistory(
+            CreateAiTextGenDialogueHistory(
                 prompt=question,
                 answer=response.answer,
                 created_at=response.created_at,

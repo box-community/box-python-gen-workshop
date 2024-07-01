@@ -3,11 +3,12 @@
 This is a simple HTTP server that listens for a request from Box OAuth2.0.
 picking up the code and csrf_token from the query string.
 """
+
 import logging
 import urllib.parse
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from box_sdk_gen.oauth import BoxOAuth
+from box_sdk_gen import BoxOAuth
 
 
 CSRF_TOKEN_ORIG = ""
@@ -33,7 +34,9 @@ class CallbackServer(BaseHTTPRequestHandler):
         code = " ".join(params.get("code")) if params.get("code") else None
         state = " ".join(params.get("state")) if params.get("state") else None
         error = " ".join(params.get("error")) if params.get("error") else None
-        error_description = " ".join(params.get("error_description")) if params.get("error_description") else None
+        error_description = (
+            " ".join(params.get("error_description")) if params.get("error_description") else None
+        )
 
         logging.info("code: %s", code)
         logging.info("state: %s", state)

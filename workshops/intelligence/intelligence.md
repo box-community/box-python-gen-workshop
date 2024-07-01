@@ -66,17 +66,13 @@ For the DEMO_FILE constant, use the file id from the previous step, in my case i
 
 import logging
 
-from utils.box_ai_client import BoxAIClient as Client
+from box_sdk_gen.client import BoxClient as Client
 
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
+from box_sdk_gen.client import BoxClient as Client
+from box_sdk_gen.managers.ai import CreateAiAskMode, CreateAiAskItems, AiResponse
 
-from utils.ai_schemas import (
-    IntelligenceResponse,
-    IntelligenceMode,
-)
-
-
-from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 
 logging.basicConfig(level=logging.INFO)
@@ -88,7 +84,7 @@ DEMO_FILE = "1442379637774"
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
     conf = ConfigOAuth()
-    client = get_ai_client_oauth(conf)
+    client = get_client_oauth(conf)
 
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
@@ -107,31 +103,27 @@ Hello, I'm Rui Barbosa (barduinor@gmail.com) [18622116055]
 Now, let's create a method to ask a question to the AI.
 
 ```python
-def ask(
-    client: Client, question: str, file_id: str, content: str = None
-) -> IntelligenceResponse:
+def ask(client: Client, question: str, file_id: str, content: str = None) -> AiResponse:
     """Ask a question to the AI"""
 
     if file_id is None:
         raise ValueError("file_id must be provided")
 
-    mode = IntelligenceMode.SINGLE_ITEM_QA
-    items = [{"id": file_id, "type": "file"}]
+    mode = CreateAiAskMode.SINGLE_ITEM_QA
+
+    items = [CreateAiAskItems(id=file_id, type="file")]
 
     # add content if provided
     if content is not None:
         items[0]["content"] = content
 
     try:
-        response = client.intelligence.intelligence_ask(
-            mode=mode,
-            prompt=question,
-            items=items,
-        )
+        ai_response = client.ai.create_ai_ask(mode=mode, prompt=question, items=items)
+
     except BoxAPIError as e:
         print(f"Error: {e}")
 
-    return response
+    return ai_response
 ```
 
 Next, let's create a input prompt cycle in our main method, so the user can interact with the AI.
@@ -196,17 +188,17 @@ For the DEMO_FILE constant, use the file id from the previous step, in my case i
 
 import logging
 
-from utils.box_ai_client import BoxAIClient as Client
+from box_sdk_gen.client import BoxClient as Client
 
-from box_sdk_gen.errors import BoxAPIError
-
-from utils.ai_schemas import (
-    IntelligenceResponse,
-    IntelligenceDialogueHistory,
+from box_sdk_gen import BoxAPIError
+from box_sdk_gen.client import BoxClient as Client
+from box_sdk_gen.managers.ai import (
+    CreateAiAskItems,
+    AiResponse,
+    CreateAiTextGenDialogueHistory,
 )
 
-
-from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 
 logging.basicConfig(level=logging.INFO)
@@ -217,7 +209,7 @@ DEMO_FILE = "1442379637774"
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
     conf = ConfigOAuth()
-    client = get_ai_client_oauth(conf)
+    client = get_client_oauth(conf)
 
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
@@ -240,21 +232,22 @@ def text_gen(
     prompt: str,
     file_id: str,
     content: str = None,
-    dialogue_history: IntelligenceDialogueHistory = None,
-) -> IntelligenceResponse:
+    dialogue_history: CreateAiTextGenDialogueHistory = None,
+) -> AiResponse:
     """Ask a question to the AI"""
 
     if file_id is None:
         raise ValueError("file_id must be provided")
 
-    items = [{"id": file_id, "type": "file"}]
+    items = [CreateAiAskItems(id=file_id, type="file")]
 
     # add content if provided
     if content is not None:
         items[0]["content"] = content
 
     try:
-        response = client.intelligence.intelligence_text_gen(
+        # response = client.intelligence.intelligence_text_gen(
+        response = client.ai.create_ai_text_gen(
             prompt=prompt,
             items=items,
             dialogue_history=dialogue_history,
@@ -274,9 +267,7 @@ def main():
     # Text gen dialog
     dialog_history = []
     while True:
-        question = input(
-            "\nWhat would you like to talk about? (type 'exit' to quit): "
-        )
+        question = input("\nWhat would you like to talk about? (type 'exit' to quit): ")
         if question == "exit":
             break
 
@@ -289,7 +280,7 @@ def main():
         print(f"\nResponse: {response.answer}")
 
         dialog_history.append(
-            IntelligenceDialogueHistory(
+            CreateAiTextGenDialogueHistory(
                 prompt=question,
                 answer=response.answer,
                 created_at=response.created_at,

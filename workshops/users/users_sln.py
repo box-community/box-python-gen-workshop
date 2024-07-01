@@ -3,7 +3,7 @@
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from box_sdk_gen.schemas import User
 from box_sdk_gen.managers.transfer import TransferOwnedFolderOwnedBy
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -24,12 +24,11 @@ def list_users(client: Client):
 def create_user(client: Client, name: str, login: str) -> User:
     """Create a user"""
     try:
-        user = client.users.create_user(name, login)
+        user = client.users.create_user(name, login=login)
     except BoxAPIError as err:
         if (
             err.response_info.status_code == 409
-            and err.response_info.body.get("code", None)
-            == "user_login_already_used"
+            and err.response_info.body.get("code", None) == "user_login_already_used"
         ):
             # User already exists, let's get it
             user = client.users.get_users(login).entries[0]
@@ -57,9 +56,7 @@ def update_user(
     return user
 
 
-def user_transfer(
-    client: Client, source_user_id: str, destination_user_id: str
-):
+def user_transfer(client: Client, source_user_id: str, destination_user_id: str):
     owned_by = TransferOwnedFolderOwnedBy(destination_user_id)
     client.transfer.transfer_owned_folder(source_user_id, owned_by)
 
@@ -80,7 +77,7 @@ def main():
     list_users(client)
 
     # create a user
-    new_user = create_user(client, "Test User", "barbasr+new@gmail.com")
+    new_user = create_user(client, "Test User", "YOUR_EMAIL+new@gmail.com")
     print(f"\nNew user: {new_user.name} ({new_user.login}) [{new_user.id}]")
 
     # update a user
@@ -88,7 +85,7 @@ def main():
         client,
         new_user.id,
         "John Doe",
-        "barbasr+new@gmail.com",
+        "YOUR_EMAIL+new@gmail.com",
         "+15551234567",
         "123 Main St",
     )

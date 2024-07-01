@@ -138,7 +138,7 @@ def sign_doc_single(
     destination_folder = FolderMini(
         id=destination_folder_id, type=FolderBaseTypeField.FOLDER
     )
-    signer = SignRequestCreateSigner(signer_email)
+    signer = SignRequestCreateSigner(email=signer_email)
     # sign document
     sign_request = client.sign_requests.create_sign_request(
         signers=[signer],

@@ -5,9 +5,9 @@ orchestrates the authentication process
 
 import os
 import dotenv
-from box_sdk_gen.client import BoxClient
-from box_sdk_gen.jwt_auth import BoxJWTAuth, JWTConfig
-from box_sdk_gen.token_storage import FileWithInMemoryCacheTokenStorage
+from box_sdk_gen import BoxClient
+from box_sdk_gen import BoxJWTAuth, JWTConfig
+from box_sdk_gen import FileWithInMemoryCacheTokenStorage
 
 
 ENV_JET = ".jwt.env"
@@ -31,13 +31,11 @@ class ConfigJWT:
 
 
 def get_jwt_enterprise_client(config: ConfigJWT) -> BoxClient:
-    """Returns a boxsdk Client object"""
+    """Returns a box sdk Client object"""
 
     jwt = JWTConfig.from_config_file(
         config_file_path=config.jwt_config_path,
-        token_storage=FileWithInMemoryCacheTokenStorage(
-            ".ent" + config.cache_file
-        ),
+        token_storage=FileWithInMemoryCacheTokenStorage(".ent" + config.cache_file),
     )
     auth = BoxJWTAuth(jwt)
 
@@ -47,16 +45,14 @@ def get_jwt_enterprise_client(config: ConfigJWT) -> BoxClient:
 
 
 def get_jwt_user_client(config: ConfigJWT, user_id: str) -> BoxClient:
-    """Returns a boxsdk Client object"""
+    """Returns a box sdk Client object"""
 
     jwt = JWTConfig.from_config_file(
         config_file_path=config.jwt_config_path,
-        token_storage=FileWithInMemoryCacheTokenStorage(
-            ".user" + config.cache_file
-        ),
+        token_storage=FileWithInMemoryCacheTokenStorage(".user" + config.cache_file),
     )
     auth = BoxJWTAuth(jwt)
-    auth = auth.as_user(user_id)
+    auth = auth.with_user_subject(user_id)
 
     client = BoxClient(auth)
 

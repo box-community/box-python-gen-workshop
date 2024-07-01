@@ -61,7 +61,7 @@ Create a DEMO_FILE constant with the id of the `sample word document.docx` file 
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from box_sdk_gen.schemas import (
     Watermark,
 )
@@ -110,9 +110,7 @@ Let's start by creating a method to turn on the watermark for a file. Add the fo
 ```python
 def add_watermark_to_file(client: Client, file_id: str) -> Watermark:
     """Watermark a file"""
-    update_watermark = UpdateFileWatermarkWatermark(
-        UpdateFileWatermarkWatermarkImprintField.DEFAULT
-    )
+    update_watermark = UpdateFileWatermarkWatermark(imprint=UpdateFileWatermarkWatermarkImprintField.DEFAULT)
     return client.file_watermarks.update_file_watermark(
         file_id=file_id,
         watermark=update_watermark,
@@ -175,7 +173,7 @@ Applying watermarks to individual files is a tedious task. Let's now create a me
 def add_watermark_to_folder(client: Client, folder_id: str) -> Watermark:
     """Watermark a folder"""
     update_watermark = UpdateFolderWatermarkWatermark(
-        UpdateFolderWatermarkWatermarkImprintField.DEFAULT
+        imprint=UpdateFolderWatermarkWatermarkImprintField.DEFAULT
     )
     return client.folder_watermarks.update_folder_watermark(
         folder_id=folder_id,

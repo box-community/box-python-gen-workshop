@@ -167,20 +167,18 @@ def create_file_request(
     is_description_required: bool | None = None,
     expires_at: str | None = None,
 ) -> FileRequest:
-    folder = CreateFileRequestCopyFolder(
-        folder_id, CreateFileRequestCopyFolderTypeField.FOLDER
-    )
+    folder = CreateFileRequestCopyFolder(folder_id, type=CreateFileRequestCopyFolderTypeField.FOLDER)
     status = CreateFileRequestCopyStatus.ACTIVE
 
     file_request = client.file_requests.create_file_request_copy(
         from_file_request_id,
         folder,
-        title,
-        description,
-        status,
-        is_email_required,
-        is_description_required,
-        expires_at,
+        title=title,
+        description=description,
+        status=status,
+        is_email_required=is_email_required,
+        is_description_required=is_description_required,
+        expires_at=expires_at,
     )
     return file_request
 ```
@@ -239,12 +237,12 @@ def update_file_request(
 ) -> FileRequest:
     file_request = client.file_requests.update_file_request_by_id(
         file_request_id,
-        title,
-        description,
-        status,
-        is_email_required,
-        is_description_required,
-        expires_at,
+        title=title,
+        description=description,
+        status=status,
+        is_email_required=is_email_required,
+        is_description_required=is_description_required,
+        expires_at=expires_at,
     )
     return file_request
 ```

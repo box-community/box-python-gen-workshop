@@ -1,4 +1,5 @@
 """Box Shared links"""
+
 import logging
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -18,11 +19,11 @@ from utils.oauth_callback import open_browser
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-SIGN_DOCS_FOLDER = "234102987614"
+SIGN_DOCS_FOLDER = "249194622181"
 
-SIMPLE_PDF = "1355143830404"
-SIMPLE_DOC = "1358077513913"
-CONTRACT = "1358047520478"
+SIMPLE_PDF = "1445561259986"
+SIMPLE_DOC = "1445560726821"
+CONTRACT = "1445563382130"
 
 SIGNER_A = "YOUR_EMAIL+A@gmail.com"
 SIGNER_A_PHONE = "+15554443322"
@@ -51,10 +52,8 @@ def sign_doc_single(
 
     # Sign request params
     source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
-    destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
-    )
-    signer = SignRequestCreateSigner(signer_email)
+    destination_folder = FolderMini(id=destination_folder_id, type=FolderBaseTypeField.FOLDER)
+    signer = SignRequestCreateSigner(email=signer_email)
     # sign document
     sign_request = client.sign_requests.create_sign_request(
         signers=[signer],
@@ -78,9 +77,7 @@ def sign_contract(
 
     # Sign request params
     source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
-    destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
-    )
+    destination_folder = FolderMini(id=destination_folder_id, type=FolderBaseTypeField.FOLDER)
 
     # signers
     institution = SignRequestCreateSigner(
@@ -129,9 +126,7 @@ def sign_doc_single_more_options(
 
     # Sign request params
     source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
-    destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
-    )
+    destination_folder = FolderMini(id=destination_folder_id, type=FolderBaseTypeField.FOLDER)
 
     # signer
     signer = SignRequestCreateSigner(signer_email)
@@ -162,9 +157,7 @@ def sign_doc_verify_phone(
 ) -> SignRequest:
     # Sign request params
     source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
-    destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
-    )
+    destination_folder = FolderMini(id=destination_folder_id, type=FolderBaseTypeField.FOLDER)
 
     signer = SignRequestCreateSigner(
         email=signer_email,
@@ -191,9 +184,7 @@ def sign_doc_verify_password(
 ) -> SignRequest:
     # Sign request params
     source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
-    destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
-    )
+    destination_folder = FolderMini(id=destination_folder_id, type=FolderBaseTypeField.FOLDER)
 
     # signer
     signer = SignRequestCreateSigner(
@@ -224,9 +215,7 @@ def sign_contract_step(
 
     # Sign request params
     source_file = FileBase(id=document_id, type=FileBaseTypeField.FILE)
-    destination_folder = FolderMini(
-        id=destination_folder_id, type=FolderBaseTypeField.FOLDER
-    )
+    destination_folder = FolderMini(id=destination_folder_id, type=FolderBaseTypeField.FOLDER)
 
     # signers
     institution = SignRequestCreateSigner(
@@ -275,9 +264,7 @@ def main():
     # check_sign_request(sign_pdf)
 
     # Simple sign a pdf request with preparation
-    sign_pdf_prep = sign_doc_single(
-        client, SIMPLE_PDF, SIGN_DOCS_FOLDER, SIGNER_A, True
-    )
+    sign_pdf_prep = sign_doc_single(client, SIMPLE_PDF, SIGN_DOCS_FOLDER, SIGNER_A, True)
     check_sign_request(sign_pdf_prep)
     if sign_pdf_prep.prepare_url is not None:
         open_browser(sign_pdf_prep.prepare_url)

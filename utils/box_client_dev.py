@@ -2,11 +2,12 @@
 Handles the box client object creation for a box application using a developer token
 note: developer tokens are always associated with the user who created them
 """
+
 import os
 import dotenv
 
 from box_sdk_gen.client import BoxClient
-from box_sdk_gen.developer_token_auth import BoxDeveloperTokenAuth
+from box_sdk_gen import BoxDeveloperTokenAuth
 
 
 ENV_DEV = ".dev.env"
@@ -25,6 +26,6 @@ class ConfigDev:
 
 
 def get_client_dev(config: ConfigDev) -> BoxClient:
-    """Returns a boxsdk Client object"""
+    """Returns a box sdk Client object"""
     auth = BoxDeveloperTokenAuth(config.dev_token)
     return BoxClient(auth)

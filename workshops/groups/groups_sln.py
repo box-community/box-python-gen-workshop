@@ -3,7 +3,7 @@
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.errors import BoxAPIError
+from box_sdk_gen import BoxAPIError
 from box_sdk_gen.schemas import (
     User,
     Group,
@@ -48,24 +48,19 @@ def create_group(
     """Create group"""
 
     invitability_level = CreateGroupInvitabilityLevel.ADMINS_AND_MEMBERS
-    member_viewability_level = (
-        CreateGroupMemberViewabilityLevel.ADMINS_AND_MEMBERS
-    )
+    member_viewability_level = CreateGroupMemberViewabilityLevel.ADMINS_AND_MEMBERS
 
     try:
         group = client.groups.create_group(
             name,
-            provenance,
-            external_sync_identifier,
-            description,
-            invitability_level,
-            member_viewability_level,
+            provenance=provenance,
+            external_sync_identifier=external_sync_identifier,
+            description=description,
+            invitability_level=invitability_level,
+            member_viewability_level=member_viewability_level,
         )
     except BoxAPIError as err:
-        if (
-            err.response_info.status_code == 409
-            and err.response_info.body.get("code", None) == "conflict"
-        ):
+        if err.response_info.status_code == 409 and err.response_info.body.get("code", None) == "conflict":
             # group already exists
             groups = client.groups.get_groups(filter_term=name)
             for group in groups.entries:
@@ -90,18 +85,11 @@ def add_user_to_group(
     """Add user to group"""
 
     try:
-        group_membership = client.memberships.create_group_membership(
-            user, group, role
-        )
+        group_membership = client.memberships.create_group_membership(user, group, role=role)
     except BoxAPIError as err:
-        if (
-            err.response_info.status_code == 409
-            and err.response_info.body.get("code", None) == "conflict"
-        ):
+        if err.response_info.status_code == 409 and err.response_info.body.get("code", None) == "conflict":
             # user already in group
-            group_memberships = client.memberships.get_group_memberships(
-                group.id
-            )
+            group_memberships = client.memberships.get_group_memberships(group.id)
             for group_membership in group_memberships.entries:
                 if group_membership.user.id == user.id:
                     return group_membership
@@ -112,9 +100,7 @@ def add_user_to_group(
 def list_group_members(client: Client, group: Group) -> None:
     """List group members"""
     print(f"\nGroup members for {group.name} ({group.id}):")
-    for group_membership in client.memberships.get_group_memberships(
-        group.id
-    ).entries:
+    for group_membership in client.memberships.get_group_memberships(group.id).entries:
         print(
             f" - {group_membership.user.name} as ",
             f"{group_membership.role.value} ",
@@ -125,9 +111,7 @@ def list_group_members(client: Client, group: Group) -> None:
 def list_user_groups(client: Client, user: User) -> None:
     """List groups for user"""
     print(f"\nGroups for {user.name} ({user.id}):")
-    for group_membership in client.memberships.get_user_memberships(
-        user.id
-    ).entries:
+    for group_membership in client.memberships.get_user_memberships(user.id).entries:
         print(
             f" - {group_membership.group.name} as ",
             f"{group_membership.role.value} ",
@@ -135,30 +119,21 @@ def list_user_groups(client: Client, user: User) -> None:
         )
 
 
-def share_folder_with_group(
-    client: Client, folder_id: str, group: Group
-) -> Collaboration:
+def share_folder_with_group(client: Client, folder_id: str, group: Group) -> Collaboration:
     """Share folder with group"""
 
     try:
         collaboration = client.user_collaborations.create_collaboration(
-            item=CreateCollaborationItem(
-                type=CreateCollaborationItemTypeField.FOLDER, id=DEMO_FOLDER
-            ),
+            item=CreateCollaborationItem(type=CreateCollaborationItemTypeField.FOLDER, id=DEMO_FOLDER),
             accessible_by=CreateCollaborationAccessibleBy(
-                CreateCollaborationAccessibleByTypeField.GROUP, group.id
+                CreateCollaborationAccessibleByTypeField.GROUP, id=group.id
             ),
             role=CreateCollaborationRole.EDITOR,
         )
     except BoxAPIError as err:
-        if (
-            err.response_info.status_code == 409
-            and err.response_info.body.get("code", None) == "conflict"
-        ):
+        if err.response_info.status_code == 409 and err.response_info.body.get("code", None) == "conflict":
             # folder already shared with group
-            collaborations = (
-                client.list_collaborations.get_folder_collaborations(folder_id)
-            )
+            collaborations = client.list_collaborations.get_folder_collaborations(folder_id)
             for collaboration in collaborations.entries:
                 if collaboration.accessible_by.id == group.id:
                     return collaboration
@@ -212,8 +187,7 @@ def main():
         f"\nShared folder <{collaboration.item.name}> ",
         f"({collaboration.item.id}) ",
         f"with group <{collaboration.accessible_by.name}> ",
-        f"({collaboration.accessible_by.id}) "
-        f"as {collaboration.role.value}",
+        f"({collaboration.accessible_by.id}) " f"as {collaboration.role.value}",
     )
 
     # delete group

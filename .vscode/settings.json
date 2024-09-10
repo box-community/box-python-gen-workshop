@@ -9,5 +9,6 @@
         "etag",
         "getsize",
         "shutil"
-    ]
+    ],
+    "editor.formatOnSave": true
 }

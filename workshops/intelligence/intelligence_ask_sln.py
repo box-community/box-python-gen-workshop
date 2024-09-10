@@ -2,19 +2,16 @@
 
 import logging
 
-from box_sdk_gen.client import BoxClient as Client
-
-from box_sdk_gen import BoxAPIError
-from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.managers.ai import CreateAiAskMode, CreateAiAskItems, AiResponse
+from box_sdk_gen import AiResponse, BoxAPIError
+from box_sdk_gen import BoxClient as Client
+from box_sdk_gen import CreateAiAskItems, CreateAiAskMode
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
-
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FILE = "1530265998769"
+DEMO_FILE = "1514587167701"
 
 
 def ask(client: Client, question: str, file_id: str, content: str = None) -> AiResponse:
@@ -35,8 +32,8 @@ def ask(client: Client, question: str, file_id: str, content: str = None) -> AiR
         ai_response = client.ai.create_ai_ask(mode=mode, prompt=question, items=items)
 
     except BoxAPIError as e:
-        print(f"Error: {e}")
-
+        # print(f"Error: {e}")
+        ai_response = AiResponse(answer=e.message, created_at=None, completion_reason="error")
     return ai_response
 
 

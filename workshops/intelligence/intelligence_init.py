@@ -1,8 +1,8 @@
 """create sample content to box"""
 
 import logging
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from workshops.intelligence.create_samples import create_samples
 
 logging.basicConfig(level=logging.INFO)

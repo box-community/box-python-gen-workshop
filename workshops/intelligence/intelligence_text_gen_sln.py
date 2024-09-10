@@ -2,23 +2,16 @@
 
 import logging
 
-from box_sdk_gen.client import BoxClient as Client
-
-from box_sdk_gen import BoxAPIError
-from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.managers.ai import (
-    CreateAiAskItems,
-    AiResponse,
-    CreateAiTextGenDialogueHistory,
-)
+from box_sdk_gen import AiDialogueHistory, AiResponse, BoxAPIError
+from box_sdk_gen import BoxClient as Client
+from box_sdk_gen import CreateAiAskItems
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
-
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FILE = "1530265998769"
+DEMO_FILE = "1514587167701"
 
 
 def text_gen(
@@ -26,7 +19,7 @@ def text_gen(
     prompt: str,
     file_id: str,
     content: str = None,
-    dialogue_history: CreateAiTextGenDialogueHistory = None,
+    dialogue_history: AiDialogueHistory = None,
 ) -> AiResponse:
     """Ask a question to the AI"""
 
@@ -76,7 +69,7 @@ def main():
         print(f"\nResponse: {response.answer}")
 
         dialog_history.append(
-            CreateAiTextGenDialogueHistory(
+            AiDialogueHistory(
                 prompt=question,
                 answer=response.answer,
                 created_at=response.created_at,

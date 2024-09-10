@@ -1,0 +1,7 @@
+Vendor: Quasar Innovations
+Invoice Number: Q2468
+Purchase Order Number: 003
+Line Items:
+    - Infinite Probability Drive: $1,000
+    - Celestial Kaleidoscope: $50
+Total: $1,050

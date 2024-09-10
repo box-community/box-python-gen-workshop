@@ -1,0 +1,7 @@
+Vendor: AstroTech Solutions
+Invoice Number: A5555
+
+Line Items:
+    - Gravitational Wave Detector Kit: $800
+    - Exoplanet Terrarium: $120
+Total: $920

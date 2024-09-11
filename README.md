@@ -27,7 +27,7 @@ This project contains workshops on how to use the Box Python SDK to interact wit
 
 ### Get the code
 ```bash
-git clone git@github.com:barduinor/box-python-gen-workshop.git
+git clone git@github.com:box-community/box-python-gen-workshop.git
 cd box-python-gen-workshop
 ```
 

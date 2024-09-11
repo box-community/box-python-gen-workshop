@@ -1,4 +1,4 @@
-"""Box Shared links"""
+"""Box Sign API example"""
 
 import logging
 

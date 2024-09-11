@@ -62,22 +62,22 @@ if __name__ == "__main__":
 ```
 Result:
 ```yaml
-INFO:root:Folder workshops with id: 248851586376
-INFO:root:Folder metadata with id: 248847004564
-INFO:root:Folder invoices with id: 248887218023
+INFO:root:Folder workshops with id: 260937698360
+INFO:root:Folder metadata with id: 261452450320
+INFO:root:Folder invoices with id: 261456614253
 INFO:root: Folder invoices
-INFO:root:      Uploaded Invoice-Q8888.txt (1443719236185) 164 bytes
-INFO:root:      Uploaded Invoice-B1234.txt (1443724064462) 168 bytes
-INFO:root:      Uploaded Invoice-C9876.txt (1443729681339) 189 bytes
-INFO:root:      Uploaded Invoice-A5555.txt (1443738625223) 150 bytes
-INFO:root:      Uploaded Invoice-Q2468.txt (1443721424754) 176 bytes
-INFO:root:Folder purchase_orders with id: 248891043873
+INFO:root:      Uploaded Invoice-Q8888.txt (1517630440115) 185 bytes
+INFO:root:      Uploaded Invoice-B1234.txt (1517619752941) 189 bytes
+INFO:root:      Uploaded Invoice-C9876.txt (1517619788460) 210 bytes
+INFO:root:      Uploaded Invoice-A5555.txt (1517632907985) 171 bytes
+INFO:root:      Uploaded Invoice-Q2468.txt (1517629086517) 197 bytes
+INFO:root:Folder purchase_orders with id: 261457585224
 INFO:root: Folder purchase_orders
-INFO:root:      Uploaded PO-001.txt (1443731848797) 212 bytes
-INFO:root:      Uploaded PO-002.txt (1443739645222) 229 bytes
-INFO:root:      Uploaded PO-003.txt (1443724777261) 222 bytes
-INFO:root:      Uploaded PO-004.txt (1443739415948) 217 bytes
-INFO:root:      Uploaded PO-005.txt (1443724550074) 211 bytes
+INFO:root:      Uploaded PO-001.txt (1517628618684) 212 bytes
+INFO:root:      Uploaded PO-002.txt (1517626773559) 229 bytes
+INFO:root:      Uploaded PO-003.txt (1517628291707) 222 bytes
+INFO:root:      Uploaded PO-004.txt (1517625894126) 217 bytes
+INFO:root:      Uploaded PO-005.txt (1517628697289) 211 bytes
 ```
 
 Next, create a `metadata.py` file on the root of the project that you will use to write your code.
@@ -87,34 +87,33 @@ You can get the `ENTERPRISE_SCOPE` from the Box Admin Console -> Account & Billi
 
 ```python
 import logging
-from typing import Dict
+from datetime import datetime
+from typing import Dict, List
 
-from utils.box_ai_client import BoxAIClient as Client
-from box_sdk_gen import BoxAPIError
-
-from box_sdk_gen.schemas import MetadataTemplate
-from utils.ai_schemas import IntelligenceMetadataSuggestions
-from box_sdk_gen.managers.metadata_templates import (
-    CreateMetadataTemplateFields,
-    CreateMetadataTemplateFieldsTypeField,
-    CreateMetadataTemplateFieldsOptionsField,
-)
-
-from box_sdk_gen.managers.file_metadata import (
+from box_sdk_gen import (
+    AiResponseFull,
+    BoxAPIError,
+    CreateAiAskItems,
     CreateFileMetadataByIdScope,
-    UpdateFileMetadataByIdScope,
+    CreateMetadataTemplateFields,
+    CreateMetadataTemplateFieldsOptionsField,
+    CreateMetadataTemplateFieldsTypeField,
+    MetadataTemplate,
+    SearchByMetadataQueryOrderBy,
+    SearchByMetadataQueryOrderByDirectionField,
     UpdateFileMetadataByIdRequestBody,
     UpdateFileMetadataByIdRequestBodyOpField,
+    UpdateFileMetadataByIdScope,
 )
 
-from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
+from utils.box_ai_client_oauth import BoxAIClient, ConfigOAuth, get_ai_client_oauth
+from utils.intelligence import ExtractStructuredMetadataTemplate
 
-logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-INVOICE_FOLDER = "248887218023"
-PO_FOLDER = "248891043873"
-ENTERPRISE_SCOPE = "enterprise_1133807781"
+INVOICE_FOLDER = "261456614253"
+PO_FOLDER = "261457585224"
+ENTERPRISE_SCOPE = "enterprise_1134207681"
 
 def main():
     conf = ConfigOAuth()
@@ -130,7 +129,7 @@ if __name__ == "__main__":
 Resulting in:
 
 ```yaml
-Hello, I'm Rui Barbosa (barduinor@gmail.com) [18622116055]
+Hello, I'm RB Admin (rbarbosa+devday@boxdemo.com) [31519033281]
 ```
 ## Create some helper functions
 To make our life easier later, let's create some helper functions to interact with the Box API.
@@ -138,15 +137,13 @@ To make our life easier later, let's create some helper functions to interact wi
 First, let's create a function to get a metadata template by key:
 
 ```python
-def get_template_by_key(client: Client, template_key: str) -> MetadataTemplate:
+def get_template_by_key(client: BoxAIClient, template_key: str) -> MetadataTemplate:
     """Get a metadata template by key"""
 
     scope = "enterprise"
 
     try:
-        template = client.metadata_templates.get_metadata_template(
-            scope=scope, template_key=template_key
-        )
+        template = client.metadata_templates.get_metadata_template(scope=scope, template_key=template_key)
     except BoxAPIError as err:
         if err.response_info.status_code == 404:
             template = None
@@ -159,15 +156,13 @@ def get_template_by_key(client: Client, template_key: str) -> MetadataTemplate:
 Next, let's create a function to delete a metadata template by key, just in case we get stuck and need to start over:
 
 ```python
-def delete_template_by_key(client: Client, template_key: str):
+def delete_template_by_key(client: BoxAIClient, template_key: str):
     """Delete a metadata template by key"""
 
     scope = "enterprise"
 
     try:
-        client.metadata_templates.delete_metadata_template(
-            scope=scope, template_key=template_key
-        )
+        client.metadata_templates.delete_metadata_template(scope=scope, template_key=template_key)
     except BoxAPIError as err:
         if err.response_info.status_code == 404:
             pass
@@ -182,9 +177,7 @@ Because metadata templates are common to the entire enterprise, use your initial
 
 Let's create a metadata template using this method:
 ```python
-def create_invoice_po_template(
-    client: Client, template_key: str, display_name: str
-) -> MetadataTemplate:
+def create_invoice_po_template(client: BoxAIClient, template_key: str, display_name: str) -> MetadataTemplate:
     """Create a metadata template"""
 
     scope = "enterprise"
@@ -197,10 +190,10 @@ def create_invoice_po_template(
             type=CreateMetadataTemplateFieldsTypeField.ENUM,
             key="documentType",
             display_name="Document Type",
-            description="Identifies document as an invoice or purchase order",
             options=[
                 CreateMetadataTemplateFieldsOptionsField(key="Invoice"),
                 CreateMetadataTemplateFieldsOptionsField(key="Purchase Order"),
+                CreateMetadataTemplateFieldsOptionsField(key="Unknown"),
             ],
         )
     )
@@ -217,10 +210,10 @@ def create_invoice_po_template(
     # Document total
     fields.append(
         CreateMetadataTemplateFields(
-            type=CreateMetadataTemplateFieldsTypeField.FLOAT,
-            key="documentTotal",
-            display_name="Document Total",
-            description="Total USD value of document",
+            type=CreateMetadataTemplateFieldsTypeField.STRING,
+            key="total",
+            display_name="Total: $",
+            description="Total: $",
         )
     )
 
@@ -238,8 +231,8 @@ def create_invoice_po_template(
     fields.append(
         CreateMetadataTemplateFields(
             type=CreateMetadataTemplateFieldsTypeField.STRING,
-            key="invoice",
-            display_name="Invoice #",
+            key="invoiceNumber",
+            display_name="Invoice Number",
             description="Document number or associated invoice",
         )
     )
@@ -248,8 +241,8 @@ def create_invoice_po_template(
     fields.append(
         CreateMetadataTemplateFields(
             type=CreateMetadataTemplateFieldsTypeField.STRING,
-            key="po",
-            display_name="PO #",
+            key="purchaseOrderNumber",
+            display_name="Purchase Order Number",
             description="Document number or associated purchase order",
         )
     )
@@ -312,15 +305,13 @@ Create a method to scan the content and get metadata suggestions:
 
 ```python
 def get_metadata_suggestions_for_file(
-    client: Client, file_id: str, enterprise_scope: str, template_key: str
-) -> IntelligenceMetadataSuggestions:
+    client_ai: BoxAIClient, file_id: str, scope: str, template_key: str
+) -> AiResponseFull:
     """Get metadata suggestions for a file"""
-    return client.intelligence.intelligence_metadata_suggestion(
-        item=file_id,
-        scope=enterprise_scope,
-        template_key=template_key,
-        confidence="experimental",
-    )
+
+    item = CreateAiAskItems(id=file_id, type="file")
+    metadata_template = ExtractStructuredMetadataTemplate(scope=scope, template_key=template_key)
+    return client_ai.intelligence.extract_structured(items=[item], metadata_template=metadata_template)
 ```
 
 Next add the following code to the main function to scan the content and get metadata suggestions:
@@ -329,32 +320,31 @@ Next add the following code to the main function to scan the content and get met
 def main():
     ...
 
-    # Scan the purchase folder for metadata suggestions
+    # # Scan the purchase folder for metadata suggestions
     folder_items = client.folders.get_folder_items(PO_FOLDER)
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
-        suggestions = get_metadata_suggestions_for_file(
-            client, item.id, ENTERPRISE_SCOPE, template_key
-        )
-        print(f"Suggestions: {suggestions.suggestions}")
+        ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
+        print(f"Suggestions: {ai_response.answer}")
+
 ```
 
 Your results may vary, but in my case:
 ```yaml
-Item: PO-001.txt [1443731848797]
-Suggestions: {'documentType': 'Purchase Order', 'documentDate': '2024-02-13T00:00:00.000Z', 'vendor': 'Galactic Gizmos Inc.', 'invoiceNumber': None, 'purchaseOrderNumber': '001', 'total': '$575'}
+Item: PO-001.txt [1517628618684]
+Suggestions: {'documentDate': 'February 13, 2024', 'total': '$575', 'documentType': 'Purchase Order', 'vendor': 'Galactic Gizmos Inc.', 'purchaseOrderNumber': '001'}
 
-Item: PO-002.txt [1443739645222]
-Suggestions: {'documentType': 'Purchase Order', 'documentDate': '2024-02-13T00:00:00.000Z', 'total': '$230', 'vendor': 'Cosmic Contraptions Ltd.', 'invoiceNumber': None, 'purchaseOrderNumber': '002'}
+Item: PO-002.txt [1517626773559]
+Suggestions: {'documentDate': 'February 13, 2024', 'total': '$230', 'documentType': 'Purchase Order', 'vendor': 'Cosmic Contraptions Ltd.', 'purchaseOrderNumber': '002'}
 
-Item: PO-003.txt [1443724777261]
-Suggestions: {'documentType': 'Purchase Order', 'documentDate': '2024-02-13T00:00:00.000Z', 'total': '1,050', 'vendor': 'Quasar Innovations'}
+Item: PO-003.txt [1517628291707]
+Suggestions: {'documentDate': 'February 13, 2024', 'total': '$1,050', 'documentType': 'Purchase Order', 'vendor': 'Quasar Innovations', 'purchaseOrderNumber': '003'}
 
-Item: PO-004.txt [1443739415948]
-Suggestions: {'documentType': 'Purchase Order', 'documentDate': '2024-02-13T00:00:00.000Z', 'vendor': 'AstroTech Solutions', 'invoiceNumber': None, 'purchaseOrderNumber': '004', 'total': '920'}
+Item: PO-004.txt [1517625894126]
+Suggestions: {'documentDate': 'February 13, 2024', 'total': '$920', 'documentType': 'Purchase Order', 'vendor': 'AstroTech Solutions', 'purchaseOrderNumber': '004'}
 
-Item: PO-005.txt [1443724550074]
-Suggestions: {'documentType': 'Purchase Order', 'documentDate': '2024-02-13T00:00:00.000Z', 'vendor': 'Quantum Quirks Co.', 'invoiceNumber': None, 'purchaseOrderNumber': '005'}
+Item: PO-005.txt [1517628697289]
+Suggestions: {'documentDate': 'February 13, 2024', 'total': '$45', 'documentType': 'Purchase Order', 'vendor': 'Quantum Quirks Co.', 'purchaseOrderNumber': '005'}
 ```
 
 ## Updating the content metadata
@@ -368,9 +358,29 @@ There are 3 things to consider here:
 Create a method to update the content metadata:
 
 ```python
-def apply_template_to_file(
-    client: Client, file_id: str, template_key: str, data: Dict[str, str]
-):
+def convert_to_datetime(date_string):
+    """
+    Converts a date string in the format 'February 13, 2024' or '2024-03-13' to a datetime object.
+
+    :param date_string: The date string to convert.
+    :return: A datetime object or None if the format is not recognized.
+    """
+    # Define possible date formats
+    date_formats = ["%B %d, %Y", "%Y-%m-%d"]
+
+    for date_format in date_formats:
+        try:
+            # Attempt to parse the date string with the current format
+            return datetime.strptime(date_string, date_format)
+        except ValueError:
+            # If parsing fails, continue to the next format
+            continue
+
+    # If none of the formats match, return None
+    return None
+
+
+def apply_template_to_file(client: BoxAIClient, file_id: str, template_key: str, data: Dict[str, str]):
     """Apply a metadata template to a folder"""
     default_data = {
         "documentType": "Unknown",
@@ -388,12 +398,12 @@ def apply_template_to_file(
     if "documentDate" in data:
         try:
             date_string = data["documentDate"]
-            date2 = datetime.fromisoformat(date_string)
-            data["documentDate"] = (
-                date2.isoformat().replace("+00:00", "") + "Z"
-            )
-        except ValueError:
+            date2 = convert_to_datetime(date_string)
+
+            data["documentDate"] = date2.isoformat().replace("+00:00", "") + "Z"
+        except ValueError as e:
             data["documentDate"] = "1900-01-01T00:00:00Z"
+            print(f"Error converting date: {e}")
 
     # Merge the default data with the data
     data = {**default_data, **data}
@@ -424,9 +434,7 @@ def apply_template_to_file(
                     request_body=update_data,
                 )
             except BoxAPIError as error_b:
-                logging.error(
-                    f"Error updating metadata: {error_b.status}:{error_b.code}:{file_id}"
-                )
+                logging.error(f"Error updating metadata: {error_b.status}:{error_b.code}:{file_id}")
         else:
             raise error_a
 ```
@@ -466,15 +474,13 @@ Add the following code to the main function to scan and apply the metadata to th
 def main():
     ...
 
-    # Scan the invoice folder for metadata suggestions
+    # # Scan the invoice folder for metadata suggestions
     folder_items = client.folders.get_folder_items(INVOICE_FOLDER)
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
-        suggestions = get_metadata_suggestions_for_file(
-            client, item.id, ENTERPRISE_SCOPE, template_key
-        )
-        print(f"Suggestions: {suggestions.suggestions}")
-        metadata = suggestions.suggestions
+        ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
+        print(f"Suggestions: {ai_response.answer}")
+        metadata = ai_response.answer
         apply_template_to_file(
             client,
             item.id,
@@ -485,27 +491,27 @@ def main():
 
 Resulting in:
 ```yaml
-Item: Invoice-A5555.txt [1443738625223]
-Suggestions: {'documentType': 'Invoice', 'invoiceNumber': 'A5555', 'total': '920'}
+Item: Invoice-A5555.txt [1517632907985]
+Suggestions: {'documentDate': '2024-03-13', 'invoiceNumber': 'A5555', 'total': '$920', 'documentType': 'Invoice', 'vendor': 'AstroTech Solutions'}
 
-Item: Invoice-B1234.txt [1443724064462]
-Suggestions: {'documentType': 'Invoice', 'documentDate': None, 'total': '575', 'vendor': 'Galactic Gizmos Inc.', 'invoiceNumber': 'B1234', 'purchaseOrderNumber': '001'}
+Item: Invoice-B1234.txt [1517619752941]
+Suggestions: {'documentDate': '2024-03-13', 'invoiceNumber': 'B1234', 'total': '$575', 'documentType': 'Invoice', 'vendor': 'Galactic Gizmos Inc.', 'purchaseOrderNumber': '001'}
 
-Item: Invoice-C9876.txt [1443729681339]
-Suggestions: {'documentType': 'Invoice', 'invoiceNumber': 'C9876', 'purchaseOrderNumber': '002', 'total': '$230', 'vendor': 'Cosmic Contraptions Ltd.'}
+Item: Invoice-C9876.txt [1517619788460]
+Suggestions: {'documentDate': '2024-03-13', 'invoiceNumber': 'C9876', 'total': '$230', 'documentType': 'Invoice', 'vendor': 'Cosmic Contraptions Ltd.', 'purchaseOrderNumber': '002'}
 
-Item: Invoice-Q2468.txt [1443721424754]
-Suggestions: {'documentType': 'Invoice', 'documentDate': None, 'total': '1,050', 'vendor': 'Quasar Innovations', 'invoiceNumber': 'Q2468', 'purchaseOrderNumber': '003'}
+Item: Invoice-Q2468.txt [1517629086517]
+Suggestions: {'documentDate': '2024-03-13', 'invoiceNumber': 'Q2468', 'total': '$1,050', 'documentType': 'Invoice', 'vendor': 'Quasar Innovations', 'purchaseOrderNumber': '003'}
 
-Item: Invoice-Q8888.txt [1443719236185]
-Suggestions: {'documentType': 'Invoice', 'invoiceNumber': 'Q8888', 'purchaseOrderNumber': '005', 'total': '$45', 'vendor': 'Quantum Quirks Co.'}
+Item: Invoice-Q8888.txt [1517630440115]
+Suggestions: {'documentDate': '2024-03-13', 'invoiceNumber': 'Q8888', 'total': '$45', 'documentType': 'Invoice', 'vendor': 'Quantum Quirks Co.', 'purchaseOrderNumber': '005'}
 ```
 
 ## Getting metadata for a file
 We can directly get the metadata for a file using the following method:
 
 ```python
-def get_file_metadata(client: Client, file_id: str, template_key: str):
+def get_file_metadata(client: BoxAIClient, file_id: str, template_key: str):
     """Get file metadata"""
     metadata = client.file_metadata.get_file_metadata_by_id(
         file_id=file_id,
@@ -521,15 +527,13 @@ def main():
     ...
 
     # get metadata for a file
-    metadata = get_file_metadata(
-        client, folder_items.entries[0].id, template_key
-    )
+    metadata = get_file_metadata(client, folder_items.entries[0].id, template_key)
     print(f"\nMetadata for file: {metadata.extra_data}")
 ```
 
 Resulting in:
 ```yaml
-Metadata for file: {'invoiceNumber': 'A5555', 'vendor': 'Unknown', 'documentType': 'Invoice', 'documentDate': '1900-01-01T00:00:00.000Z', 'purchaseOrderNumber': 'Unknown', 'total': '920'}
+Metadata for file: {'invoiceNumber': 'A5555', 'vendor': 'AstroTech Solutions', 'documentDate': '2024-03-13T00:00:00.000Z', 'total': '$920', 'purchaseOrderNumber': 'Unknown', 'documentType': 'Invoice'}
 ```
 
 
@@ -538,7 +542,7 @@ We may have invoices that do not have a matching purchase order. Let's create a 
 
 ```python
 def search_metadata(
-    client: Client,
+    client: BoxAIClient,
     template_key: str,
     folder_id: str,
     query: str,
@@ -582,19 +586,17 @@ And in our main, search for invoices that do not have a matching purchase order:
 def main():
     ...
 
-    # search for invoices without purchase orders
+    # # search for invoices without purchase orders
     query = "documentType = :docType AND purchaseOrderNumber = :poNumber"
     query_params = {"docType": "Invoice", "poNumber": "Unknown"}
 
-    search_result = search_metadata(
-        client, template_key, INVOICE_FOLDER, query, query_params
-    )
+    search_result = search_metadata(client, template_key, INVOICE_FOLDER, query, query_params)
     print(f"\nSearch results: {search_result.entries}")
 ```
 
 Resulting in:
 ```yaml
-Search results: [{'metadata': {'enterprise_1133807781': {'rbInvoicePO': {'$scope': 'enterprise_1133807781', '$template': 'rbInvoicePO', '$parent': 'file_1443738625223', 'purchaseOrderNumber': 'Unknown', 'invoiceNumber': 'A5555', '$version': 11}}}, 'id': '1443738625223', 'type': 'file', 'etag': '3', 'name': 'Invoice-A5555.txt'}]
+Search results: [<class 'box_sdk_gen.schemas.file.File'> {'metadata': {'enterprise_1134207681': {'rbInvoicePO': {'$scope': 'enterprise_1134207681', '$template': 'rbInvoicePO', '$parent': 'file_1517632907985', 'purchaseOrderNumber': 'Unknown', 'invoiceNumber': 'A5555', '$version': 7}}}, 'id': '1517632907985', 'etag': '2', 'type': 'file', 'name': 'Invoice-A5555.txt'}]
 ```
 
 It may take 10 to 15 minutes for the metadata to be indexed and available for search. If you don't see any results, wait a few minutes and try again.

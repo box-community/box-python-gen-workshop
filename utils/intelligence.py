@@ -12,11 +12,8 @@ from box_sdk_gen import (
     fetch,
     prepare_params,
     serialize,
-    to_string,
 )
 from box_sdk_gen.serialization import deserialize
-
-from utils.ai_schemas import IntelligenceMetadataSuggestions, IntelligenceResponse
 
 
 class ExtractStructuredMetadataTemplate(BaseObject):
@@ -28,7 +25,6 @@ class ExtractStructuredMetadataTemplate(BaseObject):
     ):
         """
         param scope: The scope of the metadata template can either be global or at the enterprise level. The global scope is used for templates that are available to any Box enterprise. The enterprise_ scope represents templates that have been created within a specific enterprise, where * will be the ID of that enterprise.
-        type scope: str
         param template_key: The name of the metadata template.
         type template_key: str
         param type: always "metadata_template".
@@ -92,6 +88,7 @@ class IntelligenceManager:
         self.network_session = network_session
 
     # region deprecated code
+
     # def intelligence_ask(
     #     self,
     #     mode: IntelligenceMode,
@@ -179,54 +176,46 @@ class IntelligenceManager:
     #     )
     #     return deserialize(response.data, IntelligenceResponse)
 
-    # endregion
+    # def intelligence_metadata_suggestion(
+    #     self,
+    #     item: str,
+    #     scope: str,
+    #     template_key: str,
+    #     confidence: str = "experimental",
+    #     extra_headers: Optional[Dict[str, Optional[str]]] = None,
+    # ) -> IntelligenceResponse:
+    #     if extra_headers is None:
+    #         extra_headers = {}
+    #     query_params_map: Dict[str, str] = prepare_params(
+    #         {
+    #             "item": to_string("file_" + item),
+    #             # "item": to_string("file_" + item),
+    #             "scope": to_string(scope),
+    #             "template_key": to_string(template_key),
+    #             "confidence": to_string(confidence),
+    #         }
+    #     )
+    #     headers_map: Dict[str, str] = prepare_params({**extra_headers})
+    #     response: FetchResponse = fetch(
+    #         FetchOptions(
+    #             url="".join([self.network_session.base_urls.base_url, "/2.0/metadata_instances/suggestions"]),
+    #             method="GET",
+    #             params=query_params_map,
+    #             headers=headers_map,
+    #             response_format="json",
+    #             auth=self.auth,
+    #             network_session=self.network_session,
+    #         ),
+    #     )
+    #     return deserialize(response.data, IntelligenceMetadataSuggestions)
 
-    # region Intelligence custom code
-    def intelligence_metadata_suggestion(
-        self,
-        item: str,
-        scope: str,
-        template_key: str,
-        confidence: str = "experimental",
-        extra_headers: Optional[Dict[str, Optional[str]]] = None,
-    ) -> IntelligenceResponse:
-        if extra_headers is None:
-            extra_headers = {}
-        query_params_map: Dict[str, str] = prepare_params(
-            {
-                "item": to_string("file_" + item),
-                # "item": to_string("file_" + item),
-                "scope": to_string(scope),
-                "template_key": to_string(template_key),
-                "confidence": to_string(confidence),
-            }
-        )
-        headers_map: Dict[str, str] = prepare_params({**extra_headers})
-        response: FetchResponse = fetch(
-            "".join(
-                [
-                    self.network_session.base_urls.base_url,
-                    "/2.0/metadata_instances/suggestions",
-                ]
-            ),
-            FetchOptions(
-                method="GET",
-                params=query_params_map,
-                headers=headers_map,
-                response_format="json",
-                auth=self.auth,
-                network_session=self.network_session,
-            ),
-        )
-        return deserialize(response.data, IntelligenceMetadataSuggestions)
+    # endregion
 
     def extract(
         self,
-        # mode: CreateAiAskMode,
         prompt: str,
         items: List[CreateAiAskItems],
         *,
-        # dialogue_history: Optional[List[AiDialogueHistory]] = None,
         include_citations: Optional[bool] = None,
         ai_agent: Optional[AiAgentAsk] = None,
         extra_headers: Optional[Dict[str, Optional[str]]] = None,
@@ -234,10 +223,8 @@ class IntelligenceManager:
         if extra_headers is None:
             extra_headers = {}
         request_body: Dict = {
-            # 'mode': mode,
             "prompt": prompt,
             "items": items,
-            # 'dialogue_history': dialogue_history,
             "include_citations": include_citations,
             "ai_agent": ai_agent,
         }
@@ -259,7 +246,7 @@ class IntelligenceManager:
     def extract_structured(
         self,
         items: List[CreateAiAskItems],
-        fields: List[ExtractStructuredField],
+        fields: Optional[List[ExtractStructuredField]] = None,
         metadata_template: Optional[ExtractStructuredMetadataTemplate] = None,
         *,
         include_citations: Optional[bool] = None,
@@ -290,7 +277,3 @@ class IntelligenceManager:
         )
         ai_answer = AiResponseFull(answer=response.data, created_at=response.headers.get("date"))
         return ai_answer
-        # return deserialize(response.data, AiResponseFull)
-
-
-# endregion

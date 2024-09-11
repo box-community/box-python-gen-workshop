@@ -1,44 +1,36 @@
-""" Metadata Box exercises"""
+""" Box Metadata exercises"""
 
 import logging
-from typing import Dict, List
 from datetime import datetime
+from typing import Dict, List
 
-from utils.box_ai_client import BoxAIClient as ClientAI
-
-from box_sdk_gen import BoxAPIError
-
-from box_sdk_gen.schemas import MetadataTemplate
-from utils.ai_schemas import IntelligenceMetadataSuggestions
-from box_sdk_gen.managers.metadata_templates import (
+from box_sdk_gen import (
+    AiResponseFull,
+    BoxAPIError,
+    CreateAiAskItems,
+    CreateFileMetadataByIdScope,
     CreateMetadataTemplateFields,
-    CreateMetadataTemplateFieldsTypeField,
     CreateMetadataTemplateFieldsOptionsField,
-)
-
-from box_sdk_gen.managers.search import (
+    CreateMetadataTemplateFieldsTypeField,
+    MetadataTemplate,
     SearchByMetadataQueryOrderBy,
     SearchByMetadataQueryOrderByDirectionField,
-)
-
-from box_sdk_gen.managers.file_metadata import (
-    CreateFileMetadataByIdScope,
-    UpdateFileMetadataByIdScope,
     UpdateFileMetadataByIdRequestBody,
     UpdateFileMetadataByIdRequestBodyOpField,
+    UpdateFileMetadataByIdScope,
 )
 
-from utils.box_ai_client_oauth import ConfigOAuth, get_ai_client_oauth
+from utils.box_ai_client_oauth import BoxAIClient, ConfigOAuth, get_ai_client_oauth
+from utils.intelligence import ExtractStructuredMetadataTemplate
 
-logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-INVOICE_FOLDER = "248887218023"
-PO_FOLDER = "248891043873"
-ENTERPRISE_SCOPE = "enterprise_1133807781"
+INVOICE_FOLDER = "261456614253"
+PO_FOLDER = "261457585224"
+ENTERPRISE_SCOPE = "enterprise_1134207681"
 
 
-def get_template_by_key(client: ClientAI, template_key: str) -> MetadataTemplate:
+def get_template_by_key(client: BoxAIClient, template_key: str) -> MetadataTemplate:
     """Get a metadata template by key"""
 
     scope = "enterprise"
@@ -54,7 +46,7 @@ def get_template_by_key(client: ClientAI, template_key: str) -> MetadataTemplate
     return template
 
 
-def delete_template_by_key(client: ClientAI, template_key: str):
+def delete_template_by_key(client: BoxAIClient, template_key: str):
     """Delete a metadata template by key"""
 
     scope = "enterprise"
@@ -68,7 +60,7 @@ def delete_template_by_key(client: ClientAI, template_key: str):
             raise err
 
 
-def create_invoice_po_template(client: ClientAI, template_key: str, display_name: str) -> MetadataTemplate:
+def create_invoice_po_template(client: BoxAIClient, template_key: str, display_name: str) -> MetadataTemplate:
     """Create a metadata template"""
 
     scope = "enterprise"
@@ -149,19 +141,38 @@ def create_invoice_po_template(client: ClientAI, template_key: str, display_name
 
 
 def get_metadata_suggestions_for_file(
-    client_ai: ClientAI, file_id: str, enterprise_scope: str, template_key: str
-) -> IntelligenceMetadataSuggestions:
+    client_ai: BoxAIClient, file_id: str, scope: str, template_key: str
+) -> AiResponseFull:
     """Get metadata suggestions for a file"""
 
-    return client_ai.intelligence.intelligence_metadata_suggestion(
-        item=file_id,
-        scope=enterprise_scope,
-        template_key=template_key,
-        confidence="experimental",
-    )
+    item = CreateAiAskItems(id=file_id, type="file")
+    metadata_template = ExtractStructuredMetadataTemplate(scope=scope, template_key=template_key)
+    return client_ai.intelligence.extract_structured(items=[item], metadata_template=metadata_template)
 
 
-def apply_template_to_file(client: ClientAI, file_id: str, template_key: str, data: Dict[str, str]):
+def convert_to_datetime(date_string):
+    """
+    Converts a date string in the format 'February 13, 2024' or '2024-03-13' to a datetime object.
+
+    :param date_string: The date string to convert.
+    :return: A datetime object or None if the format is not recognized.
+    """
+    # Define possible date formats
+    date_formats = ["%B %d, %Y", "%Y-%m-%d"]
+
+    for date_format in date_formats:
+        try:
+            # Attempt to parse the date string with the current format
+            return datetime.strptime(date_string, date_format)
+        except ValueError:
+            # If parsing fails, continue to the next format
+            continue
+
+    # If none of the formats match, return None
+    return None
+
+
+def apply_template_to_file(client: BoxAIClient, file_id: str, template_key: str, data: Dict[str, str]):
     """Apply a metadata template to a folder"""
     default_data = {
         "documentType": "Unknown",
@@ -179,10 +190,12 @@ def apply_template_to_file(client: ClientAI, file_id: str, template_key: str, da
     if "documentDate" in data:
         try:
             date_string = data["documentDate"]
-            date2 = datetime.fromisoformat(date_string)
+            date2 = convert_to_datetime(date_string)
+
             data["documentDate"] = date2.isoformat().replace("+00:00", "") + "Z"
-        except ValueError:
+        except ValueError as e:
             data["documentDate"] = "1900-01-01T00:00:00Z"
+            print(f"Error converting date: {e}")
 
     # Merge the default data with the data
     data = {**default_data, **data}
@@ -218,7 +231,7 @@ def apply_template_to_file(client: ClientAI, file_id: str, template_key: str, da
             raise error_a
 
 
-def get_file_metadata(client: ClientAI, file_id: str, template_key: str):
+def get_file_metadata(client: BoxAIClient, file_id: str, template_key: str):
     """Get file metadata"""
     metadata = client.file_metadata.get_file_metadata_by_id(
         file_id=file_id,
@@ -229,7 +242,7 @@ def get_file_metadata(client: ClientAI, file_id: str, template_key: str):
 
 
 def search_metadata(
-    client: ClientAI,
+    client: BoxAIClient,
     template_key: str,
     folder_id: str,
     query: str,
@@ -298,9 +311,9 @@ def main():
     folder_items = client.folders.get_folder_items(PO_FOLDER)
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
-        suggestions = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
-        print(f"Suggestions: {suggestions.suggestions}")
-        metadata = suggestions.suggestions
+        ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
+        print(f"Suggestions: {ai_response.answer}")
+        metadata = ai_response.answer
         apply_template_to_file(
             client,
             item.id,
@@ -312,9 +325,9 @@ def main():
     folder_items = client.folders.get_folder_items(INVOICE_FOLDER)
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
-        suggestions = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
-        print(f"Suggestions: {suggestions.suggestions}")
-        metadata = suggestions.suggestions
+        ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
+        print(f"Suggestions: {ai_response.answer}")
+        metadata = ai_response.answer
         apply_template_to_file(
             client,
             item.id,

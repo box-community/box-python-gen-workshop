@@ -2,31 +2,31 @@
 
 import logging
 
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import (
+    FileBase,
+    FileBaseTypeField,
+    FolderBaseTypeField,
+    FolderMini,
     SignRequest,
     SignRequestCreateSigner,
     SignRequestCreateSignerRoleField,
-    FileBaseTypeField,
-    FolderBaseTypeField,
-    FileBase,
-    FolderMini,
 )
 
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from utils.oauth_callback import open_browser
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-SIGN_DOCS_FOLDER = "249194622181"
+SIGN_DOCS_FOLDER = "284392089314"
 
-SIMPLE_PDF = "1445561259986"
-SIMPLE_DOC = "1445560726821"
-CONTRACT = "1445563382130"
+SIMPLE_PDF = "1645081417259"
+SIMPLE_DOC = "1645081691917"
+CONTRACT = "1645083589406"
 
 SIGNER_A = "YOUR_EMAIL+A@gmail.com"
-SIGNER_A_PHONE = "+15554443322"
+SIGNER_A_PHONE = "+12345678900"
 
 SIGNER_B = "YOUR_EMAIL+B@gmail.com"
 

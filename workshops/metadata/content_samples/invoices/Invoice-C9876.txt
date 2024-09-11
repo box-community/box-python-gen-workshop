@@ -1,4 +1,5 @@
 Vendor: Cosmic Contraptions Ltd.
+Date: March 13, 2024
 Invoice Number: C9876
 Purchase Order Number: 002
 Line Items:

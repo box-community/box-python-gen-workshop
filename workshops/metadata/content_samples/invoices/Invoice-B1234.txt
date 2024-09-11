@@ -1,4 +1,5 @@
 Vendor: Galactic Gizmos Inc.
+Date: March 13, 2024
 Invoice Number: B1234
 Purchase Order Number: 001
 Line Items:

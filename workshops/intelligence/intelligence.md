@@ -1,4 +1,4 @@
-# Box AI (Intelligence)
+# Box AI
 In today's data-rich landscape, extracting meaningful insights from unstructured documents is crucial. The Box AI API provides a powerful toolkit for developers to tap into the content of documents, enabling summarization, and conversational AI. 
 
 In this workshop, we'll dive deep into the capabilities of Box AI API, exploring how it empowers applications to swiftly analyze and comprehend textual content.

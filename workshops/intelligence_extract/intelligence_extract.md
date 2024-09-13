@@ -11,7 +11,7 @@ This API has 2 endpoints, and both return structured data from a document:
 * `/ai/extract_structured/` - You specify a formal output structure, and the API will return the data in that specific format.
 
 ## Box AI documentation
-This API doesn't have a public documentation yet, stay tunned for updates.
+This API doesn't have a public documentation yet, stay tuned for updates.
 
 # Exercises
 ## Setup

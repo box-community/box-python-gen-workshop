@@ -16,7 +16,7 @@ The Box AI api has 3 main concepts:
 * **Context** - The context is the information that the Box AI will use to answer the questions. It can be a document, multiple documents or a snippet of text.
 
 ## Box AI documentation
-This API doesn't have a public documentation yet, stay tunned for updates.
+This API doesn't have a public documentation yet, stay tuned for updates.
 
 # Exercises
 ## Setup

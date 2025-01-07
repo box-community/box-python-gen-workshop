@@ -6,7 +6,12 @@ orchestrates the authentication process
 import os
 
 import dotenv
-from box_sdk_gen import BoxClient, BoxJWTAuth, FileWithInMemoryCacheTokenStorage, JWTConfig
+from box_sdk_gen import (
+    BoxClient,
+    BoxJWTAuth,
+    FileWithInMemoryCacheTokenStorage,
+    JWTConfig,
+)
 
 ENV_JET = ".jwt.env"
 

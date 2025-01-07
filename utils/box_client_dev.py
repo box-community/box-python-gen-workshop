@@ -4,11 +4,10 @@ note: developer tokens are always associated with the user who created them
 """
 
 import os
+
 import dotenv
-
-from box_sdk_gen.client import BoxClient
 from box_sdk_gen import BoxDeveloperTokenAuth
-
+from box_sdk_gen.client import BoxClient
 
 ENV_DEV = ".dev.env"
 

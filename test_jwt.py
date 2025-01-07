@@ -1,6 +1,7 @@
 """Test configuration for developer token access"""
 
 import logging
+
 from utils.box_client_jwt import (
     ConfigJWT,
     get_jwt_enterprise_client,

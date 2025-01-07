@@ -5,3 +5,7 @@ dependencies = ["box-sdk-gen[jwt]", "python-dotenv"]
 
 [project.optional-dependencies]
 dev = ["ruff"]
+
+[tool.ruff]
+# Allow lines to be as long as 120.
+line-length = 120

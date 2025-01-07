@@ -4,12 +4,9 @@ orchestrates the authentication process
 """
 
 import os
+
 import dotenv
-
-from box_sdk_gen import BoxClient
-from box_sdk_gen import BoxCCGAuth, CCGConfig
-from box_sdk_gen import FileWithInMemoryCacheTokenStorage
-
+from box_sdk_gen import BoxCCGAuth, BoxClient, CCGConfig, FileWithInMemoryCacheTokenStorage
 
 ENV_CCG = ".ccg.env"
 

@@ -1,10 +1,10 @@
 """Test configuration for developer token access"""
 
 import logging
+
+from box_sdk_gen import BoxCCGAuth, BoxClient, CCGConfig, FileWithInMemoryCacheTokenStorage
+
 from utils.box_client_ccg import ConfigCCG
-from box_sdk_gen import BoxClient
-from box_sdk_gen import BoxCCGAuth, CCGConfig
-from box_sdk_gen import FileWithInMemoryCacheTokenStorage
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)

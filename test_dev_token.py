@@ -1,6 +1,7 @@
 """Test configuration for developer token access"""
 
 import logging
+
 from utils.box_client_dev import ConfigDev, get_client_dev
 
 logging.basicConfig(level=logging.INFO)

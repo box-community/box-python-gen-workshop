@@ -1,8 +1,12 @@
 {
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "charliermarsh.ruff"
     },
-    "python.formatting.provider": "none",
     "cSpell.words": [
         "chatbots",
         "docgen",
@@ -11,6 +15,5 @@
         "etag",
         "getsize",
         "shutil"
-    ],
-    "editor.formatOnSave": true
+    ]
 }

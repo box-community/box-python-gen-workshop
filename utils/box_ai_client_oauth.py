@@ -3,15 +3,14 @@ Handles the box client object creation
 orchestrates the authentication process
 """
 
-import os
 import logging
-import dotenv
+import os
 import uuid
+
+import dotenv
+from box_sdk_gen import BoxOAuth, FileWithInMemoryCacheTokenStorage, GetAuthorizeUrlOptions, OAuthConfig
+
 from utils.box_ai_client import BoxAIClient
-
-from box_sdk_gen import OAuthConfig, BoxOAuth, GetAuthorizeUrlOptions
-from box_sdk_gen import FileWithInMemoryCacheTokenStorage
-
 from utils.oauth_callback import callback_handle_request, open_browser
 
 ENV_OAUTH = ".oauth.env"

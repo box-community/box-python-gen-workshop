@@ -1,7 +1,8 @@
 from typing import Optional
 
-from box_sdk_gen.client import BoxClient, NetworkSession
 from box_sdk_gen import Authentication
+from box_sdk_gen.client import BoxClient, NetworkSession
+
 from utils.intelligence import IntelligenceManager
 
 

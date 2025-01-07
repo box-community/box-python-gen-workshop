@@ -1,10 +1,11 @@
 """Test configuration for developer token access"""
 
 import logging
-from utils.box_client_jwt import ConfigJWT
+
+from box_sdk_gen import BoxJWTAuth, FileWithInMemoryCacheTokenStorage, JWTConfig
 from box_sdk_gen.client import BoxClient
-from box_sdk_gen import BoxJWTAuth, JWTConfig
-from box_sdk_gen import FileWithInMemoryCacheTokenStorage
+
+from utils.box_client_jwt import ConfigJWT
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)

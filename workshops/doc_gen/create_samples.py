@@ -11,9 +11,7 @@ logging.getLogger(__name__)
 
 def create_samples(client: Client):
     """Uploads sample content to Box."""
-    wks_folder = create_box_folder(
-        client, "workshops", client.folders.get_folder_by_id("0")
-    )
+    wks_folder = create_box_folder(client, "workshops", client.folders.get_folder_by_id("0"))
 
     doc_gen_folder = create_box_folder(client, "doc_gen", wks_folder)
 

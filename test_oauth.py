@@ -1,6 +1,7 @@
 """Test configuration for developer token access"""
 
 import logging
+
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 logging.basicConfig(level=logging.INFO)

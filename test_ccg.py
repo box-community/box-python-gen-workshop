@@ -1,6 +1,7 @@
 """Test configuration for developer token access"""
 
 import logging
+
 from utils.box_client_ccg import (
     ConfigCCG,
     get_ccg_enterprise_client,

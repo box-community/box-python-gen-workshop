@@ -1,8 +1,8 @@
 import logging
 
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
+from box_sdk_gen import DocgenTemplates
 
-from box_sdk_gen import DocgenTemplates, DocgenTemplate
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)

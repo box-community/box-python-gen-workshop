@@ -17,4 +17,6 @@ def create_samples(client: Client):
 
     template_folder = create_box_folder(client, "templates", doc_gen_folder)
 
+    leases_folder = create_box_folder(client, "leases", doc_gen_folder)  # noqa: F841
+
     folder_upload(client, template_folder, "workshops/doc_gen/content_samples/")

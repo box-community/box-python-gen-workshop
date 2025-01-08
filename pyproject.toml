@@ -1,7 +1,11 @@
 [project]
 name = "box-python-gen-workshop"
 version = "0.7.0"
-dependencies = ["box-sdk-gen[jwt]", "python-dotenv"]
+dependencies = [
+    "box-sdk-gen[jwt]",
+    "python-dateutil>=2.9.0.post0",
+    "python-dotenv",
+]
 
 [project.optional-dependencies]
 dev = ["ruff"]

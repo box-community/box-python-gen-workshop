@@ -16,6 +16,6 @@
         "etag",
         "getsize",
         "relativedelta",
-        "shutil"
+        "shutil",
     ]
 }

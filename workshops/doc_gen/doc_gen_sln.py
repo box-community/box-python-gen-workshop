@@ -11,7 +11,6 @@ from box_sdk_gen import (
     CreateDocgenTemplateFile,
     DocgenBatchBase,
     DocgenDocumentGenerationData,
-    DocgenTags,
     DocgenTemplate,
 )
 from dateutil.relativedelta import relativedelta
@@ -32,11 +31,6 @@ def set_file_as_template(client: BoxClient, file_id: str) -> DocgenTemplate:
 
     template_base = client.doc_gen_template.create_docgen_template(file=CreateDocgenTemplateFile(id=file.id))
     return client.doc_gen_template.get_docgen_template_by_id(template_base.file.id)
-
-
-def get_tags_from_template(client: BoxClient, template_id: str) -> DocgenTags:
-    """Get tags from a template"""
-    return client.doc_gen_template.get_docgen_template_tags(template_id)
 
 
 def generate_new_document(
@@ -93,12 +87,12 @@ def main():
     print(f"Template created: {template.to_dict()}")
 
     # List template tags
-    template_tags = get_tags_from_template(client, template.file.id)
+    template_tags = client.doc_gen_template.get_docgen_template_tags(template_id=template.file.id)
     print("\nFound tags:")
     for tag in template_tags.entries:
         print(f"  - {tag.tag_content} : {tag.tag_type.name} : {tag.json_paths}")
 
-    # Generate a new lease agreement
+    # Generate 5 new lease agreement
     docs_data: List[DocgenDocumentGenerationData] = []
     start_date = date.today().replace(day=1) + relativedelta(months=1)
 

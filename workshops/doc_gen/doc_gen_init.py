@@ -2,7 +2,7 @@
 
 import logging
 
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
+from utils import ConfigOAuth, get_client_oauth
 from workshops.doc_gen.create_samples import create_samples
 
 logging.basicConfig(level=logging.INFO)

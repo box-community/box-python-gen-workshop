@@ -1,0 +1,64 @@
+SCHIAPARELLI PLAZA PROPERTY LEASE AGREEMENT
+This Lunar Property Lease Agreement (hereinafter referred to as the "Agreement") is made and entered into on this {{ LeaseDate }} by and between:
+
+Lessor: Schiaparelli plaza, with a registered address at Schiaparelli crater, Oceanus Procellarum, Moon, hereinafter referred to as the "Lessor."
+
+Lessee: {{ Tenant }}, with a registered address {{ Email }}, hereinafter referred to as the "Lessee."
+
+Both parties agree to the following terms and conditions governing the lease of lunar property located in the designated lunar territory as described below.
+1. PROPERTY DESCRIPTION
+The Lessor agrees to lease to the Lessee a designated {{ PropertyType }} of lunar surface, identified as {{ Property }}, on the Schiaparelli Plaza Property.
+BEDROOMS:
+{{ Description }}
+OPEN-PLAN KITCHEN AND LIVING ROOM:
+A central, open space designed for communal living. The kitchen is equipped with advanced hydroponic food systems, enabling sustainable food production, and energy-efficient appliances designed for zero-gravity cooking. The living area provides a relaxing space with modular, multi-functional furniture that adapts to various configurations for lounging or socializing with guests.
+RECYCLING FACILITIES:
+Each unit includes individual, on-site recycling systems, specifically engineered for lunar waste management. The recycling facilities convert organic waste into usable resources, including oxygen and water, through advanced regenerative life-support technologies. Separate waste collection modules for non-organic materials are integrated into the unit for resource recovery.
+ADDITIONAL AMENITIES:
+LIFE SUPPORT SYSTEMS:
+A robust life support system provides continuous air filtration, water purification, and temperature control, ensuring a safe and comfortable environment.
+CONNECTIVITY:
+The unit is equipped with high-bandwidth communication arrays for Earth-lunar data exchange, facilitating constant connectivity for both personal and research needs.
+2. TERM OF LEASE
+The term of this Agreement shall commence on {{ StartDate }} and shall remain in effect until {{ EndDate }}, unless terminated earlier in accordance with this Agreement. The lease is renewable based on mutual agreement and availability of the lunar property.
+3. RENT
+The Lessee agrees to pay the Lessor an amount of {{ Rent }} per Month for the use of the property. Payments are due on the first of each lunar month and are to be made electronically to the Lessor's designated account on Earth.
+4. USE OF THE PROPERTY
+The habitat units are exclusively designated for private living and remote work in a quiet and focused environment. These units are designed to support daily life and work activities for lunar residents, ensuring comfort and sustainability.
+The use of the habitats for commercial purposes, public entertainment, parties, or similar social gatherings is strictly prohibited.
+5. COMPLIANCE WITH OUTER SPACE TREATY AND INTERNATIONAL LAWS
+Both the Lessor and Lessee agree to comply with the provisions of the 1967 Outer Space Treaty and any other applicable international laws. Ownership of the lunar property is not recognized, but the lease grants the Lessee non-exclusive rights for exploration and use during the term of this Agreement.
+6. RESPONSIBILITIES AND MAINTENANCE
+The Lessee shall be responsible for maintaining the habitability of the lunar habitat and all other leased facilities. Any damages caused by misuse or negligence will be the responsibility of the Lessee.
+The Lessor shall ensure that the property is habitable at the start of the lease, including functional life support systems, solar energy generators, and communication devices.
+7. INSURANCE AND LIABILITY
+Due to the unique nature of space property, the Lessee agrees to obtain lunar insurance, covering both third-party liability and property damage, including damages resulting from space debris, meteor strikes, or unforeseen lunar surface incidents.
+8. TERMINATION
+Either party may terminate this Agreement with a 60-day written notice. The Lessor reserves the right to terminate the lease if the Lessee fails to comply with the terms, including payment, maintenance, or violation of international space law.
+9. GOVERNING LAW
+This Agreement shall be governed by the principles outlined in the Outer Space Treaty, United Nations Space Law, and any applicable space regulations in place at the time.
+10. DISPUTE RESOLUTION
+In the event of any disputes arising from this Agreement, both parties agree to submit to arbitration conducted by the United Nations Office for Outer Space Affairs (UNOOSA).
+11. MISCELLANEOUS
+Transfer of Lease: The Lessee shall not transfer or sublet the property without prior written consent from the Lessor.
+Force Majeure: Neither party shall be held responsible for delays or failures in performance due to circumstances beyond their control, including but not limited to space storms, mechanical failures, or launch delays.
+
+ 
+SIGNATURES
+
+LESSOR:
+
+
+________________________________________
+Name: Schiaparelli plaza
+Date: {{ LeaseDate }}
+
+
+LESSEE:
+
+
+________________________________________
+Name: {{ Tenant }}
+Date: {{ LeaseDate }}
+
+

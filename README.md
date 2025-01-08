@@ -126,3 +126,4 @@ You'll find the workshop exercises in the [workshops](workshops) folder.
 * [Box AI](workshops/intelligence/intelligence.md) - Working with Box AI.
 * [Box AI Extract](workshops/intelligence_extract/intelligence_extract.md) - Extracting structured data from documents using Box AI.
 * [Metadata](workshops/metadata/metadata.md) - Working with Metadata.
+* [Doc Gen](workshops/doc_gen/doc_gen.md) - Document Generation

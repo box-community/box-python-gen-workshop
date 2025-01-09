@@ -12,6 +12,12 @@ from box_sdk_gen import (
     DocgenBatchBase,
     DocgenDocumentGenerationData,
     DocgenTemplate,
+    FileBaseTypeField,
+    FileMini,
+    FolderBaseTypeField,
+    FolderMini,
+    SignRequest,
+    SignRequestCreateSigner,
 )
 from dateutil.relativedelta import relativedelta
 
@@ -22,6 +28,7 @@ logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 LEASE_TEMPLATE_ID = "1744637428174"
 LEASES_FOLDER_ID = "301836779172"
+SIGNED_LEASES_FOLDER_ID = "301990449099"
 
 
 def set_file_as_template(client: BoxClient, file_id: str) -> DocgenTemplate:
@@ -72,6 +79,27 @@ def generate_new_data(name: str, email: str, start_date: date) -> DocgenDocument
     )
 
 
+def create_sign_request_structured(
+    client: BoxClient, file_id: str, tenant_email: str, landlord_email: str
+) -> SignRequest:
+    """Create a sign request with structured data"""
+
+    # Sign request params
+    structure_file = FileMini(id=file_id, type=FileBaseTypeField.FILE)
+    parent_folder = FolderMini(id=SIGNED_LEASES_FOLDER_ID, type=FolderBaseTypeField.FOLDER)
+    landlord_signer = SignRequestCreateSigner(email=landlord_email, order=1)
+    tenant_signer = SignRequestCreateSigner(email=tenant_email, order=2)
+
+    # Create a sign request
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[landlord_signer, tenant_signer],
+        parent_folder=parent_folder,
+        source_files=[structure_file],
+    )
+
+    return sign_request
+
+
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
     conf = ConfigOAuth()
@@ -116,7 +144,7 @@ def main():
     for job in jobs.entries:
         print(f"  - Job {job.id} - {job.status.name}")
 
-    # Lis jobs in batch
+    # List jobs in batch
     print("\nJob details:")
     for job in jobs.entries:
         job_details = client.doc_gen.get_docgen_job_by_id(job.id)
@@ -124,13 +152,13 @@ def main():
         sleep(3)
 
     # List all jobs for user
-    user_jobs = client.doc_gen.get_docgen_jobs(limit=50)
+    user_jobs = client.doc_gen.get_docgen_jobs(limit=5)
     print("\nAll jobs for current user:")
     for job in user_jobs.entries:
         print(f"  - Job {job.id} {datetime.fromtimestamp(int(job.created_at)).isoformat()} {job.status.name}")
 
     # List all jobs by template
-    template_jobs = client.doc_gen_template.get_docgen_template_job_by_id(template.file.id)
+    template_jobs = client.doc_gen_template.get_docgen_template_job_by_id(template.file.id, limit=5)
     print("\nAll jobs for template:")
     for job in template_jobs.entries:
         print(f"  - Job {job.id} {datetime.fromtimestamp(int(job.created_at)).isoformat()} {job.status.name}")
@@ -148,15 +176,15 @@ def main():
     else:
         print("  - No templates found")
 
-    # print(
-    #     "\nAll templates:",
-    #     *(
-    #         [f"  - {template.to_dict()}" for template in templates.entries]
-    #         if templates.entries
-    #         else ["  - No templates found"]
-    #     ),
-    #     sep="\n",
-    # )
+    # Request signature for first lease
+    sign_job = client.doc_gen.get_docgen_job_by_id(jobs.entries[0].id)
+    sign_request = create_sign_request_structured(
+        client,
+        sign_job.output_file.id,
+        tenant_email="barduinor+tenant@gmail.com",
+        landlord_email="barduinor+landlord@gmail.com",
+    )
+    print(f"\nSign request created: {sign_request.to_dict()}")
 
 
 if __name__ == "__main__":

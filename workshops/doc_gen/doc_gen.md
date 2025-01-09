@@ -81,12 +81,13 @@ INFO:root:Folder workshops with id: 260937698360
 INFO:root:Folder doc_gen with id: 301695350038
 INFO:root:Folder templates with id: 301695956946
 INFO:root:Folder leases with id: 301836779172
-INFO:root:      Uploaded Lease_Template.docx (1744637428174) 16813 bytes
+INFO:root:Folder leases signed with id: 301990449099
+INFO:root:      Uploaded Lease_Template.docx (1744637428174) 17148 bytes
 INFO:root:      Uploaded Leases.csv (1744637248481) 25520 bytes
 INFO:root:      Uploaded Leases.xlsx (1744628742518) 25072 bytes
 INFO:root:      Uploaded sample.txt (1744638486280) 5178 bytes
 ```
-Take note of the `Lease_Template.docx` file id, in my case `1744637428174`, and also the leases folder, in my case `301836779172`, you will need these next.
+Take note of the `Lease_Template.docx` file id, in my case `1744637428174`, the leases folder, in my case `301836779172`, and also the leases signed folder, in my case `301990449099`, you will need these next.
 
 If you're curious, go ahead and open the template file on your browser, it should look like this:
 ![Lease template sample](img/lease_template_sample.png)
@@ -120,6 +121,7 @@ logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 LEASE_TEMPLATE_ID = "1744637428174"
 LEASES_FOLDER_ID = "301836779172"
+SIGNED_LEASES_FOLDER_ID = "301990449099"
 
 
 def main():
@@ -370,7 +372,7 @@ All templates:
 There are plenty of use cases where Doc Gen can be applied, and in this particular example one stands out.
 * Send the generated leases for signature.
 
-
+![Sign tags in template document](img/lease_template_sign_tags.png)
 
 ## Final thoughts
 Congratulations on completing the Doc Gen Workshop! You've gained hands-on experience with creating templates, utilizing tags, and generating dynamic documents.

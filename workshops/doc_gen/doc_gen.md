@@ -434,6 +434,11 @@ Resulting in:
 Sign request created: {'is_phone_verification_required_to_view': False, 'is_document_preparation_needed': False, 'are_text_signatures_enabled': True, 'are_reminders_enabled': False, 'name': 'HAB-2-9683_2025-01-09-08-28-33-319.pdf', 'prefill_tags': [], 'type': 'sign-request', 'source_files': [{'sequence_id': '0', 'name': 'HAB-2-9683_2025-01-09-08-28-33-319.pdf', 'sha1': '0fb482e0a570f486a3108428245cadfecb6798e2', 'file_version': {'id': '1922545333867', 'type': 'file_version', 'sha1': '0fb482e0a570f486a3108428245cadfecb6798e2'}, 'id': '1745647477867', 'etag': '0', 'type': 'file'}], 'signers': [{'email': '...@boxdemo.com', 'role': 'final_copy_reader', 'is_in_person': False, 'order': 0, 'login_required': False, 'suppress_notifications': False, 'has_viewed_document': False, 'inputs': []}, {'email': '...@gmail.com', 'role': 'signer', 'is_in_person': False, 'order': 1, 'login_required': False, 'suppress_notifications': False, 'has_viewed_document': False, 'inputs': []}, {'email': '...@gmail.com', 'role': 'signer', 'is_in_person': False, 'order': 2, 'login_required': False, 'suppress_notifications': False, 'has_viewed_document': False, 'inputs': []}], 'id': '53991795-004e-498a-b523-626519ef656c', 'status': 'converting', 'sign_files': {'files': [{'id': '1745641547479', 'etag': '0', 'type': 'file', 'sequence_id': '0', 'name': 'HAB-2-9683_2025-01-09-08-28-33-319.pdf', 'sha1': '0fb482e0a570f486a3108428245cadfecb6798e2', 'file_version': {'id': '1922539041079', 'type': 'file_version', 'sha1': '0fb482e0a570f486a3108428245cadfecb6798e2'}}], 'is_ready_for_download': True}, 'parent_folder': {'id': '301990449099', 'etag': '0', 'type': 'folder', 'sequence_id': '0', 'name': 'leases signed'}}
 ```
 
+Go ahead, open the emails you've used and complete the signing process.
+Once complete your signed lease last page should look like this:
+
+![Signed lease](img/signed_lease.png)
+
 ## Final thoughts
 Congratulations on completing the Doc Gen Workshop! You've gained hands-on experience with creating templates, utilizing tags, and generating dynamic documents.
 

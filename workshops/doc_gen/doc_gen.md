@@ -109,8 +109,13 @@ from box_sdk_gen import (
     CreateDocgenTemplateFile,
     DocgenBatchBase,
     DocgenDocumentGenerationData,
-    DocgenTags,
     DocgenTemplate,
+    FileBaseTypeField,
+    FileMini,
+    FolderBaseTypeField,
+    FolderMini,
+    SignRequest,
+    SignRequestCreateSigner,
 )
 from dateutil.relativedelta import relativedelta
 
@@ -372,7 +377,62 @@ All templates:
 There are plenty of use cases where Doc Gen can be applied, and in this particular example one stands out.
 * Send the generated leases for signature.
 
+### Sign specific tags
+If you open the MS Word template document you'll notice in the last page Box Sign tags that are different from the format we use for Doc Gen:
+
 ![Sign tags in template document](img/lease_template_sign_tags.png)
+
+These are used to tell Box Sign how to treat the document. 
+There is a lot to unpack in Box Sign, however we won't go deep into the details.
+
+We do provide Box Sign workshops:
+* [Sign structured](../sign_structured/sign_structured.md) - The same process we're using here
+* [Sign templates](../sign_templates/sign_templates.md)
+* [Sign simple documents](../sign/sign.md)
+
+Let's start by creating a method to request a signature:
+```python
+def create_sign_request_structured(
+    client: BoxClient, file_id: str, tenant_email: str, landlord_email: str
+) -> SignRequest:
+    """Create a sign request with structured data"""
+
+    # Sign request params
+    structure_file = FileMini(id=file_id, type=FileBaseTypeField.FILE)
+    parent_folder = FolderMini(id=SIGNED_LEASES_FOLDER_ID, type=FolderBaseTypeField.FOLDER)
+    landlord_signer = SignRequestCreateSigner(email=landlord_email, order=1)
+    tenant_signer = SignRequestCreateSigner(email=tenant_email, order=2)
+
+    # Create a sign request
+    sign_request = client.sign_requests.create_sign_request(
+        signers=[landlord_signer, tenant_signer],
+        parent_folder=parent_folder,
+        source_files=[structure_file],
+    )
+
+    return sign_request
+```
+
+Next we use it in our main method. For simplicity we're only sending one signature request.
+Remember to replace the fake emails with real ones that you have access so you can complete the signing process.
+
+```python
+def main():
+    ...
+    # Request signature for first lease
+    sign_job = client.doc_gen.get_docgen_job_by_id(jobs.entries[0].id)
+    sign_request = create_sign_request_structured(
+        client,
+        sign_job.output_file.id,
+        tenant_email="YOUR_TENANT_EMAIL@example.com",
+        landlord_email="YOUR_LANDLORD_EMAIL@example.com",
+    )
+    print(f"\nSign request created: {sign_request.to_dict()}")
+```
+Resulting in:
+```yaml
+Sign request created: {'is_phone_verification_required_to_view': False, 'is_document_preparation_needed': False, 'are_text_signatures_enabled': True, 'are_reminders_enabled': False, 'name': 'HAB-2-9683_2025-01-09-08-28-33-319.pdf', 'prefill_tags': [], 'type': 'sign-request', 'source_files': [{'sequence_id': '0', 'name': 'HAB-2-9683_2025-01-09-08-28-33-319.pdf', 'sha1': '0fb482e0a570f486a3108428245cadfecb6798e2', 'file_version': {'id': '1922545333867', 'type': 'file_version', 'sha1': '0fb482e0a570f486a3108428245cadfecb6798e2'}, 'id': '1745647477867', 'etag': '0', 'type': 'file'}], 'signers': [{'email': '...@boxdemo.com', 'role': 'final_copy_reader', 'is_in_person': False, 'order': 0, 'login_required': False, 'suppress_notifications': False, 'has_viewed_document': False, 'inputs': []}, {'email': '...@gmail.com', 'role': 'signer', 'is_in_person': False, 'order': 1, 'login_required': False, 'suppress_notifications': False, 'has_viewed_document': False, 'inputs': []}, {'email': '...@gmail.com', 'role': 'signer', 'is_in_person': False, 'order': 2, 'login_required': False, 'suppress_notifications': False, 'has_viewed_document': False, 'inputs': []}], 'id': '53991795-004e-498a-b523-626519ef656c', 'status': 'converting', 'sign_files': {'files': [{'id': '1745641547479', 'etag': '0', 'type': 'file', 'sequence_id': '0', 'name': 'HAB-2-9683_2025-01-09-08-28-33-319.pdf', 'sha1': '0fb482e0a570f486a3108428245cadfecb6798e2', 'file_version': {'id': '1922539041079', 'type': 'file_version', 'sha1': '0fb482e0a570f486a3108428245cadfecb6798e2'}}], 'is_ready_for_download': True}, 'parent_folder': {'id': '301990449099', 'etag': '0', 'type': 'folder', 'sequence_id': '0', 'name': 'leases signed'}}
+```
 
 ## Final thoughts
 Congratulations on completing the Doc Gen Workshop! You've gained hands-on experience with creating templates, utilizing tags, and generating dynamic documents.

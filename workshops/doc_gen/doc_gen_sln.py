@@ -181,8 +181,8 @@ def main():
     sign_request = create_sign_request_structured(
         client,
         sign_job.output_file.id,
-        tenant_email="barduinor+tenant@gmail.com",
-        landlord_email="barduinor+landlord@gmail.com",
+        tenant_email="YOUR_TENANT_EMAIL@example.com",
+        landlord_email="YOUR_LANDLORD_EMAIL@example.com",
     )
     print(f"\nSign request created: {sign_request.to_dict()}")
 

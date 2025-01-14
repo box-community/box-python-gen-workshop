@@ -4,11 +4,11 @@ import logging
 from typing import Union
 
 from box_sdk_gen import BoxAPIError
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import Folder, FolderMini, FileMini, WebLinkMini
-from box_sdk_gen.managers.folders import Items, CreateFolderParent
+from box_sdk_gen.managers.folders import CreateFolderParent, Items
+from box_sdk_gen.schemas import FileMini, Folder, FolderMini, WebLinkMini
 
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
@@ -110,7 +110,7 @@ def main():
 
     # Create folders
     my_documents = create_box_folder(client, "my_documents", workshop_folder)
-    work = create_box_folder(client, "work", my_documents)
+    work = create_box_folder(client, "work", my_documents)  # noqa: F841
 
     downloads = create_box_folder(client, "downloads", workshop_folder)
     personal = create_box_folder(client, "personal", downloads)
@@ -144,7 +144,7 @@ def main():
 
     # Delete a folder
     tmp = create_box_folder(client, "tmp", downloads)
-    tmp2 = create_box_folder(client, "tmp2", tmp)
+    tmp2 = create_box_folder(client, "tmp2", tmp)  # noqa: F841
 
     print("--- Before the delete ---")
     print_folder_items_recursive(client, downloads.id)

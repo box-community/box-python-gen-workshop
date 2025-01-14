@@ -2,18 +2,19 @@
 
 import logging
 
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.schemas import (
+    FileBase,
+    FileBaseTypeField,
+    FolderBaseTypeField,
+    FolderMini,
     SignRequest,
     SignRequestCreateSigner,
     SignRequestPrefillTag,
     SignRequestSignerInputContentTypeField,
-    FolderBaseTypeField,
-    FolderMini,
-    FileBase,
-    FileBaseTypeField,
 )
+
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 # from utils.oauth_callback import open_browser
 
@@ -127,7 +128,7 @@ def main():
 
     # # Create a sign request with name pre populate
     # sign_request_pre_pop = create_sign_request_structured_with_prefill(
-    #     client, STRUCTURED_DOC, "Rui Barbosa", SIGNER_A
+    #     client, STRUCTURED_DOC, "Your Name", SIGNER_A
     # )
     # check_sign_request(sign_request_pre_pop)
 

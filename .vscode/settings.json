@@ -8,6 +8,7 @@
         "editor.defaultFormatter": "charliermarsh.ruff"
     },
     "cSpell.words": [
+        "ananas",
         "chatbots",
         "dateutil",
         "docgen",
@@ -15,8 +16,11 @@
         "endregion",
         "etag",
         "getsize",
+        "Invitability",
         "relativedelta",
         "shutil",
-        "usemarker"
+        "timespec",
+        "usemarker",
+        "Viewability"
     ]
 }

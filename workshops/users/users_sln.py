@@ -2,12 +2,12 @@
 
 import logging
 
-from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen import BoxAPIError
-from box_sdk_gen.schemas import User
+from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.managers.transfer import TransferOwnedFolderOwnedBy
-from utils.box_client_oauth import ConfigOAuth, get_client_oauth
+from box_sdk_gen.schemas import User
 
+from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
@@ -81,7 +81,7 @@ def main():
     print(f"\nNew user: {new_user.name} ({new_user.login}) [{new_user.id}]")
 
     # update a user
-    updt_user = update_user(
+    updated_user = update_user(
         client,
         new_user.id,
         "John Doe",
@@ -89,11 +89,11 @@ def main():
         "+15551234567",
         "123 Main St",
     )
-    print(f"\nUpdated user: {updt_user.name} {updt_user.id}")
-    print(f"Login: {updt_user.login}")
+    print(f"\nUpdated user: {updated_user.name} {updated_user.id}")
+    print(f"Login: {updated_user.login}")
 
-    print(f"Phone: {updt_user.phone}")
-    print(f"Address: {updt_user.address}")
+    print(f"Phone: {updated_user.phone}")
+    print(f"Address: {updated_user.address}")
 
     # transfer content
     user_transfer(client, new_user.id, me.id)

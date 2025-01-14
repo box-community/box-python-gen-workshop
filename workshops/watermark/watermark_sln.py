@@ -3,19 +3,16 @@
 import logging
 
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen import BoxAPIError
-from box_sdk_gen.schemas import (
-    Watermark,
-)
-
 from box_sdk_gen.managers.file_watermarks import (
     UpdateFileWatermarkWatermark,
     UpdateFileWatermarkWatermarkImprintField,
 )
-
 from box_sdk_gen.managers.folder_watermarks import (
     UpdateFolderWatermarkWatermark,
     UpdateFolderWatermarkWatermarkImprintField,
+)
+from box_sdk_gen.schemas import (
+    Watermark,
 )
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -43,9 +40,7 @@ def remove_watermark_from_file(client: Client, file_id: str) -> Watermark:
 
 def add_watermark_to_folder(client: Client, folder_id: str) -> Watermark:
     """Watermark a folder"""
-    update_watermark = UpdateFolderWatermarkWatermark(
-        imprint=UpdateFolderWatermarkWatermarkImprintField.DEFAULT
-    )
+    update_watermark = UpdateFolderWatermarkWatermark(imprint=UpdateFolderWatermarkWatermarkImprintField.DEFAULT)
     return client.folder_watermarks.update_folder_watermark(
         folder_id=folder_id,
         watermark=update_watermark,

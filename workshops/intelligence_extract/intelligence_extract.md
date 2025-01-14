@@ -72,10 +72,18 @@ For the DEMO_FILE constant, use the file id from the previous step, in my case i
 ```python
 import json
 import logging
+from typing import List, Optional
 
-from box_sdk_gen import AiResponse, CreateAiAskItems
+from box_sdk_gen import (
+    AiExtractResponse,
+    AiItemBase,
+    AiResponse,
+    CreateAiExtractStructuredFields,
+    CreateAiExtractStructuredFieldsOptionsField,
+    CreateAiExtractStructuredMetadataTemplate,
+)
 
-from utils.box_ai_client_oauth import BoxAIClient, ConfigOAuth, get_ai_client_oauth
+from utils.box_client_oauth import BoxClient, ConfigOAuth, get_client_oauth
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
@@ -86,7 +94,7 @@ SAMPLE_INVOICE = "1644174078580"
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
     conf = ConfigOAuth()
-    client = get_ai_client_oauth(conf)
+    client = get_client_oauth(conf)
 
     me = client.users.get_user_me()
     print(f"\nHello, I'm {me.name} ({me.login}) [{me.id}]")
@@ -107,10 +115,11 @@ Hello, I'm Rui Barbosa (barduinor@gmail.com) [18622116055]
 Now, let's create a method to extract the data from the document.
 
 ```python
-def intelligence_extract(client: BoxAIClient, file_id: str, prompt: str) -> AiResponse:
-    items = CreateAiAskItems(id=file_id, type="file")
+def intelligence_extract(client: BoxClient, file_id: str, prompt: str) -> AiResponse:
+    items = AiItemBase(id=file_id, type="file")
 
-    ai_response: AiResponse = client.intelligence.extract(prompt=prompt, items=[items])
+    # file = client.files.get_file_by_id(file_id)
+    ai_response: AiResponse = client.ai.create_ai_extract(prompt=prompt, items=[items])
 
     return ai_response
 ```
@@ -142,7 +151,7 @@ def main():
     # Using a more explicit prompt
     prompt = '{"document_type","document_number","date","vendor","total","PO"}'
     ai_response = intelligence_extract(client, SAMPLE_INVOICE, prompt)
-    print(f"Prompt: {prompt}\nResponse: \n{ai_response.answer}\n")    
+    print(f"Prompt: {prompt}\nResponse: \n{ai_response.answer}\n")
 ```
 
 Results in:
@@ -173,7 +182,7 @@ def main():
     }
     prompt = json.dumps(my_structure, indent=2)
     ai_response = intelligence_extract(client, SAMPLE_INVOICE, prompt)
-    print(f"Prompt: {prompt}\nResponse: \n{ai_response.answer}")
+    print(f"Prompt: {prompt}\nResponse: \n{ai_response.answer}\n")
 ```
 
 Resulting in:
@@ -217,15 +226,15 @@ Let's create a method to call this endpoint.
 
 ```python
 def intelligence_extract_structured(
-    client: BoxAIClient,
+    client: BoxClient,
     file_id: str,
-    fields: List[ExtractStructuredField],
-    metadata_template: ExtractStructuredMetadataTemplate,
-) -> AiResponse:
-    items = CreateAiAskItems(id=file_id, type="file")
+    fields: Optional[List[CreateAiExtractStructuredFields]] = None,
+    metadata_template: Optional[CreateAiExtractStructuredMetadataTemplate] = None,
+) -> AiExtractResponse:
+    items = AiItemBase(id=file_id, type="file")
 
     # file = client.files.get_file_by_id(file_id)
-    ai_response: AiResponse = client.intelligence.extract_structured(
+    ai_response: AiResponse = client.ai.create_ai_extract_structured(
         items=[items], fields=fields, metadata_template=metadata_template
     )
 
@@ -240,23 +249,23 @@ def main():
     ...
 
     # Extract structured endpoint
-    fields: List[ExtractStructuredField] = []
+    fields: List[CreateAiExtractStructuredFields] = []
 
     fields.append(
-        ExtractStructuredField(
+        CreateAiExtractStructuredFields(
             key="documentType",
             type="enum",
             prompt="what type of document is this?",
             options=[
-                ExtractStructuredFieldOption(key="Invoice"),
-                ExtractStructuredFieldOption(key="Purchase Order"),
-                ExtractStructuredFieldOption(key="Unknown"),
+                CreateAiExtractStructuredFieldsOptionsField(key="Invoice"),
+                CreateAiExtractStructuredFieldsOptionsField(key="Purchase Order"),
+                CreateAiExtractStructuredFieldsOptionsField(key="Unknown"),
             ],
         )
     )
 
     fields.append(
-        ExtractStructuredField(
+        CreateAiExtractStructuredFields(
             key="doc_number",
             type="string",
             prompt="what is the document number?",
@@ -264,7 +273,7 @@ def main():
     )
 
     fields.append(
-        ExtractStructuredField(
+        CreateAiExtractStructuredFields(
             key="date",
             type="date",
             prompt="what is the date of the document?",
@@ -272,7 +281,7 @@ def main():
     )
 
     fields.append(
-        ExtractStructuredField(
+        CreateAiExtractStructuredFields(
             key="vendor",
             type="string",
             prompt="who is the vendor?",
@@ -280,7 +289,7 @@ def main():
     )
 
     fields.append(
-        ExtractStructuredField(
+        CreateAiExtractStructuredFields(
             key="total",
             type="float",
             prompt="what is the total amount?",
@@ -288,22 +297,22 @@ def main():
     )
 
     fields.append(
-        ExtractStructuredField(
+        CreateAiExtractStructuredFields(
             key="poNumber",
             type="string",
             prompt="what is the PO number?",
         )
     )
 
-    ai_response = intelligence_extract_structured(client, SAMPLE_INVOICE, fields)
-    print(f"Using Extract structured\nResponse: \n{ai_response.answer}")
+    ai_response_structured = intelligence_extract_structured(client, SAMPLE_INVOICE, fields)
+    print(f"Using Extract structured\nResponse: \n{ai_response_structured.to_dict()}")
 ```
 
 Resulting in:
 ```yaml
 Using Extract structured
 Response: 
-{'date': '2024-03-13', 'doc_number': 'B1234', 'total': 575, 'documentType': 'Invoice', 'poNumber': '001', 'vendor': 'Galactic Gizmos Inc.'}
+{'date': 'March 13, 2024', 'doc_number': 'B1234', 'total': 575, 'documentType': 'Invoice', 'poNumber': '001', 'vendor': 'Galactic Gizmos Inc.'}
 ```
 
 

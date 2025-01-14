@@ -1,13 +1,14 @@
-""" Box Metadata exercises"""
+"""Box Metadata exercises"""
 
 import logging
 from datetime import datetime
 from typing import Dict, List
 
 from box_sdk_gen import (
-    AiResponseFull,
+    AiExtractResponse,
+    AiItemBase,
     BoxAPIError,
-    CreateAiAskItems,
+    CreateAiExtractStructuredMetadataTemplate,
     CreateFileMetadataByIdScope,
     CreateMetadataTemplateFields,
     CreateMetadataTemplateFieldsOptionsField,
@@ -20,8 +21,10 @@ from box_sdk_gen import (
     UpdateFileMetadataByIdScope,
 )
 
-from utils.box_ai_client_oauth import BoxAIClient, ConfigOAuth, get_ai_client_oauth
-from utils.intelligence import ExtractStructuredMetadataTemplate
+# from utils.box_ai_client_oauth import BoxAIClient, ConfigOAuth, get_ai_client_oauth
+from utils.box_client_oauth import BoxClient, ConfigOAuth, get_client_oauth
+
+# from utils.intelligence import ExtractStructuredMetadataTemplate
 
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
@@ -30,11 +33,9 @@ PO_FOLDER = "261457585224"
 ENTERPRISE_SCOPE = "enterprise_1134207681"
 
 
-def get_template_by_key(client: BoxAIClient, template_key: str) -> MetadataTemplate:
+def get_template_by_key(client: BoxClient, template_key: str) -> MetadataTemplate:
     """Get a metadata template by key"""
-
     scope = "enterprise"
-
     try:
         template = client.metadata_templates.get_metadata_template(scope=scope, template_key=template_key)
     except BoxAPIError as err:
@@ -42,15 +43,12 @@ def get_template_by_key(client: BoxAIClient, template_key: str) -> MetadataTempl
             template = None
         else:
             raise err
-
     return template
 
 
-def delete_template_by_key(client: BoxAIClient, template_key: str):
+def delete_template_by_key(client: BoxClient, template_key: str):
     """Delete a metadata template by key"""
-
     scope = "enterprise"
-
     try:
         client.metadata_templates.delete_metadata_template(scope=scope, template_key=template_key)
     except BoxAPIError as err:
@@ -60,7 +58,7 @@ def delete_template_by_key(client: BoxAIClient, template_key: str):
             raise err
 
 
-def create_invoice_po_template(client: BoxAIClient, template_key: str, display_name: str) -> MetadataTemplate:
+def create_invoice_po_template(client: BoxClient, template_key: str, display_name: str) -> MetadataTemplate:
     """Create a metadata template"""
 
     scope = "enterprise"
@@ -141,13 +139,13 @@ def create_invoice_po_template(client: BoxAIClient, template_key: str, display_n
 
 
 def get_metadata_suggestions_for_file(
-    client_ai: BoxAIClient, file_id: str, scope: str, template_key: str
-) -> AiResponseFull:
+    client: BoxClient, file_id: str, scope: str, template_key: str
+) -> AiExtractResponse:
     """Get metadata suggestions for a file"""
 
-    item = CreateAiAskItems(id=file_id, type="file")
-    metadata_template = ExtractStructuredMetadataTemplate(scope=scope, template_key=template_key)
-    return client_ai.intelligence.extract_structured(items=[item], metadata_template=metadata_template)
+    item = AiItemBase(id=file_id, type="file")
+    metadata_template = CreateAiExtractStructuredMetadataTemplate(scope=scope, template_key=template_key)
+    return client.ai.create_ai_extract_structured(items=[item], metadata_template=metadata_template)
 
 
 def convert_to_datetime(date_string):
@@ -158,7 +156,7 @@ def convert_to_datetime(date_string):
     :return: A datetime object or None if the format is not recognized.
     """
     # Define possible date formats
-    date_formats = ["%B %d, %Y", "%Y-%m-%d"]
+    date_formats = ["%B %d, %Y", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%SZ"]
 
     for date_format in date_formats:
         try:
@@ -169,10 +167,10 @@ def convert_to_datetime(date_string):
             continue
 
     # If none of the formats match, return None
-    return None
+    raise ValueError(f"Date string '{date_string}' does not match any of the expected formats.")
 
 
-def apply_template_to_file(client: BoxAIClient, file_id: str, template_key: str, data: Dict[str, str]):
+def apply_template_to_file(client: BoxClient, file_id: str, template_key: str, data: Dict[str, str]):
     """Apply a metadata template to a folder"""
     default_data = {
         "documentType": "Unknown",
@@ -231,7 +229,7 @@ def apply_template_to_file(client: BoxAIClient, file_id: str, template_key: str,
             raise error_a
 
 
-def get_file_metadata(client: BoxAIClient, file_id: str, template_key: str):
+def get_file_metadata(client: BoxClient, file_id: str, template_key: str):
     """Get file metadata"""
     metadata = client.file_metadata.get_file_metadata_by_id(
         file_id=file_id,
@@ -242,7 +240,7 @@ def get_file_metadata(client: BoxAIClient, file_id: str, template_key: str):
 
 
 def search_metadata(
-    client: BoxAIClient,
+    client: BoxClient,
     template_key: str,
     folder_id: str,
     query: str,
@@ -282,7 +280,7 @@ def search_metadata(
 
 def main():
     conf = ConfigOAuth()
-    client = get_ai_client_oauth(conf)
+    client = get_client_oauth(conf)
 
     user = client.users.get_user_me()
     print(f"\nHello, I'm {user.name} ({user.login}) [{user.id}]")
@@ -312,8 +310,8 @@ def main():
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
         ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
-        print(f"Suggestions: {ai_response.answer}")
-        metadata = ai_response.answer
+        print(f"Suggestions: {ai_response.to_dict()}")
+        metadata = ai_response.to_dict()
         apply_template_to_file(
             client,
             item.id,
@@ -326,8 +324,8 @@ def main():
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
         ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
-        print(f"Suggestions: {ai_response.answer}")
-        metadata = ai_response.answer
+        print(f"Suggestions: {ai_response.to_dict()}")
+        metadata = ai_response.to_dict()
         apply_template_to_file(
             client,
             item.id,

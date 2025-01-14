@@ -91,9 +91,10 @@ from datetime import datetime
 from typing import Dict, List
 
 from box_sdk_gen import (
-    AiResponseFull,
+    AiExtractResponse,
+    AiItemBase,
     BoxAPIError,
-    CreateAiAskItems,
+    CreateAiExtractStructuredMetadataTemplate,
     CreateFileMetadataByIdScope,
     CreateMetadataTemplateFields,
     CreateMetadataTemplateFieldsOptionsField,
@@ -106,8 +107,10 @@ from box_sdk_gen import (
     UpdateFileMetadataByIdScope,
 )
 
-from utils.box_ai_client_oauth import BoxAIClient, ConfigOAuth, get_ai_client_oauth
-from utils.intelligence import ExtractStructuredMetadataTemplate
+# from utils.box_ai_client_oauth import BoxAIClient, ConfigOAuth, get_ai_client_oauth
+from utils.box_client_oauth import BoxClient, ConfigOAuth, get_client_oauth
+
+# from utils.intelligence import ExtractStructuredMetadataTemplate
 
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
@@ -117,7 +120,7 @@ ENTERPRISE_SCOPE = "enterprise_1134207681"
 
 def main():
     conf = ConfigOAuth()
-    client = get_ai_client_oauth(conf)
+    client = get_client_oauth(conf)
 
     user = client.users.get_user_me()
     print(f"\nHello, I'm {user.name} ({user.login}) [{user.id}]")
@@ -137,11 +140,9 @@ To make our life easier later, let's create some helper functions to interact wi
 First, let's create a function to get a metadata template by key:
 
 ```python
-def get_template_by_key(client: BoxAIClient, template_key: str) -> MetadataTemplate:
+def get_template_by_key(client: BoxClient, template_key: str) -> MetadataTemplate:
     """Get a metadata template by key"""
-
     scope = "enterprise"
-
     try:
         template = client.metadata_templates.get_metadata_template(scope=scope, template_key=template_key)
     except BoxAPIError as err:
@@ -149,18 +150,15 @@ def get_template_by_key(client: BoxAIClient, template_key: str) -> MetadataTempl
             template = None
         else:
             raise err
-
     return template
 ```
 
 Next, let's create a function to delete a metadata template by key, just in case we get stuck and need to start over:
 
 ```python
-def delete_template_by_key(client: BoxAIClient, template_key: str):
+def delete_template_by_key(client: BoxClient, template_key: str):
     """Delete a metadata template by key"""
-
     scope = "enterprise"
-
     try:
         client.metadata_templates.delete_metadata_template(scope=scope, template_key=template_key)
     except BoxAPIError as err:
@@ -177,7 +175,7 @@ Because metadata templates are common to the entire enterprise, use your initial
 
 Let's create a metadata template using this method:
 ```python
-def create_invoice_po_template(client: BoxAIClient, template_key: str, display_name: str) -> MetadataTemplate:
+def create_invoice_po_template(client: BoxClient, template_key: str, display_name: str) -> MetadataTemplate:
     """Create a metadata template"""
 
     scope = "enterprise"
@@ -272,18 +270,16 @@ def main():
 
     if template:
         print(
-            f"\nMetadata template exists: '{template.display_name}' ",
+            f"\nMetadata template created: {template.display_name} ",
             f"[{template.id}]",
         )
     else:
-        print("\nMetadata template does not exist, creating...")
+        # print("\nMetadata template does not exist, creating...")
 
         # create a metadata template
-        template = create_invoice_po_template(
-            client, template_key, template_display_name
-        )
+        template = create_invoice_po_template(client, template_key, template_display_name)
         print(
-            f"\nMetadata template created: '{template.display_name}' ",
+            f"\nMetadata template created: {template.display_name} ",
             f"[{template.id}]",
         )
 ```    
@@ -305,13 +301,13 @@ Create a method to scan the content and get metadata suggestions:
 
 ```python
 def get_metadata_suggestions_for_file(
-    client_ai: BoxAIClient, file_id: str, scope: str, template_key: str
-) -> AiResponseFull:
+    client: BoxClient, file_id: str, scope: str, template_key: str
+) -> AiExtractResponse:
     """Get metadata suggestions for a file"""
 
-    item = CreateAiAskItems(id=file_id, type="file")
-    metadata_template = ExtractStructuredMetadataTemplate(scope=scope, template_key=template_key)
-    return client_ai.intelligence.extract_structured(items=[item], metadata_template=metadata_template)
+    item = AiItemBase(id=file_id, type="file")
+    metadata_template = CreateAiExtractStructuredMetadataTemplate(scope=scope, template_key=template_key)
+    return client.ai.create_ai_extract_structured(items=[item], metadata_template=metadata_template)
 ```
 
 Next add the following code to the main function to scan the content and get metadata suggestions:
@@ -325,7 +321,7 @@ def main():
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
         ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
-        print(f"Suggestions: {ai_response.answer}")
+        print(f"Suggestions: {ai_response.to_dict()}")
 
 ```
 
@@ -366,7 +362,7 @@ def convert_to_datetime(date_string):
     :return: A datetime object or None if the format is not recognized.
     """
     # Define possible date formats
-    date_formats = ["%B %d, %Y", "%Y-%m-%d"]
+    date_formats = ["%B %d, %Y", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%SZ"]
 
     for date_format in date_formats:
         try:
@@ -377,10 +373,10 @@ def convert_to_datetime(date_string):
             continue
 
     # If none of the formats match, return None
-    return None
+    raise ValueError(f"Date string '{date_string}' does not match any of the expected formats.")
 
 
-def apply_template_to_file(client: BoxAIClient, file_id: str, template_key: str, data: Dict[str, str]):
+def apply_template_to_file(client: BoxClient, file_id: str, template_key: str, data: Dict[str, str]):
     """Apply a metadata template to a folder"""
     default_data = {
         "documentType": "Unknown",
@@ -445,15 +441,13 @@ Next, update the following code to the main function to update the content metad
 def main():
     ...
 
-    # Scan the purchase folder for metadata suggestions
+    # # Scan the purchase folder for metadata suggestions
     folder_items = client.folders.get_folder_items(PO_FOLDER)
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
-        suggestions = get_metadata_suggestions_for_file(
-            client, item.id, ENTERPRISE_SCOPE, template_key
-        )
-        print(f"Suggestions: {suggestions.suggestions}")
-        metadata = suggestions.suggestions
+        ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
+        print(f"Suggestions: {ai_response.to_dict()}")
+        metadata = ai_response.to_dict()
         apply_template_to_file(
             client,
             item.id,
@@ -479,8 +473,8 @@ def main():
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
         ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
-        print(f"Suggestions: {ai_response.answer}")
-        metadata = ai_response.answer
+        print(f"Suggestions: {ai_response.to_dict()}")
+        metadata = ai_response.to_dict()
         apply_template_to_file(
             client,
             item.id,
@@ -511,7 +505,7 @@ Suggestions: {'documentDate': '2024-03-13', 'invoiceNumber': 'Q8888', 'total': '
 We can directly get the metadata for a file using the following method:
 
 ```python
-def get_file_metadata(client: BoxAIClient, file_id: str, template_key: str):
+def get_file_metadata(client: BoxClient, file_id: str, template_key: str):
     """Get file metadata"""
     metadata = client.file_metadata.get_file_metadata_by_id(
         file_id=file_id,
@@ -542,7 +536,7 @@ We may have invoices that do not have a matching purchase order. Let's create a 
 
 ```python
 def search_metadata(
-    client: BoxAIClient,
+    client: BoxClient,
     template_key: str,
     folder_id: str,
     query: str,

@@ -17,5 +17,6 @@
         "getsize",
         "relativedelta",
         "shutil",
+        "usemarker"
     ]
 }

@@ -104,12 +104,12 @@ from typing import List
 
 from box_sdk_gen import (
     BoxClient,
-    CreateDocgenBatchDestinationFolder,
-    CreateDocgenBatchFile,
-    CreateDocgenTemplateFile,
-    DocgenBatchBase,
-    DocgenDocumentGenerationData,
-    DocgenTemplate,
+    CreateDocgenBatchV2025R0DestinationFolder,
+    CreateDocgenBatchV2025R0File,
+    CreateDocgenTemplateV2025R0File,
+    DocGenBatchBaseV2025R0,
+    DocGenDocumentGenerationDataV2025R0,
+    DocGenTemplateV2025R0,
     FileBaseTypeField,
     FileMini,
     FolderBaseTypeField,
@@ -153,13 +153,15 @@ Since our template is already uploaded to Box, we just need to let Doc Gen know 
 
 Let's create a method to do that:
 ```python
-def set_file_as_template(client: BoxClient, file_id: str) -> DocgenTemplate:
+def set_file_as_template(client: BoxClient, file_id: str) -> DocGenTemplateV2025R0:
     """Mark a file as a DocGen template"""
     # check if file exists and it is accessible
     file = client.files.get_file_by_id(file_id)
 
-    template_base = client.doc_gen_template.create_docgen_template(file=CreateDocgenTemplateFile(id=file.id))
-    return client.doc_gen_template.get_docgen_template_by_id(template_base.file.id)
+    template_base = client.docgen_template.create_docgen_template_v2025_r0(
+        file=CreateDocgenTemplateV2025R0File(id=file.id)
+    )
+    return client.docgen_template.get_docgen_template_by_id_v2025_r0(template_base.file.id)
 ```
 and incorporate it in our main method:
 ```python
@@ -181,7 +183,7 @@ We can query the documents set as templates and list the available tags:
 def main():
     ...
     # List template tags
-    template_tags = client.doc_gen_template.get_docgen_template_tags(template_id=template.file.id)
+    template_tags = client.docgen_template.get_docgen_template_tags_v2025_r0(template_id=template.file.id)
     print("\nFound tags:")
     for tag in template_tags.entries:
         print(f"  - {tag.tag_content} : {tag.tag_type.name} : {tag.json_paths}")
@@ -204,7 +206,7 @@ Found tags:
 ## Generating new lease agreements
 We'll now create a method to make the dataset generation a bit easier, by adding this to your code:
 ```python
-def generate_new_data(name: str, email: str, start_date: date) -> DocgenDocumentGenerationData:
+def generate_new_data(name: str, email: str, start_date: date) -> DocGenDocumentGenerationDataV2025R0:
     # gen random property id
     property = f"HAB-2-{random.randint(1000, 9999):04}"
     # todays date
@@ -212,7 +214,7 @@ def generate_new_data(name: str, email: str, start_date: date) -> DocgenDocument
     # end date in 3 years
     end_date = start_date + relativedelta(years=3)
 
-    return DocgenDocumentGenerationData(
+    return DocGenDocumentGenerationDataV2025R0(
         generated_file_name=f"{property}.pdf",
         user_input={
             "LeaseDate": lease_date.isoformat(),
@@ -230,12 +232,12 @@ def generate_new_data(name: str, email: str, start_date: date) -> DocgenDocument
 Next the method to actually call the Doc Gen API:
 ```python
 def generate_new_document(
-    client: BoxClient, template_id: str, destination_folder_id: str, data: List[DocgenDocumentGenerationData]
-) -> DocgenBatchBase:
+    client: BoxClient, template_id: str, destination_folder_id: str, data: List[DocGenDocumentGenerationDataV2025R0]
+) -> DocGenBatchBaseV2025R0:
     """Generate a new document from a template"""
-    template_file = CreateDocgenBatchFile(id=template_id)
-    destination_folder = CreateDocgenBatchDestinationFolder(id=destination_folder_id)
-    return client.doc_gen.create_docgen_batch(
+    template_file = CreateDocgenBatchV2025R0File(id=template_id)
+    destination_folder = CreateDocgenBatchV2025R0DestinationFolder(id=destination_folder_id)
+    return client.docgen.create_docgen_batch_v2025_r0(
         file=template_file,
         input_source="api",
         destination_folder=destination_folder,
@@ -248,7 +250,7 @@ Finally we orchestrate this in our main method. Once we call the Doc Gen API, it
 def main():
     ...
     # Generate 5 new lease agreement
-    docs_data: List[DocgenDocumentGenerationData] = []
+    docs_data: List[DocGenDocumentGenerationDataV2025R0] = []
     start_date = date.today().replace(day=1) + relativedelta(months=1)
 
     # Create 5 random person names
@@ -267,7 +269,7 @@ def main():
 
     # Get jobs in batch
     print("\nJobs in batch:")
-    jobs = client.doc_gen.get_docgen_batch_job_by_id(batch.id)
+    jobs = client.docgen.get_docgen_batch_job_by_id_v2025_r0(batch.id)
     for job in jobs.entries:
         print(f"  - Job {job.id} - {job.status.name}")
 ```
@@ -287,10 +289,10 @@ As you would expect this operation is asynchronous. We can poll the `jobs` detai
 ```python
 def main():
     ...
-    # Lis jobs in batch
+    # List jobs in batch
     print("\nJob details:")
     for job in jobs.entries:
-        job_details = client.doc_gen.get_docgen_job_by_id(job.id)
+        job_details = client.docgen.get_docgen_job_by_id_v2025_r0(job.id)
         print(f"  - {job_details.to_dict()}\n")
         sleep(3)
 ```
@@ -315,7 +317,7 @@ You can list `jobs` by user:
 def main():
     ...
     # List all jobs for user
-    user_jobs = client.doc_gen.get_docgen_jobs(limit=50)
+    user_jobs = client.docgen.get_docgen_jobs_v2025_r0(limit=5)
     print("\nAll jobs for current user:")
     for job in user_jobs.entries:
         print(f"  - Job {job.id} {datetime.fromtimestamp(int(job.created_at)).isoformat()} {job.status.name}")
@@ -334,7 +336,7 @@ Or by template:
 def main():
     ...
     # List all jobs by template
-    template_jobs = client.doc_gen_template.get_docgen_template_job_by_id(template.file.id)
+    template_jobs = client.docgen_template.get_docgen_template_job_by_id_v2025_r0(template.file.id, limit=5)
     print("\nAll jobs for template:")
     for job in template_jobs.entries:
         print(f"  - Job {job.id} {datetime.fromtimestamp(int(job.created_at)).isoformat()} {job.status.name}")
@@ -355,10 +357,10 @@ To wrap up, we can remove the Doc Gen template flag from the template document:
 def main():
     ...
     # Remove the template
-    client.doc_gen_template.delete_docgen_template_by_id(template.file.id)
+    client.docgen_template.delete_docgen_template_by_id_v2025_r0(template.file.id)
 
     # List all templates
-    templates = client.doc_gen_template.get_docgen_templates()
+    templates = client.docgen_template.get_docgen_templates_v2025_r0()
     print("\nAll templates:")
 
     if templates.entries:
@@ -420,7 +422,7 @@ Remember to replace the fake emails with real ones that you have access so you c
 def main():
     ...
     # Request signature for first lease
-    sign_job = client.doc_gen.get_docgen_job_by_id(jobs.entries[0].id)
+    sign_job = client.docgen.get_docgen_job_by_id_v2025_r0(jobs.entries[0].id)
     sign_request = create_sign_request_structured(
         client,
         sign_job.output_file.id,

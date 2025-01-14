@@ -66,19 +66,15 @@ For the DEMO_FILE constant, use the file id from the previous step, in my case i
 
 import logging
 
-from box_sdk_gen.client import BoxClient as Client
-
-from box_sdk_gen import BoxAPIError
-from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.managers.ai import CreateAiAskMode, CreateAiAskItems, AiResponse
+from box_sdk_gen import AiItemBase, AiResponse, BoxAPIError, CreateAiAskMode
+from box_sdk_gen import BoxClient as Client
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
-
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FILE = "1442379637774"
+DEMO_FILE = "1514587167701"
 
 
 def main():
@@ -111,7 +107,7 @@ def ask(client: Client, question: str, file_id: str, content: str = None) -> AiR
 
     mode = CreateAiAskMode.SINGLE_ITEM_QA
 
-    items = [CreateAiAskItems(id=file_id, type="file")]
+    items = [AiItemBase(id=file_id, type="file")]
 
     # add content if provided
     if content is not None:
@@ -121,8 +117,8 @@ def ask(client: Client, question: str, file_id: str, content: str = None) -> AiR
         ai_response = client.ai.create_ai_ask(mode=mode, prompt=question, items=items)
 
     except BoxAPIError as e:
-        print(f"Error: {e}")
-
+        # print(f"Error: {e}")
+        ai_response = AiResponse(answer=e.message, created_at=None, completion_reason="error")
     return ai_response
 ```
 
@@ -188,23 +184,15 @@ For the DEMO_FILE constant, use the file id from the previous step, in my case i
 
 import logging
 
-from box_sdk_gen.client import BoxClient as Client
-
-from box_sdk_gen import BoxAPIError
-from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.managers.ai import (
-    CreateAiAskItems,
-    AiResponse,
-    CreateAiTextGenDialogueHistory,
-)
+from box_sdk_gen import AiDialogueHistory, AiResponse, BoxAPIError, CreateAiTextGenItems
+from box_sdk_gen import BoxClient as Client
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
-
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FILE = "1442379637774"
+DEMO_FILE = "1514587167701"
 
 def main():
     """Simple script to demonstrate how to use the Box SDK"""
@@ -232,14 +220,14 @@ def text_gen(
     prompt: str,
     file_id: str,
     content: str = None,
-    dialogue_history: CreateAiTextGenDialogueHistory = None,
+    dialogue_history: AiDialogueHistory = None,
 ) -> AiResponse:
     """Ask a question to the AI"""
 
     if file_id is None:
         raise ValueError("file_id must be provided")
 
-    items = [CreateAiAskItems(id=file_id, type="file")]
+    items = [CreateAiTextGenItems(id=file_id, type="file")]
 
     # add content if provided
     if content is not None:
@@ -280,7 +268,7 @@ def main():
         print(f"\nResponse: {response.answer}")
 
         dialog_history.append(
-            CreateAiTextGenDialogueHistory(
+            AiDialogueHistory(
                 prompt=question,
                 answer=response.answer,
                 created_at=response.created_at,

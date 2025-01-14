@@ -2,9 +2,8 @@
 
 import logging
 
-from box_sdk_gen import AiDialogueHistory, AiResponse, BoxAPIError
+from box_sdk_gen import AiDialogueHistory, AiResponse, BoxAPIError, CreateAiTextGenItems
 from box_sdk_gen import BoxClient as Client
-from box_sdk_gen import CreateAiAskItems
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
@@ -26,7 +25,7 @@ def text_gen(
     if file_id is None:
         raise ValueError("file_id must be provided")
 
-    items = [CreateAiAskItems(id=file_id, type="file")]
+    items = [CreateAiTextGenItems(id=file_id, type="file")]
 
     # add content if provided
     if content is not None:

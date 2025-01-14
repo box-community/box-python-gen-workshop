@@ -2,9 +2,8 @@
 
 import logging
 
-from box_sdk_gen import AiResponse, BoxAPIError
+from box_sdk_gen import AiItemBase, AiResponse, BoxAPIError, CreateAiAskMode
 from box_sdk_gen import BoxClient as Client
-from box_sdk_gen import CreateAiAskItems, CreateAiAskMode
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
@@ -22,7 +21,7 @@ def ask(client: Client, question: str, file_id: str, content: str = None) -> AiR
 
     mode = CreateAiAskMode.SINGLE_ITEM_QA
 
-    items = [CreateAiAskItems(id=file_id, type="file")]
+    items = [AiItemBase(id=file_id, type="file")]
 
     # add content if provided
     if content is not None:

@@ -1,7 +1,7 @@
 """Box Metadata exercises"""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from box_sdk_gen import (
@@ -37,7 +37,9 @@ def get_template_by_key(client: BoxClient, template_key: str) -> MetadataTemplat
     """Get a metadata template by key"""
     scope = "enterprise"
     try:
-        template = client.metadata_templates.get_metadata_template(scope=scope, template_key=template_key)
+        template = client.metadata_templates.get_metadata_template(
+            scope=scope, template_key=template_key
+        )
     except BoxAPIError as err:
         if err.response_info.status_code == 404:
             template = None
@@ -50,7 +52,9 @@ def delete_template_by_key(client: BoxClient, template_key: str):
     """Delete a metadata template by key"""
     scope = "enterprise"
     try:
-        client.metadata_templates.delete_metadata_template(scope=scope, template_key=template_key)
+        client.metadata_templates.delete_metadata_template(
+            scope=scope, template_key=template_key
+        )
     except BoxAPIError as err:
         if err.response_info.status_code == 404:
             pass
@@ -58,7 +62,9 @@ def delete_template_by_key(client: BoxClient, template_key: str):
             raise err
 
 
-def create_invoice_po_template(client: BoxClient, template_key: str, display_name: str) -> MetadataTemplate:
+def create_invoice_po_template(
+    client: BoxClient, template_key: str, display_name: str
+) -> MetadataTemplate:
     """Create a metadata template"""
 
     scope = "enterprise"
@@ -144,8 +150,12 @@ def get_metadata_suggestions_for_file(
     """Get metadata suggestions for a file"""
 
     item = AiItemBase(id=file_id, type="file")
-    metadata_template = CreateAiExtractStructuredMetadataTemplate(scope=scope, template_key=template_key)
-    return client.ai.create_ai_extract_structured(items=[item], metadata_template=metadata_template)
+    metadata_template = CreateAiExtractStructuredMetadataTemplate(
+        scope=scope, template_key=template_key
+    )
+    return client.ai.create_ai_extract_structured(
+        items=[item], metadata_template=metadata_template
+    )
 
 
 def convert_to_datetime(date_string):
@@ -167,10 +177,14 @@ def convert_to_datetime(date_string):
             continue
 
     # If none of the formats match, return None
-    raise ValueError(f"Date string '{date_string}' does not match any of the expected formats.")
+    raise ValueError(
+        f"Date string '{date_string}' does not match any of the expected formats."
+    )
 
 
-def apply_template_to_file(client: BoxClient, file_id: str, template_key: str, data: Dict[str, str]):
+def apply_template_to_file(
+    client: BoxClient, file_id: str, template_key: str, data: Dict[str, str]
+):
     """Apply a metadata template to a folder"""
     default_data = {
         "documentType": "Unknown",
@@ -189,8 +203,14 @@ def apply_template_to_file(client: BoxClient, file_id: str, template_key: str, d
         try:
             date_string = data["documentDate"]
             date2 = convert_to_datetime(date_string)
+            # Convert to ISO format and remove the timezone offset
+            # Note: Box expects the date in ISO format with a 'Z' at the end
+            # to indicate UTC time
+            if date2.tzinfo is None:
+                # If the date is naive (no timezone info), assume it's UTC
+                date2 = date2.replace(tzinfo=timezone.utc)
 
-            data["documentDate"] = date2.isoformat().replace("+00:00", "") + "Z"
+            # data["documentDate"] = date2.isoformat().replace("+00:00", "") + "Z"
         except ValueError as e:
             data["documentDate"] = "1900-01-01T00:00:00Z"
             print(f"Error converting date: {e}")
@@ -224,7 +244,9 @@ def apply_template_to_file(client: BoxClient, file_id: str, template_key: str, d
                     request_body=update_data,
                 )
             except BoxAPIError as error_b:
-                logging.error(f"Error updating metadata: {error_b.status}:{error_b.code}:{file_id}")
+                logging.error(
+                    f"Error updating metadata: {error_b.status}:{error_b.code}:{file_id}"
+                )
         else:
             raise error_a
 
@@ -299,7 +321,9 @@ def main():
         # print("\nMetadata template does not exist, creating...")
 
         # create a metadata template
-        template = create_invoice_po_template(client, template_key, template_display_name)
+        template = create_invoice_po_template(
+            client, template_key, template_display_name
+        )
         print(
             f"\nMetadata template created: {template.display_name} ",
             f"[{template.id}]",
@@ -309,9 +333,11 @@ def main():
     folder_items = client.folders.get_folder_items(PO_FOLDER)
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
-        ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
+        ai_response = get_metadata_suggestions_for_file(
+            client, item.id, ENTERPRISE_SCOPE, template_key
+        )
         print(f"Suggestions: {ai_response.to_dict()}")
-        metadata = ai_response.to_dict()
+        metadata = ai_response.answer.to_dict()
         apply_template_to_file(
             client,
             item.id,
@@ -323,9 +349,11 @@ def main():
     folder_items = client.folders.get_folder_items(INVOICE_FOLDER)
     for item in folder_items.entries:
         print(f"\nItem: {item.name} [{item.id}]")
-        ai_response = get_metadata_suggestions_for_file(client, item.id, ENTERPRISE_SCOPE, template_key)
+        ai_response = get_metadata_suggestions_for_file(
+            client, item.id, ENTERPRISE_SCOPE, template_key
+        )
         print(f"Suggestions: {ai_response.to_dict()}")
-        metadata = ai_response.to_dict()
+        metadata = ai_response.answer.to_dict()
         apply_template_to_file(
             client,
             item.id,
@@ -341,7 +369,9 @@ def main():
     query = "documentType = :docType AND purchaseOrderNumber = :poNumber"
     query_params = {"docType": "Invoice", "poNumber": "Unknown"}
 
-    search_result = search_metadata(client, template_key, INVOICE_FOLDER, query, query_params)
+    search_result = search_metadata(
+        client, template_key, INVOICE_FOLDER, query, query_params
+    )
     print(f"\nSearch results: {search_result.entries}")
 
     # # delete the metadata template

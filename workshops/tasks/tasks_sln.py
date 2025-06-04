@@ -1,24 +1,23 @@
 """Box Tasks API example"""
 
-from datetime import datetime, timedelta, UTC
 import logging
+from datetime import UTC, datetime, timedelta
+
 from box_sdk_gen import BoxAPIError
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import Task, TaskAssignment, Tasks
-
-from box_sdk_gen.managers.tasks import (
-    CreateTaskItem,
-    CreateTaskItemTypeField,
-    CreateTaskAction,
-    CreateTaskCompletionRule,
-)
-
 from box_sdk_gen.managers.task_assignments import (
+    CreateTaskAssignmentAssignTo,
     CreateTaskAssignmentTask,
     CreateTaskAssignmentTaskTypeField,
-    CreateTaskAssignmentAssignTo,
     UpdateTaskAssignmentByIdResolutionState,
 )
+from box_sdk_gen.managers.tasks import (
+    CreateTaskAction,
+    CreateTaskCompletionRule,
+    CreateTaskItem,
+    CreateTaskItemTypeField,
+)
+from box_sdk_gen.schemas import Task, TaskAssignment, Tasks
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
@@ -26,9 +25,9 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 
-TASKS_ROOT = "237424755849"
-SAMPLE_FILE_A = "1375106202533"
-SAMPLE_FILE_B = "1375116033188"
+TASKS_ROOT = "324557689568"
+SAMPLE_FILE_A = "1883185696603"
+SAMPLE_FILE_B = "1883185324213"
 
 
 def create_task(
@@ -55,12 +54,16 @@ def create_task(
 def assign_task_to_user(client: Client, task_id: str, user_id: str) -> TaskAssignment:
     """assign task"""
 
-    task = task = CreateTaskAssignmentTask(id=task_id, type=CreateTaskAssignmentTaskTypeField.TASK)
+    task = task = CreateTaskAssignmentTask(
+        id=task_id, type=CreateTaskAssignmentTaskTypeField.TASK
+    )
 
     assign_to = CreateTaskAssignmentAssignTo(
         id=user_id,
     )
-    assignment = client.task_assignments.create_task_assignment(task=task, assign_to=assign_to)
+    assignment = client.task_assignments.create_task_assignment(
+        task=task, assign_to=assign_to
+    )
 
     return assignment
 

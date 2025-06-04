@@ -2,15 +2,13 @@
 
 import logging
 
-
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import FileRequest
-
 from box_sdk_gen.managers.file_requests import (
     CreateFileRequestCopyFolder,
-    CreateFileRequestCopyStatus,
     CreateFileRequestCopyFolderTypeField,
+    CreateFileRequestCopyStatus,
 )
+from box_sdk_gen.schemas import FileRequest
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
@@ -19,8 +17,8 @@ from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-FILE_REQUEST_TEMPLATE = "7931914925"
-REQUESTS_FOLDER = "241674714563"
+FILE_REQUEST_TEMPLATE = "16775864485"
+REQUESTS_FOLDER = "324535828661"
 
 
 def get_file_request(client: Client, file_request_id: str) -> FileRequest:
@@ -45,7 +43,9 @@ def create_file_request(
     is_description_required: bool | None = None,
     expires_at: str | None = None,
 ) -> FileRequest:
-    folder = CreateFileRequestCopyFolder(folder_id, type=CreateFileRequestCopyFolderTypeField.FOLDER)
+    folder = CreateFileRequestCopyFolder(
+        folder_id, type=CreateFileRequestCopyFolderTypeField.FOLDER
+    )
     status = CreateFileRequestCopyStatus.ACTIVE
 
     file_request = client.file_requests.create_file_request_copy(
@@ -119,10 +119,8 @@ def main():
     print_file_request(file_request_template)
 
     # delete the file requests
-    delete_file_request(client, "7932431925")
-    delete_file_request(client, "7932434325")
-    delete_file_request(client, "7932351693")
-    delete_file_request(client, "7932882833")
+    # delete_file_request(client, file_request.id)
+    # delete_file_request(client, file_request_template.id)
 
 
 if __name__ == "__main__":

@@ -2,40 +2,37 @@
 
 import logging
 
-from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen import BoxAPIError
-from box_sdk_gen.schemas import (
-    User,
-    Group,
-    GroupMembership,
-    Collaboration,
-)
+from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.managers.groups import (
     CreateGroupInvitabilityLevel,
     CreateGroupMemberViewabilityLevel,
 )
 from box_sdk_gen.managers.memberships import (
-    CreateGroupMembershipUser,
     CreateGroupMembershipGroup,
     CreateGroupMembershipRole,
+    CreateGroupMembershipUser,
 )
-
 from box_sdk_gen.managers.user_collaborations import (
-    CreateCollaborationItemTypeField,
-    CreateCollaborationItem,
     CreateCollaborationAccessibleBy,
-    CreateCollaborationRole,
     CreateCollaborationAccessibleByTypeField,
+    CreateCollaborationItem,
+    CreateCollaborationItemTypeField,
+    CreateCollaborationRole,
 )
-
+from box_sdk_gen.schemas import (
+    Collaboration,
+    Group,
+    GroupMembership,
+    User,
+)
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
-
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FOLDER = "244395947100"
+DEMO_FOLDER = "324537714839"
 
 
 def create_group(
@@ -60,7 +57,10 @@ def create_group(
             member_viewability_level=member_viewability_level,
         )
     except BoxAPIError as err:
-        if err.response_info.status_code == 409 and err.response_info.body.get("code", None) == "conflict":
+        if (
+            err.response_info.status_code == 409
+            and err.response_info.body.get("code", None) == "conflict"
+        ):
             # group already exists
             groups = client.groups.get_groups(filter_term=name)
             for group in groups.entries:
@@ -85,9 +85,14 @@ def add_user_to_group(
     """Add user to group"""
 
     try:
-        group_membership = client.memberships.create_group_membership(user, group, role=role)
+        group_membership = client.memberships.create_group_membership(
+            user, group, role=role
+        )
     except BoxAPIError as err:
-        if err.response_info.status_code == 409 and err.response_info.body.get("code", None) == "conflict":
+        if (
+            err.response_info.status_code == 409
+            and err.response_info.body.get("code", None) == "conflict"
+        ):
             # user already in group
             group_memberships = client.memberships.get_group_memberships(group.id)
             for group_membership in group_memberships.entries:
@@ -119,21 +124,30 @@ def list_user_groups(client: Client, user: User) -> None:
         )
 
 
-def share_folder_with_group(client: Client, folder_id: str, group: Group) -> Collaboration:
+def share_folder_with_group(
+    client: Client, folder_id: str, group: Group
+) -> Collaboration:
     """Share folder with group"""
 
     try:
         collaboration = client.user_collaborations.create_collaboration(
-            item=CreateCollaborationItem(type=CreateCollaborationItemTypeField.FOLDER, id=DEMO_FOLDER),
+            item=CreateCollaborationItem(
+                type=CreateCollaborationItemTypeField.FOLDER, id=DEMO_FOLDER
+            ),
             accessible_by=CreateCollaborationAccessibleBy(
                 CreateCollaborationAccessibleByTypeField.GROUP, id=group.id
             ),
             role=CreateCollaborationRole.EDITOR,
         )
     except BoxAPIError as err:
-        if err.response_info.status_code == 409 and err.response_info.body.get("code", None) == "conflict":
+        if (
+            err.response_info.status_code == 409
+            and err.response_info.body.get("code", None) == "conflict"
+        ):
             # folder already shared with group
-            collaborations = client.list_collaborations.get_folder_collaborations(folder_id)
+            collaborations = client.list_collaborations.get_folder_collaborations(
+                folder_id
+            )
             for collaboration in collaborations.entries:
                 if collaboration.accessible_by.id == group.id:
                     return collaboration

@@ -32,7 +32,9 @@ def ask(client: Client, question: str, file_id: str, content: str = None) -> AiR
 
     except BoxAPIError as e:
         # print(f"Error: {e}")
-        ai_response = AiResponse(answer=e.message, created_at=None, completion_reason="error")
+        ai_response = AiResponse(
+            answer=e.message, created_at=None, completion_reason="error"
+        )
     return ai_response
 
 

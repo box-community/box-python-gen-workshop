@@ -1,21 +1,21 @@
 """Box Collaborations"""
 
 import logging
+
 from box_sdk_gen import BoxAPIError
 from box_sdk_gen.client import BoxClient as Client
-from box_sdk_gen.schemas import (
-    Collaborations,
-    Collaboration,
-    CollaborationStatusField,
-)
-
 from box_sdk_gen.managers.user_collaborations import (
-    CreateCollaborationItem,
-    CreateCollaborationItemTypeField,
     CreateCollaborationAccessibleBy,
     CreateCollaborationAccessibleByTypeField,
+    CreateCollaborationItem,
+    CreateCollaborationItemTypeField,
     CreateCollaborationRole,
     UpdateCollaborationByIdRole,
+)
+from box_sdk_gen.schemas import (
+    Collaboration,
+    Collaborations,
+    CollaborationStatusField,
 )
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
@@ -24,8 +24,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 
-COLLABORATION_ROOT = "265383071019"
-SAMPLE_FILE = "1537376413878"
+COLLABORATION_ROOT = "302671494106"
+SAMPLE_FILE = "1749519707316"
 SAMPLE_EMAIL = "YOUR_EMAIL+collab@gmail.com"
 
 
@@ -63,17 +63,21 @@ def create_file_collaboration(
             for collaboration in collaborations.entries:
                 # pending collaborations have no accessible_by.login
                 if collaboration.invite_email == user_email:
-                    collaboration_updated = client.user_collaborations.update_collaboration_by_id(
-                        collaboration_id=collaboration.id,
-                        role=role,
+                    collaboration_updated = (
+                        client.user_collaborations.update_collaboration_by_id(
+                            collaboration_id=collaboration.id,
+                            role=role,
+                        )
                     )
                     return collaboration_updated
 
                 # accepted collaborations have accessible_by.login
                 if collaboration.accessible_by.login == user_email:
-                    collaboration_updated = client.user_collaborations.update_collaboration_by_id(
-                        collaboration_id=collaboration.id,
-                        role=role,
+                    collaboration_updated = (
+                        client.user_collaborations.update_collaboration_by_id(
+                            collaboration_id=collaboration.id,
+                            role=role,
+                        )
                     )
                     return collaboration_updated
     return collaboration

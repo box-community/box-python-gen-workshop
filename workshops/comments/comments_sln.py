@@ -2,14 +2,13 @@
 
 import logging
 
-from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen import BoxAPIError
-from box_sdk_gen.schemas import File, Comment
-
+from box_sdk_gen.client import BoxClient as Client
 from box_sdk_gen.managers.comments import (
     CreateCommentItem,
     CreateCommentItemTypeField,
 )
+from box_sdk_gen.schemas import Comment, File
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
@@ -17,8 +16,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 
-COMMENTS_ROOT = "248382959747"
-SAMPLE_FILE = "1440413752296"
+COMMENTS_ROOT = "324534470079"
+SAMPLE_FILE = "1883040859068"
 
 
 def file_comments_print(client: Client, file: File):
@@ -79,7 +78,9 @@ def main():
     file_comments_print(client, file)
 
     # reply to the last comment
-    comment_reply = file_comment_reply(client, comment, "I hear you!!! This is a sample file")
+    comment_reply = file_comment_reply(
+        client, comment, "I hear you!!! This is a sample file"
+    )
     file_comments_print(client, file)
 
     # delete all comments

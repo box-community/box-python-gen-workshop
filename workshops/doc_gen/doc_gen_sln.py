@@ -7,13 +7,12 @@ from typing import List
 from box_sdk_gen import (
     BoxClient,
     CreateDocgenBatchV2025R0DestinationFolder,
-    CreateDocgenBatchV2025R0File,
-    CreateDocgenTemplateV2025R0File,
     DocGenBatchBaseV2025R0,
     DocGenDocumentGenerationDataV2025R0,
     DocGenTemplateV2025R0,
     FileBaseTypeField,
     FileMini,
+    FileReferenceV2025R0,
     FolderBaseTypeField,
     FolderMini,
     SignRequest,
@@ -37,12 +36,16 @@ def set_file_as_template(client: BoxClient, file_id: str) -> DocGenTemplateV2025
     file = client.files.get_file_by_id(file_id)
 
     template_base = client.docgen_template.create_docgen_template_v2025_r0(
-        file=CreateDocgenTemplateV2025R0File(id=file.id)
+        file=FileReferenceV2025R0(id=file.id)
     )
-    return client.docgen_template.get_docgen_template_by_id_v2025_r0(template_base.file.id)
+    return client.docgen_template.get_docgen_template_by_id_v2025_r0(
+        template_base.file.id
+    )
 
 
-def generate_new_data(name: str, email: str, start_date: date) -> DocGenDocumentGenerationDataV2025R0:
+def generate_new_data(
+    name: str, email: str, start_date: date
+) -> DocGenDocumentGenerationDataV2025R0:
     # gen random property id
     property = f"HAB-2-{random.randint(1000, 9999):04}"
     # todays date
@@ -67,11 +70,16 @@ def generate_new_data(name: str, email: str, start_date: date) -> DocGenDocument
 
 
 def generate_new_document(
-    client: BoxClient, template_id: str, destination_folder_id: str, data: List[DocGenDocumentGenerationDataV2025R0]
+    client: BoxClient,
+    template_id: str,
+    destination_folder_id: str,
+    data: List[DocGenDocumentGenerationDataV2025R0],
 ) -> DocGenBatchBaseV2025R0:
     """Generate a new document from a template"""
-    template_file = CreateDocgenBatchV2025R0File(id=template_id)
-    destination_folder = CreateDocgenBatchV2025R0DestinationFolder(id=destination_folder_id)
+    template_file = FileReferenceV2025R0(id=template_id)
+    destination_folder = CreateDocgenBatchV2025R0DestinationFolder(
+        id=destination_folder_id
+    )
     return client.docgen.create_docgen_batch_v2025_r0(
         file=template_file,
         input_source="api",
@@ -88,7 +96,9 @@ def create_sign_request_structured(
 
     # Sign request params
     structure_file = FileMini(id=file_id, type=FileBaseTypeField.FILE)
-    parent_folder = FolderMini(id=SIGNED_LEASES_FOLDER_ID, type=FolderBaseTypeField.FOLDER)
+    parent_folder = FolderMini(
+        id=SIGNED_LEASES_FOLDER_ID, type=FolderBaseTypeField.FOLDER
+    )
     landlord_signer = SignRequestCreateSigner(email=landlord_email, order=1)
     tenant_signer = SignRequestCreateSigner(email=tenant_email, order=2)
 
@@ -117,7 +127,9 @@ def main():
     print(f"Template created: {template.to_dict()}")
 
     # List template tags
-    template_tags = client.docgen_template.get_docgen_template_tags_v2025_r0(template_id=template.file.id)
+    template_tags = client.docgen_template.get_docgen_template_tags_v2025_r0(
+        template_id=template.file.id
+    )
     print("\nFound tags:")
     for tag in template_tags.entries:
         print(f"  - {tag.tag_content} : {tag.tag_type.name} : {tag.json_paths}")
@@ -157,13 +169,19 @@ def main():
     user_jobs = client.docgen.get_docgen_jobs_v2025_r0(limit=5)
     print("\nAll jobs for current user:")
     for job in user_jobs.entries:
-        print(f"  - Job {job.id} {datetime.fromtimestamp(int(job.created_at)).isoformat()} {job.status.name}")
+        print(
+            f"  - Job {job.id} {datetime.fromtimestamp(int(job.created_at)).isoformat()} {job.status.name}"
+        )
 
     # List all jobs by template
-    template_jobs = client.docgen_template.get_docgen_template_job_by_id_v2025_r0(template.file.id, limit=5)
+    template_jobs = client.docgen_template.get_docgen_template_job_by_id_v2025_r0(
+        template.file.id, limit=5
+    )
     print("\nAll jobs for template:")
     for job in template_jobs.entries:
-        print(f"  - Job {job.id} {datetime.fromtimestamp(int(job.created_at)).isoformat()} {job.status.name}")
+        print(
+            f"  - Job {job.id} {datetime.fromtimestamp(int(job.created_at)).isoformat()} {job.status.name}"
+        )
 
     # Remove the template
     client.docgen_template.delete_docgen_template_by_id_v2025_r0(template.file.id)

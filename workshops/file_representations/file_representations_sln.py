@@ -1,36 +1,36 @@
 """Box File representations"""
 
-import logging
 import json
-import requests
+import logging
 import shutil
 from typing import List
 
+import requests
 from box_sdk_gen.client import BoxClient as Client
+from box_sdk_gen.managers.files import GetFileThumbnailByIdExtension
 from box_sdk_gen.schemas import (
     File,
+    FileFullRepresentationsEntriesField,
+    FileFullRepresentationsEntriesStatusStateField,
     FileMini,
     Folder,
-    FileFullRepresentationsEntriesStatusStateField,
-    FileFullRepresentationsEntriesField,
 )
-from box_sdk_gen.managers.files import GetFileThumbnailByIdExtension
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FOLDER = 248380909299
-FILE_DOCX = 1440423683668
-FILE_JS = 1440432188948
-FILE_HTML = 1440418724767
-FILE_PDF = 1440418926552
-FILE_MP3 = 1440418628782
-FILE_XLSX = 1440418779967
-FILE_JSON = 1440418859218
-FILE_ZIP = 1440421746896
-FILE_PPTX = 1440422080800
+DEMO_FOLDER = 324533308501
+FILE_DOCX = 1883050079168
+FILE_JS = 1883046098114
+FILE_HTML = 1883043172589
+FILE_PDF = 1883043964130
+FILE_MP3 = 1883053547941
+FILE_XLSX = 1883053626941
+FILE_JSON = 1883042728142
+FILE_ZIP = 1883044967109
+FILE_PPTX = 1883048203068
 
 
 def obj_dict(obj):
@@ -56,9 +56,7 @@ def file_representations(
 
 
 def do_request(url: str, access_token: str):
-    resp = requests.get(
-        url, headers={"Authorization": f"Bearer {access_token}"}
-    )
+    resp = requests.get(url, headers={"Authorization": f"Bearer {access_token}"})
     resp.raise_for_status()
     return resp.content
 
@@ -72,9 +70,7 @@ def representation_download(
         file_representation.status.state
         != FileFullRepresentationsEntriesStatusStateField.SUCCESS
     ):
-        print(
-            f"Representation {file_representation.representation} is not ready"
-        )
+        print(f"Representation {file_representation.representation} is not ready")
         return
 
     url_template = file_representation.content.url_template
@@ -125,9 +121,7 @@ def folder_list_representation_status(
     )
     for item in items:
         if isinstance(item, FileMini):
-            file_repr = file_representations(
-                client, item, "[" + representation + "]"
-            )
+            file_repr = file_representations(client, item, "[" + representation + "]")
             if file_repr:
                 state = file_repr[0].status.state.value
             else:

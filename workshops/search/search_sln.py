@@ -1,20 +1,18 @@
-""" Searching Box exercises"""
+"""Searching Box exercises"""
 
 import logging
 from typing import List, Union
 
 from box_sdk_gen.client import BoxClient as Client
-
+from box_sdk_gen.managers.search import SearchForContentContentTypes
 from box_sdk_gen.schemas import (
-    Items,
     FileMini,
     FolderMini,
-    WebLinkMini,
+    Items,
     SearchResults,
     SearchResultsWithSharedLinks,
+    WebLinkMini,
 )
-
-from box_sdk_gen.managers.search import SearchForContentContentTypes
 
 from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 
@@ -24,9 +22,7 @@ logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
 def print_box_item(box_item: Union[FileMini, FolderMini, WebLinkMini]):
     """Basic print of a Box Item attributes"""
-    print(
-        f"Type: {box_item.type.value} ID: {box_item.id} Name: {box_item.name}"
-    )
+    print(f"Type: {box_item.type.value} ID: {box_item.id} Name: {box_item.name}")
 
 
 def print_search_results(items: Items):
@@ -128,8 +124,8 @@ def main():
     # Ancestor Search
 
     # Make sure folders exist
-    folder_apple_banana = client.folders.get_folder_by_id("199903162104")
-    folder_banana_apple = client.folders.get_folder_by_id("199904090719")
+    folder_apple_banana = client.folders.get_folder_by_id("324544823928")
+    folder_banana_apple = client.folders.get_folder_by_id("324543482399")
 
     # But we only need the ids
     search_results = simple_search(

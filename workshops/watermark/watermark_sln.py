@@ -20,8 +20,8 @@ from utils.box_client_oauth import ConfigOAuth, get_client_oauth
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("box_sdk_gen").setLevel(logging.CRITICAL)
 
-DEMO_FOLDER = "244798382350"
-DEMO_FILE = "1418524151903"
+DEMO_FOLDER = "362747860223"
+DEMO_FILE = "2114489161251"
 
 
 def add_watermark_to_file(client: Client, file_id: str) -> Watermark:

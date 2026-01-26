@@ -3,9 +3,9 @@ import logging
 from typing import List, Optional
 
 from box_sdk_gen import (
-    AiExtractResponse,
     AiItemBase,
     AiResponse,
+    AiResponseFull,
     CreateAiExtractStructuredFields,
     CreateAiExtractStructuredFieldsOptionsField,
     CreateAiExtractStructuredMetadataTemplate,
@@ -33,11 +33,11 @@ def intelligence_extract_structured(
     file_id: str,
     fields: Optional[List[CreateAiExtractStructuredFields]] = None,
     metadata_template: Optional[CreateAiExtractStructuredMetadataTemplate] = None,
-) -> AiExtractResponse:
+) -> AiResponseFull:
     items = AiItemBase(id=file_id, type="file")
 
     # file = client.files.get_file_by_id(file_id)
-    ai_response: AiResponse = client.ai.create_ai_extract_structured(
+    ai_response: AiResponseFull = client.ai.create_ai_extract_structured(
         items=[items], fields=fields, metadata_template=metadata_template
     )
 

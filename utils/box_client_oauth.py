@@ -30,7 +30,7 @@ class ConfigOAuth:
         self.callback_hostname = os.getenv("CALLBACK_HOSTNAME")
         self.callback_port = int(os.getenv("CALLBACK_PORT", 5000))
 
-        self.cache_file = os.getenv("CACHE_FILE", ".oauth.tk")
+        self.cache_file = os.getenv("CACHE_FILE", ".auth.oauth")
 
     def __repr__(self) -> str:
         return f"ConfigOAuth({self.__dict__})"
@@ -41,7 +41,7 @@ def get_client_oauth(config: ConfigOAuth) -> BoxClient:
     oauth = OAuthConfig(
         client_id=config.client_id,
         client_secret=config.client_secret,
-        token_storage=FileWithInMemoryCacheTokenStorage(config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(f"{config.cache_file}.user"),
     )
 
     auth = BoxOAuth(oauth)

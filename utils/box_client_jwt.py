@@ -27,7 +27,7 @@ class ConfigJWT:
         self.jwt_user_id = os.getenv("JWT_USER_ID")
         self.enterprise_id = os.getenv("ENTERPRISE_ID")
 
-        self.cache_file = os.getenv("CACHE_FILE", ".jwt.tk")
+        self.cache_file = os.getenv("CACHE_FILE", ".auth.jwt")
 
     def __repr__(self) -> str:
         return f"ConfigJWT({self.__dict__})"
@@ -38,7 +38,7 @@ def get_jwt_enterprise_client(config: ConfigJWT) -> BoxClient:
 
     jwt = JWTConfig.from_config_file(
         config_file_path=config.jwt_config_path,
-        token_storage=FileWithInMemoryCacheTokenStorage(".ent" + config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(f"{config.cache_file}.ent"),
     )
     auth = BoxJWTAuth(jwt)
 
@@ -52,7 +52,7 @@ def get_jwt_user_client(config: ConfigJWT, user_id: str) -> BoxClient:
 
     jwt = JWTConfig.from_config_file(
         config_file_path=config.jwt_config_path,
-        token_storage=FileWithInMemoryCacheTokenStorage(".user" + config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(f"{config.cache_file}.user"),
     )
     auth = BoxJWTAuth(jwt)
     auth = auth.with_user_subject(user_id)

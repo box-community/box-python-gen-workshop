@@ -17,14 +17,16 @@ class ConfigCCG:
     def __init__(self) -> None:
         dotenv.load_dotenv(ENV_CCG)
         # Common configurations
-        self.client_id = os.getenv("CLIENT_ID")
+        self.client_id = os.getenv(
+            "CLIENT_ID",
+        )
         self.client_secret = os.getenv("CLIENT_SECRET")
 
         # CCG configurations
         self.enterprise_id = os.getenv("ENTERPRISE_ID")
         self.ccg_user_id = os.getenv("CCG_USER_ID")
 
-        self.cache_file = os.getenv("CACHE_FILE", ".ccg.tk")
+        self.cache_file = os.getenv("CACHE_FILE", ".auth.ccg")
 
 
 def __repr__(self) -> str:
@@ -38,7 +40,7 @@ def get_ccg_enterprise_client(config: ConfigCCG) -> BoxClient:
         client_id=config.client_id,
         client_secret=config.client_secret,
         enterprise_id=config.enterprise_id,
-        token_storage=FileWithInMemoryCacheTokenStorage(".ent" + config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(f"{config.cache_file}.ent"),
     )
     auth = BoxCCGAuth(ccg)
 
@@ -54,7 +56,7 @@ def get_ccg_user_client(config: ConfigCCG, user_id: str) -> BoxClient:
         client_id=config.client_id,
         client_secret=config.client_secret,
         user_id=user_id,
-        token_storage=FileWithInMemoryCacheTokenStorage(".user" + config.cache_file),
+        token_storage=FileWithInMemoryCacheTokenStorage(f"{config.cache_file}.user"),
     )
     auth = BoxCCGAuth(ccg)
     auth.with_user_subject(user_id)
